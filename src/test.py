@@ -1,10 +1,11 @@
 import os
+
 import plotly
+import torch
 from plotly.graph_objs import Scatter
 from plotly.graph_objs.scatter import Line
-import torch
 
-from env import Env
+from src.env import Env
 
 # Globals
 Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10
@@ -61,7 +62,8 @@ def test(args, T, dqn, val_mem, evaluate=False):
 
 # Plots min, max and mean + standard deviation bars of a population over time
 def _plot_line(xs, ys_population, title, path=''):
-    max_colour, mean_colour, std_colour, transparent = 'rgb(0, 132, 180)', 'rgb(0, 172, 237)', 'rgba(29, 202, 255, 0.2)', 'rgba(0, 0, 0, 0)'
+    max_colour, mean_colour, std_colour, transparent = \
+        'rgb(0, 132, 180)', 'rgb(0, 172, 237)', 'rgba(29, 202, 255, 0.2)', 'rgba(0, 0, 0, 0)'
 
     ys = torch.tensor(ys_population, dtype=torch.float32)
     ys_min, ys_max, ys_mean, ys_std = ys.min(1)[0].squeeze(), ys.max(1)[0].squeeze(), ys.mean(1).squeeze(), ys.std(

@@ -1,23 +1,23 @@
-from collections import deque
 import random
+from collections import deque
+
 import atari_py
-import torch
 import cv2  # Note that importing cv2 before torch may cause segfaults?
+import torch
 
 
-class Env():
+class Env:
     def __init__(self, args):
         self.device = args.device
         self.ale = atari_py.ALEInterface()
         self.ale.setInt('random_seed', args.seed)
+        # TODO: diff max_num_frames_per_episode
         self.ale.setInt('max_num_frames', args.max_episode_length)
         self.ale.setFloat('repeat_action_probability', 0)  # Disable sticky actions
         self.ale.setInt('frame_skip', 0)
         self.ale.setBool('color_averaging', False)
         self.ale.loadROM(atari_py.get_game_path(args.game))  # ROM loading must be done after setting options
         actions = self.ale.getMinimalActionSet()
-        # actions = set()
-        # actions = {1, 2, 3, 4, 5}
         self.actions = dict([i, e] for i, e in zip(range(len(actions)), actions))
         self.lives = 0  # Life counter (used in DeepMind training)
         self.life_termination = False  # Used to check if resetting only from loss of life
@@ -72,7 +72,7 @@ class Env():
         # Detect loss of life as terminal in training mode
         if self.training:
             lives = self.ale.lives()
-            if lives < self.lives and lives > 0:  # Lives > 0 for Q*bert
+            if self.lives > lives > 0:  # Lives > 0 for Q*bert
                 self.life_termination = not done  # Only set flag when not truly done
                 done = True
             self.lives = lives

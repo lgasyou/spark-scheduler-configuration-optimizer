@@ -1,5 +1,7 @@
 import random
 from collections import namedtuple
+
+import numpy as np
 import torch
 
 Transition = namedtuple('Transition', ('timestep', 'state', 'action', 'reward', 'nonterminal'))
@@ -7,13 +9,14 @@ blank_trans = Transition(0, torch.zeros(42, 42, dtype=torch.uint8), None, 0, Fal
 
 
 # Segment tree data structure where parent node values are sum/max of children node values
-class SegmentTree():
+class SegmentTree:
     def __init__(self, size):
         self.index = 0
         self.size = size
         self.full = False  # Used to track actual capacity
-        self.sum_tree = [0] * (2 * size - 1)  # Initialise fixed size tree with all (priority) zeros
-        self.data = [None] * size  # Wrap-around cyclic buffer
+        # Initialise fixed size tree with all (priority) zeros
+        self.sum_tree = np.zeros((2 * size - 1, ), dtype=np.float32)
+        self.data = np.array([None] * size)  # Wrap-around cyclic buffer
         self.max = 1  # Initial max value to return (1 = 1^ω)
 
     # Propagates value up tree given a tree index
@@ -51,7 +54,7 @@ class SegmentTree():
     def find(self, value):
         index = self._retrieve(0, value)  # Search for index of item from root
         data_index = index - self.size + 1
-        return (self.sum_tree[index], data_index, index)  # Return value, data index, tree index
+        return self.sum_tree[index], data_index, index  # Return value, data index, tree index
 
     # Returns data given a data index
     def get(self, data_index):
@@ -61,23 +64,25 @@ class SegmentTree():
         return self.sum_tree[0]
 
 
-class ReplayMemory():
+class ReplayMemory:
     def __init__(self, args, capacity):
         self.device = args.device
         self.capacity = capacity
         self.history = args.history_length
         self.discount = args.discount
         self.n = args.multi_step
-        self.priority_weight = args.priority_weight  # Initial importance sampling weight β, annealed to 1 over course of training
+        # Initial importance sampling weight β, annealed to 1 over course of training
+        self.priority_weight = args.priority_weight
         self.priority_exponent = args.priority_exponent
-        self.t = 0  # Internal episode timestep counter
-        self.transitions = SegmentTree(
-            capacity)  # Store transitions in a wrap-around cyclic buffer within a sum tree for querying priorities
+        # Internal episode timestep counter
+        self.t = 0
+        # Store transitions in a wrap-around cyclic buffer within a sum tree for querying priorities
+        self.transitions = SegmentTree(capacity)
 
     # Adds state and action at time t, reward and terminal at time t + 1
     def append(self, state, action, reward, terminal):
-        state = state[-1].mul(255).to(dtype=torch.uint8,
-                                      device=torch.device('cpu'))  # Only store last frame and discretise to save memory
+        # Only store last frame and discretise to save memory
+        state = state[-1].mul(255).to(dtype=torch.uint8, device=torch.device('cpu'))
         self.transitions.append(Transition(self.t, state, action, reward, not terminal),
                                 self.transitions.max)  # Store new transition with maximum priority
         self.t = 0 if terminal else self.t + 1  # Start new episodes with t = 0
@@ -121,7 +126,8 @@ class ReplayMemory():
         # TODO: action is None
         # Discrete action to be used as index
         action = torch.tensor([transition[self.history - 1].action], dtype=torch.int64, device=self.device)
-        # Calculate truncated n-step discounted return R^n = Σ_k=0->n-1 (γ^k)R_t+k+1 (note that invalid nth next states have reward 0)
+        # Calculate truncated n-step discounted return R^n = Σ_k=0->n-1 (γ^k)R_t+k+1
+        # (note that invalid nth next states have reward 0)
         R = torch.tensor([sum(self.discount ** n * transition[self.history + n - 1].reward for n in range(self.n))],
                          dtype=torch.float32, device=self.device)
         # Mask for non-terminal nth next states
@@ -131,7 +137,8 @@ class ReplayMemory():
         return prob, idx, tree_idx, state, action, R, next_state, nonterminal
 
     def sample(self, batch_size):
-        p_total = self.transitions.total()  # Retrieve sum of all priorities (used to create a normalised probability distribution)
+        # Retrieve sum of all priorities (used to create a normalised probability distribution)
+        p_total = self.transitions.total()
         segment = p_total / batch_size  # Batch size number of segments, based on sum over all probabilities
         batch = [self._get_sample_from_segment(segment, i) for i in range(batch_size)]  # Get batch of valid samples
         probs, idxs, tree_idxs, states, actions, returns, next_states, nonterminals = zip(*batch)
@@ -167,7 +174,7 @@ class ReplayMemory():
             else:
                 state_stack[t] = self.transitions.data[self.current_idx + t - self.history + 1].state
                 prev_timestep -= 1
-        state = torch.stack(state_stack, 0).to(dtype=torch.float32, device=self.device).div_(
-            255)  # Agent will turn into batch
+        # Agent will turn into batch
+        state = torch.stack(state_stack, 0).to(dtype=torch.float32, device=self.device).div_(255)
         self.current_idx += 1
         return state

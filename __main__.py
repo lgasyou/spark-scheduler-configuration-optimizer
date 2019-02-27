@@ -1,16 +1,14 @@
 import argparse
-from datetime import datetime
 import random
+
 import torch
-import numpy as np
 
-from agent import Agent
-from env import Env
-from memory import ReplayMemory
-from test import test
+from src.optimizer import Optimizer
+
+DATA_PATH = "/Users/xenon/Desktop/Rainbow/googleTraceOutputDir"
 
 
-def main():
+def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='Rainbow')
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
@@ -25,8 +23,10 @@ def main():
     parser.add_argument('--noisy-std', type=float, default=0.1, metavar='σ',
                         help='Initial standard deviation of noisy linear layers')
     parser.add_argument('--atoms', type=int, default=51, metavar='C', help='Discretised size of value distribution')
-    parser.add_argument('--V-min', type=float, default=-10, metavar='V', help='Minimum of value distribution support')
-    parser.add_argument('--V-max', type=float, default=10, metavar='V', help='Maximum of value distribution support')
+    parser.add_argument('--V-min', type=float, default=-10, metavar='V',
+                        help='Minimum of value distribution support')
+    parser.add_argument('--V-max', type=float, default=10, metavar='V',
+                        help='Maximum of value distribution support')
     parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
     parser.add_argument('--memory-capacity', type=int, default=int(1152), metavar='CAPACITY',
                         help='Experience replay memory capacity')
@@ -36,11 +36,13 @@ def main():
                         help='Prioritised experience replay exponent (originally denoted α)')
     parser.add_argument('--priority-weight', type=float, default=0.4, metavar='β',
                         help='Initial prioritised experience replay importance sampling weight')
-    parser.add_argument('--multi-step', type=int, default=3, metavar='n', help='Number of steps for multi-step return')
+    parser.add_argument('--multi-step', type=int, default=3, metavar='n',
+                        help='Number of steps for multi-step return')
     parser.add_argument('--discount', type=float, default=0.99, metavar='γ', help='Discount factor')
     parser.add_argument('--target-update', type=int, default=int(288), metavar='τ',
                         help='Number of steps after which to update target network')
-    parser.add_argument('--reward-clip', type=int, default=1, metavar='VALUE', help='Reward clipping (0 to disable)')
+    parser.add_argument('--reward-clip', type=int, default=1, metavar='VALUE',
+                        help='Reward clipping (0 to disable)')
     parser.add_argument('--lr', type=float, default=0.0000625, metavar='η', help='Learning rate')
     parser.add_argument('--adam-eps', type=float, default=1.5e-4, metavar='ε', help='Adam epsilon')
     parser.add_argument('--batch-size', type=int, default=32, metavar='SIZE', help='Batch size')
@@ -57,7 +59,11 @@ def main():
                         help='Number of training steps between logging status')
     parser.add_argument('--render', action='store_true', help='Display screen (testing only)')
 
-    # Setup
+    return parser
+
+
+# Setup args
+def setup_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     args = parser.parse_args()
     print(' ' * 26 + 'Options')
     for k, v in vars(args).items():
@@ -67,67 +73,19 @@ def main():
     if torch.cuda.is_available() and not args.disable_cuda:
         args.device = torch.device('cuda')
         torch.cuda.manual_seed(random.randint(1, 10000))
-        torch.backends.cudnn.enabled = False  # Disable nondeterministic ops (not sure if critical but better safe than sorry)
+        # Disable nondeterministic ops (not sure if critical but better safe than sorry)
+        torch.backends.cudnn.enabled = False
     else:
         args.device = torch.device('cpu')
 
-    path = "/Users/xenon/Desktop/Rainbow/googleTraceOutputDir/"
+    return args
 
-    def read_data_from_csv(hour, path, index):
-        data = np.loadtxt(path + str(index) + "/sls_jobs" + str(hour) + ".csv", delimiter=",", dtype=np.uint8)
-        return data
 
-    # Simple ISO 8601 timestamped logger
-    def log(s):
-        print('[' + str(datetime.now().strftime('%Y-%m-%dT%H:%M:%S')) + '] ' + s)
-
-    # Environment
-    env = Env(args)
-    env.train()
-    action_space = env.action_space()
-
-    # Agent
-    dqn = Agent(args, env)
-    mem = ReplayMemory(args, args.memory_capacity)
-    priority_weight_increase = (1 - args.priority_weight) / (args.T_max - args.learn_start)
-
-    for i in range(1, 13):
-        for j in range(0, 23):
-            np_data = read_data_from_csv(j, path, i)
-            torch_data = torch.from_numpy(np_data)
-            mem.append(torch_data, None, None, False)
-
-    # Construct validation memory
-    val_mem = ReplayMemory(args, args.evaluation_size)
-    T, done = 0, True
-    while T < args.evaluation_size:
-        if done:
-            state, done = env.reset(), False
-
-        next_state, _, done = env.step(random.randint(0, action_space - 1))
-        val_mem.append(state, None, None, done)
-        state = next_state
-        T += 1
-
-        # Training loop
-        T, done = 0, True
-
-        dqn.train()
-        if done:
-            state, done = env.reset(), False
-            mem.priority_weight = min(mem.priority_weight + priority_weight_increase,
-                                      1)  # Anneal importance sampling weight β to 1
-            if T % args.replay_frequency == 0:
-                dqn.learn(mem)  # Train with n-step distributional double-Q learning
-                dqn.eval()  # Set DQN (online network) to evaluation mode
-                avg_reward, avg_Q = test(args, 0, dqn, val_mem, evaluate=True)  # Test
-
-            # Update target network
-            if T % args.target_update == 0:
-                dqn.update_target_net()
-        state = next_state
-
-    env.close()
+def main():
+    parser = setup_arg_parser()
+    args = setup_args(parser)
+    optimizer = Optimizer(DATA_PATH, args)
+    optimizer.start()
 
 
 if __name__ == '__main__':
