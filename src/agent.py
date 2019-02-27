@@ -7,7 +7,8 @@ from torch import optim
 from src.model import DQN
 
 
-class Agent:
+class Agent(object):
+
     def __init__(self, args, env):
         self.action_space = env.action_space()
         self.atoms = args.atoms

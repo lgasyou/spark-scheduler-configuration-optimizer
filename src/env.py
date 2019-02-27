@@ -6,7 +6,8 @@ import cv2  # Note that importing cv2 before torch may cause segfaults?
 import torch
 
 
-class Env:
+class Env(object):
+
     def __init__(self, args):
         self.device = args.device
         self.ale = atari_py.ALEInterface()

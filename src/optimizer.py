@@ -4,6 +4,7 @@ from datetime import datetime
 
 import numpy as np
 import torch
+from tqdm import tqdm
 
 from src.agent import Agent
 from src.env import Env
@@ -64,22 +65,29 @@ class Optimizer(object):
             state = next_state
             T += 1
 
-            # Training loop
-            T, done = 0, True
-
-            self.dqn.train()
+        # Training loop
+        T, done = 0, True
+        self.dqn.train()
+        # num_training_steps = self.args.T_max
+        num_training_steps = 1  # debug
+        for T in tqdm(range(num_training_steps)):
             if done:
                 state, done = self.env.reset(), False
-                # Anneal importance sampling weight β to 1
-                self.mem.priority_weight = min(self.mem.priority_weight + self.priority_weight_increase, 1)
-                if T % self.args.replay_frequency == 0:
-                    self.dqn.learn(self.mem)  # Train with n-step distributional double-Q learning
-                    self.dqn.eval()  # Set DQN (online network) to evaluation mode
-                    avg_reward, avg_Q = test(self.args, 0, self.dqn, val_mem, evaluate=True)  # Test
 
-                # Update target network
-                if T % self.args.target_update == 0:
-                    self.dqn.update_target_net()
+            if T % self.args.replay_frequency == 0:
+                self.dqn.reset_noise()  # Draw a new set of noisy weights
+
+            # Anneal importance sampling weight β to 1
+            self.mem.priority_weight = min(self.mem.priority_weight + self.priority_weight_increase, 1)
+            if T % self.args.replay_frequency == 0:
+                self.dqn.learn(self.mem)  # Train with n-step distributional double-Q learning
+                self.dqn.eval()  # Set DQN (online network) to evaluation mode
+                avg_reward, avg_Q = test(self.args, 0, self.dqn, val_mem, evaluate=True)  # Test
+                self.dqn.train()
+
+            # Update target network
+            if T % self.args.target_update == 0:
+                self.dqn.update_target_net()
             state = next_state
 
         self.env.close()

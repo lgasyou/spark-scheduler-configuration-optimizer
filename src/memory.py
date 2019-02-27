@@ -9,7 +9,8 @@ blank_trans = Transition(0, torch.zeros(42, 42, dtype=torch.uint8), None, 0, Fal
 
 
 # Segment tree data structure where parent node values are sum/max of children node values
-class SegmentTree:
+class SegmentTree(object):
+
     def __init__(self, size):
         self.index = 0
         self.size = size
@@ -64,7 +65,8 @@ class SegmentTree:
         return self.sum_tree[0]
 
 
-class ReplayMemory:
+class ReplayMemory(object):
+
     def __init__(self, args, capacity):
         self.device = args.device
         self.capacity = capacity
