@@ -22,7 +22,8 @@ def log(s):
     print('[' + str(datetime.now().strftime('%Y-%m-%dT%H:%M:%S')) + '] ' + s)
 
 
-class Optimizer(object):
+# Cluster Scheduler Configuration Optimizer
+class CSCOptimizer(object):
 
     def __init__(self, data_path: str, args: argparse.Namespace):
         self.data_path = data_path
@@ -68,8 +69,8 @@ class Optimizer(object):
         # Training loop
         T, done = 0, True
         self.dqn.train()
-        # num_training_steps = self.args.T_max
-        num_training_steps = 1  # debug
+        num_training_steps = self.args.T_max
+        # num_training_steps = 1  # debug
         for T in tqdm(range(num_training_steps)):
             if done:
                 state, done = self.env.reset(), False
@@ -77,17 +78,44 @@ class Optimizer(object):
             if T % self.args.replay_frequency == 0:
                 self.dqn.reset_noise()  # Draw a new set of noisy weights
 
-            # Anneal importance sampling weight β to 1
-            self.mem.priority_weight = min(self.mem.priority_weight + self.priority_weight_increase, 1)
-            if T % self.args.replay_frequency == 0:
-                self.dqn.learn(self.mem)  # Train with n-step distributional double-Q learning
-                self.dqn.eval()  # Set DQN (online network) to evaluation mode
-                avg_reward, avg_Q = test(self.args, 0, self.dqn, val_mem, evaluate=True)  # Test
-                self.dqn.train()
+            action = self.dqn.act(state)  # Choose an action greedily (with noisy weights)
+            next_state, reward, done = self.env.step(action)  # Step
+            if self.args.reward_clip > 0:
+                reward = max(min(reward, self.args.reward_clip), -self.args.reward_clip)  # Clip rewards
+            self.mem.append(state, action, reward, done)  # Append transition to memory
+            T += 1
 
-            # Update target network
-            if T % self.args.target_update == 0:
-                self.dqn.update_target_net()
+            # Train and test
+            if T >= self.args.learn_start:
+                # Anneal importance sampling weight β to 1
+                self.mem.priority_weight = min(self.mem.priority_weight + self.priority_weight_increase, 1)
+
+                if T % self.args.replay_frequency == 0:
+                    self.dqn.learn(self.mem)  # Train with n-step distributional double-Q learning
+
+                if T % self.args.evaluation_interval == 0:
+                    self.dqn.eval()  # Set DQN (online network) to evaluation mode
+                    avg_reward, avg_Q = test(self.args, T, self.dqn, val_mem)  # Test
+                    log('T = ' + str(T) + ' / ' + str(self.args.T_max) + ' | Avg. reward: ' +
+                        str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
+                    self.dqn.train()  # Set DQN (online network) back to training mode
+
+                # Update target network
+                if T % self.args.target_update == 0:
+                    self.dqn.update_target_net()
             state = next_state
+
+            # Anneal importance sampling weight β to 1
+            # self.mem.priority_weight = min(self.mem.priority_weight + self.priority_weight_increase, 1)
+            # if T % self.args.replay_frequency == 0:
+            #     self.dqn.learn(self.mem)  # Train with n-step distributional double-Q learning
+            #     self.dqn.eval()  # Set DQN (online network) to evaluation mode
+            #     avg_reward, avg_Q = test(self.args, 0, self.dqn, val_mem, evaluate=True)  # Test
+            #     self.dqn.train()
+            #
+            # # Update target network
+            # if T % self.args.target_update == 0:
+            #     self.dqn.update_target_net()
+            # state = next_state
 
         self.env.close()

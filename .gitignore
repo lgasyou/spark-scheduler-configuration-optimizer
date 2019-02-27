@@ -1,9 +1,10 @@
+# DON'T ignore PyCharm's .idea directory except .idea/dictionaries/ in order to run project easily anywhere
+.idea/
+!.idea/dictionaries/
+
 # Input & output directories
 googleTraceOutputDir/
 results/
-
-# PyCharm
-.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

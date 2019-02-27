@@ -3,13 +3,13 @@ import random
 
 import torch
 
-from src.optimizer import Optimizer
+from src.csc_optimizer import CSCOptimizer
 
-DATA_PATH = "/Users/xenon/Desktop/Rainbow/googleTraceOutputDir"
+DATA_PATH = "/Users/xenon/Desktop/cluster-scheduler-configuration-optimizer/googleTraceOutputDir"
 
 
 def setup_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description='Rainbow')
+    parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
     parser.add_argument('--game', type=str, default='space_invaders', help='ATARI game')
@@ -84,7 +84,7 @@ def setup_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
 def main():
     parser = setup_arg_parser()
     args = setup_args(parser)
-    optimizer = Optimizer(DATA_PATH, args)
+    optimizer = CSCOptimizer(DATA_PATH, args)
     optimizer.start()
 
 

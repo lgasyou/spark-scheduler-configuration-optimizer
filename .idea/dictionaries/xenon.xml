@@ -1,0 +1,23 @@
+<component name="ProjectDictionaryState">
+  <dictionary name="xenon">
+    <words>
+      <w>argmax</w>
+      <w>backpropagate</w>
+      <w>cuda</w>
+      <w>discretise</w>
+      <w>discretised</w>
+      <w>idxs</w>
+      <w>minibatch</w>
+      <w>nondeterministic</w>
+      <w>nonterminal</w>
+      <w>nonterminals</w>
+      <w>probs</w>
+      <w>resample</w>
+      <w>softmax</w>
+      <w>timestep</w>
+      <w>tonexty</w>
+      <w>θonline</w>
+      <w>θtarget</w>
+    </words>
+  </dictionary>
+</component>

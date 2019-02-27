@@ -53,6 +53,7 @@ class Env(object):
         self.lives = self.ale.lives()
         return torch.stack(list(self.state_buffer), 0)
 
+    # TODO: Need reconstruct, change action table and reward
     def step(self, action):
         # Repeat action 4 times, max pool over last 2 frames
         frame_buffer = torch.zeros(2, 42, 42, device=self.device)

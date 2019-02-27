@@ -1,1 +1,1 @@
-from .optimizer import Optimizer
+from .csc_optimizer import CSCOptimizer
