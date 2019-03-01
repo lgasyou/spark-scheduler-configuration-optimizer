@@ -13,6 +13,7 @@
       <w>nonterminals</w>
       <w>probs</w>
       <w>resample</w>
+      <w>sched</w>
       <w>softmax</w>
       <w>timestep</w>
       <w>tonexty</w>

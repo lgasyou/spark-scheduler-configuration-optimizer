@@ -5,7 +5,7 @@ import torch
 from plotly.graph_objs import Scatter
 from plotly.graph_objs.scatter import Line
 
-from src.env import Env
+from src.env import RainbowEnv
 
 # Globals
 Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10
@@ -14,7 +14,7 @@ Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10
 # Test DQN
 def test(args, T, dqn, val_mem, evaluate=False):
     global Ts, rewards, Qs, best_avg_reward
-    env = Env(args)
+    env = RainbowEnv(args)
     env.eval()
     Ts.append(T)
     T_rewards, T_Qs = [], []

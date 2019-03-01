@@ -1,18 +1,86 @@
+import argparse
 import random
 from collections import deque
+from typing import Tuple
 
 import atari_py
 import cv2  # Note that importing cv2 before torch may cause segfaults?
 import torch
 
 
-class Env(object):
+class IEnv(object):
+    """
+    The interface of environment
+    """
 
-    def __init__(self, args):
+    def reset(self) -> torch.Tensor:
+        pass
+
+    # Return state, reward, done
+    # Reward: Formula 6
+    def step(self, action) -> Tuple[torch.Tensor, int, bool]:
+        pass
+
+    # Uses loss of life as terminal signal
+    def train(self) -> None:
+        pass
+
+    # Uses standard terminal signal
+    def eval(self) -> None:
+        pass
+
+    def action_space(self) -> int:
+        pass
+
+    def render(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
+
+
+class Env(IEnv):
+    """
+    The environment this project use.
+    """
+
+    def __init__(self, args: argparse.Namespace):
+        pass
+
+    def __get_state(self) -> torch.Tensor:
+        pass
+
+    def reset(self) -> torch.Tensor:
+        pass
+
+    def step(self, action) -> Tuple[torch.Tensor, int, bool]:
+        pass
+
+    def train(self) -> None:
+        pass
+
+    def eval(self) -> None:
+        pass
+
+    def action_space(self) -> int:
+        pass
+
+    def render(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
+
+
+class RainbowEnv(IEnv):
+    """
+    The environment used by the example of Rainbow.
+    """
+
+    def __init__(self, args: argparse.Namespace):
         self.device = args.device
         self.ale = atari_py.ALEInterface()
         self.ale.setInt('random_seed', args.seed)
-        # TODO: diff max_num_frames_per_episode
         self.ale.setInt('max_num_frames', args.max_episode_length)
         self.ale.setFloat('repeat_action_probability', 0)  # Disable sticky actions
         self.ale.setInt('frame_skip', 0)
@@ -53,7 +121,6 @@ class Env(object):
         self.lives = self.ale.lives()
         return torch.stack(list(self.state_buffer), 0)
 
-    # TODO: Need reconstruct, change action table and reward
     def step(self, action):
         # Repeat action 4 times, max pool over last 2 frames
         frame_buffer = torch.zeros(2, 42, 42, device=self.device)

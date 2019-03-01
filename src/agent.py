@@ -7,7 +7,82 @@ from torch import optim
 from src.model import DQN
 
 
-class Agent(object):
+class IAgent(object):
+    """
+    The interface of Agent
+    """
+
+    # Resets noisy weights in all linear layers (of online net only)
+    def reset_noise(self):
+        pass
+
+    # Acts based on single state (no batch)
+    def act(self, state):
+        pass
+
+    # Acts with an ε-greedy policy (used for evaluation only)
+    def act_e_greedy(self, state, epsilon=0.001) -> int:  # High ε can reduce evaluation scores drastically
+        pass
+
+    def learn(self, mem):
+        pass
+
+    def update_target_net(self) -> None:
+        pass
+
+    # Save model parameters on current device (don't move model between devices)
+    def save(self, path) -> None:
+        pass
+
+    # Evaluates Q-value based on single state (no batch)
+    def evaluate_q(self, state) -> float:
+        pass
+
+    def train(self):
+        pass
+
+    def eval(self):
+        pass
+
+
+class Agent(IAgent):
+    """
+    The agent used by this project
+    """
+
+    def reset_noise(self):
+        pass
+
+    # Formula 7
+    def act(self, state):
+        pass
+
+    def act_e_greedy(self, state, epsilon=0.001) -> int:
+        pass
+
+    def learn(self, mem):
+        pass
+
+    def update_target_net(self) -> None:
+        pass
+
+    def save(self, path) -> None:
+        pass
+
+    def evaluate_q(self, state) -> float:
+        pass
+
+    def train(self):
+        pass
+
+    def eval(self):
+        pass
+
+
+class RainbowAgent(IAgent):
+    """
+    The agent used by the example of Rainbow
+    """
 
     def __init__(self, args, env):
         self.action_space = env.action_space()

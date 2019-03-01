@@ -1,1 +1,1 @@
-from .csc_optimizer import CSCOptimizer
+from .optimizer import ClusterSchedConfOptimizer

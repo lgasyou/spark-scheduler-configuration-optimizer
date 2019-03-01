@@ -3,7 +3,7 @@ import random
 
 import torch
 
-from src.csc_optimizer import CSCOptimizer
+from src.optimizer import ClusterSchedConfOptimizer
 
 DATA_PATH = "/Users/xenon/Desktop/cluster-scheduler-configuration-optimizer/googleTraceOutputDir"
 
@@ -84,7 +84,7 @@ def setup_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
 def main():
     parser = setup_arg_parser()
     args = setup_args(parser)
-    optimizer = CSCOptimizer(DATA_PATH, args)
+    optimizer = ClusterSchedConfOptimizer(DATA_PATH, args)
     optimizer.start()
 
 
