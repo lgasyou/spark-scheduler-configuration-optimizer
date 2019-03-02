@@ -85,6 +85,7 @@ def main():
     parser = setup_arg_parser()
     args = setup_args(parser)
     optimizer = ClusterSchedConfOptimizer(DATA_PATH, args)
+    optimizer.pre_train_model()
     optimizer.start()
 
 

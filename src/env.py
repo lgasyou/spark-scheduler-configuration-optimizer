@@ -8,6 +8,33 @@ import cv2  # Note that importing cv2 before torch may cause segfaults?
 import torch
 
 
+class Job(object):
+    def __init__(self):
+        self.submit_time = int()
+        self.priority = int()
+        self.task = []
+
+
+class Resource(object):
+    def __init__(self):
+        self.plat = ''
+        self.cpu = ''
+        self.mem = ''
+
+
+class Constraint(object):
+    def __init__(self):
+        self.queue = []
+        self.job = []
+
+
+class State(object):
+    def __init__(self, raw_state: torch.Tensor):
+        self.job = Job()
+        self.resource = Resource()
+        self.constraint = Constraint()
+
+
 class IEnv(object):
     """
     The interface of environment
@@ -39,13 +66,47 @@ class IEnv(object):
         pass
 
 
-class Env(IEnv):
+class YarnEnv(IEnv):
     """
-    The environment this project use.
+    Manages communications with YARN cluster scheduler.
     """
 
     def __init__(self, args: argparse.Namespace):
+        self.device = args.device
+
+    def __get_state(self) -> torch.Tensor:
         pass
+
+    def reset(self) -> torch.Tensor:
+        pass
+
+    def step(self, action) -> Tuple[torch.Tensor, int, bool]:
+        pass
+
+    def train(self) -> None:
+        pass
+
+    def eval(self) -> None:
+        pass
+
+    def action_space(self) -> int:
+        pass
+
+    def render(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
+
+
+class GoogleTraceEnv(IEnv):
+    """
+    Used while pre train is running.
+    Uses Google traces as its input.
+    """
+
+    def __init__(self, args: argparse.Namespace):
+        self.device = args.device
 
     def __get_state(self) -> torch.Tensor:
         pass
@@ -87,7 +148,7 @@ class RainbowEnv(IEnv):
         self.ale.setBool('color_averaging', False)
         self.ale.loadROM(atari_py.get_game_path(args.game))  # ROM loading must be done after setting options
         actions = self.ale.getMinimalActionSet()
-        self.actions = dict([i, e] for i, e in zip(range(len(actions)), actions))
+        self.actions = dict((i, e) for i, e in zip(range(len(actions)), actions))
         self.lives = 0  # Life counter (used in DeepMind training)
         self.life_termination = False  # Used to check if resetting only from loss of life
         self.window = args.history_length  # Number of frames to concatenate

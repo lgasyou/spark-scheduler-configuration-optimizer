@@ -1,8 +1,8 @@
-Rainbow
+Cluster Scheduler Configuration Optimizer
 =======
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
-cluster-scheduler-configuration-optimizer: Combining Improvements in Deep Reinforcement Learning [[1]](#references).
+Cluster Scheduler Configuration Optimizer: Combining Improvements in Deep Reinforcement Learning [[1]](#references).
 
 Results and pretrained models can be found in the [releases](https://github.com/Kaixhin/Rainbow/releases).
 

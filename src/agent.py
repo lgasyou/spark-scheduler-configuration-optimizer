@@ -38,16 +38,16 @@ class IAgent(object):
     def evaluate_q(self, state) -> float:
         pass
 
-    def train(self):
+    def to_train_mode(self):
         pass
 
-    def eval(self):
+    def to_eval_mode(self):
         pass
 
 
 class Agent(IAgent):
     """
-    The agent used by this project
+    The DRL agent of this project.
     """
 
     def reset_noise(self):
@@ -72,10 +72,10 @@ class Agent(IAgent):
     def evaluate_q(self, state) -> float:
         pass
 
-    def train(self):
+    def to_train_mode(self):
         pass
 
-    def eval(self):
+    def to_eval_mode(self):
         pass
 
 
@@ -180,8 +180,8 @@ class RainbowAgent(IAgent):
         with torch.no_grad():
             return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).max(1)[0].item()
 
-    def train(self):
+    def to_train_mode(self):
         self.online_net.train()
 
-    def eval(self):
+    def to_eval_mode(self):
         self.online_net.eval()
