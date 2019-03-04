@@ -4,7 +4,8 @@ import random
 import torch
 from torch import optim
 
-from src.model import DQN
+from .memory import ReplayMemory
+from .model import DQN
 
 
 class IAgent(object):
@@ -17,31 +18,32 @@ class IAgent(object):
         pass
 
     # Acts based on single state (no batch)
-    def act(self, state):
+    def act(self, state: torch.Tensor):
         pass
 
     # Acts with an ε-greedy policy (used for evaluation only)
-    def act_e_greedy(self, state, epsilon=0.001) -> int:  # High ε can reduce evaluation scores drastically
+    # High ε can reduce evaluation scores drastically
+    def act_e_greedy(self, state: torch.Tensor, epsilon: int=0.001) -> int:
         pass
 
-    def learn(self, mem):
+    def learn(self, mem: ReplayMemory):
         pass
 
     def update_target_net(self) -> None:
         pass
 
     # Save model parameters on current device (don't move model between devices)
-    def save(self, path) -> None:
+    def save(self, path: str) -> None:
         pass
 
     # Evaluates Q-value based on single state (no batch)
-    def evaluate_q(self, state) -> float:
+    def evaluate_q(self, state: torch.Tensor) -> float:
         pass
 
-    def to_train_mode(self):
+    def train(self):
         pass
 
-    def to_eval_mode(self):
+    def eval(self):
         pass
 
 
@@ -72,10 +74,10 @@ class Agent(IAgent):
     def evaluate_q(self, state) -> float:
         pass
 
-    def to_train_mode(self):
+    def train(self):
         pass
 
-    def to_eval_mode(self):
+    def eval(self):
         pass
 
 
@@ -180,8 +182,8 @@ class RainbowAgent(IAgent):
         with torch.no_grad():
             return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).max(1)[0].item()
 
-    def to_train_mode(self):
+    def train(self):
         self.online_net.train()
 
-    def to_eval_mode(self):
+    def eval(self):
         self.online_net.eval()

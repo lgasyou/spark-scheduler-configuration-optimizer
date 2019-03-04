@@ -7,32 +7,7 @@ import atari_py
 import cv2  # Note that importing cv2 before torch may cause segfaults?
 import torch
 
-
-class Job(object):
-    def __init__(self):
-        self.submit_time = int()
-        self.priority = int()
-        self.task = []
-
-
-class Resource(object):
-    def __init__(self):
-        self.plat = ''
-        self.cpu = ''
-        self.mem = ''
-
-
-class Constraint(object):
-    def __init__(self):
-        self.queue = []
-        self.job = []
-
-
-class State(object):
-    def __init__(self, raw_state: torch.Tensor):
-        self.job = Job()
-        self.resource = Resource()
-        self.constraint = Constraint()
+from .yarn import YarnSchedulerCommunicator
 
 
 class IEnv(object):
@@ -73,30 +48,30 @@ class YarnEnv(IEnv):
 
     def __init__(self, args: argparse.Namespace):
         self.device = args.device
-
-    def __get_state(self) -> torch.Tensor:
-        pass
+        self.communicator = YarnSchedulerCommunicator()
+        self.actions = self.communicator.get_action_set()
+        self.training = True    # Consistent with model training mode
 
     def reset(self) -> torch.Tensor:
         pass
 
-    def step(self, action) -> Tuple[torch.Tensor, int, bool]:
-        pass
+    def step(self, action: int) -> Tuple[torch.Tensor, float, bool]:
+        reward = self.communicator.act(action)
+        done = self.communicator.is_done()
+        state = self.communicator.get_state()
+        return state, reward, done
 
     def train(self) -> None:
-        pass
+        self.training = True
 
     def eval(self) -> None:
-        pass
+        self.training = False
 
     def action_space(self) -> int:
-        pass
-
-    def render(self) -> None:
-        pass
+        return len(self.actions)
 
     def close(self) -> None:
-        pass
+        self.communicator.close()
 
 
 class GoogleTraceEnv(IEnv):
@@ -107,9 +82,6 @@ class GoogleTraceEnv(IEnv):
 
     def __init__(self, args: argparse.Namespace):
         self.device = args.device
-
-    def __get_state(self) -> torch.Tensor:
-        pass
 
     def reset(self) -> torch.Tensor:
         pass

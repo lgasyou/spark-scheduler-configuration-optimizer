@@ -7,10 +7,10 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from src.agent import IAgent, RainbowAgent
-from src.env import IEnv, RainbowEnv
-from src.memory import ReplayMemory
-from src.test import test
+from .agent import IAgent, RainbowAgent
+from .env import IEnv, RainbowEnv
+from .memory import ReplayMemory
+from .test import test
 
 
 def read_data_from_csv(path, index, hour) -> np.ndarray:
@@ -93,7 +93,7 @@ class ClusterSchedConfOptimizer(object):
         reward_clip = self.args.reward_clip
 
         T, done = 0, True
-        self.dqn.to_train_mode()
+        self.dqn.train()
         for T in tqdm(range(num_training_steps)):
             if done:
                 state, done = self.env.reset(), False
@@ -118,11 +118,11 @@ class ClusterSchedConfOptimizer(object):
                     self.dqn.learn(self.mem)  # Train with n-step distributional double-Q learning
 
                 if T % self.args.evaluation_interval == 0:
-                    self.dqn.to_eval_mode()  # Set DQN (online network) to evaluation mode
+                    self.dqn.eval()  # Set DQN (online network) to evaluation mode
                     avg_reward, avg_Q = test(self.args, T, self.dqn, self.val_mem)  # Test
                     log('T = ' + str(T) + ' / ' + str(num_training_steps) + ' | Avg. reward: ' +
                         str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
-                    self.dqn.to_train_mode()  # Set DQN (online network) back to training mode
+                    self.dqn.train()  # Set DQN (online network) back to training mode
 
                 # Update target network
                 if T % self.args.target_update == 0:
@@ -136,7 +136,7 @@ class ClusterSchedConfOptimizer(object):
         reward_clip = self.args.reward_clip
 
         T, done = 0, True
-        self.dqn.to_train_mode()
+        self.dqn.train()
         for T in tqdm(range(num_training_steps)):
             if done:
                 state, done = self.env.reset(), False
@@ -161,11 +161,11 @@ class ClusterSchedConfOptimizer(object):
                     self.dqn.learn(self.mem)  # Train with n-step distributional double-Q learning
 
                 if T % self.args.evaluation_interval == 0:
-                    self.dqn.to_eval_mode()  # Set DQN (online network) to evaluation mode
+                    self.dqn.eval()  # Set DQN (online network) to evaluation mode
                     avg_reward, avg_Q = test(self.args, T, self.dqn, self.val_mem)  # Test
                     log('T = ' + str(T) + ' / ' + str(num_training_steps) + ' | Avg. reward: ' +
                         str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
-                    self.dqn.to_train_mode()  # Set DQN (online network) back to training mode
+                    self.dqn.train()  # Set DQN (online network) back to training mode
 
                 # Update target network
                 if T % self.args.target_update == 0:
