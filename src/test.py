@@ -5,7 +5,7 @@ import torch
 from plotly.graph_objs import Scatter
 from plotly.graph_objs.scatter import Line
 
-from src.env import RainbowEnv
+from .env import RainbowEnv
 
 # Globals
 Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10

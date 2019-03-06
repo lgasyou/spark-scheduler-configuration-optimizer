@@ -30,7 +30,7 @@ class State(object):
         self.constraint = Constraint()
 
 
-class YarnAction(object):
+class Action(object):
     def __init__(self, a: int, b: int):
         self.a = a
         self.b = b
@@ -39,25 +39,41 @@ class YarnAction(object):
 class YarnSchedulerCommunicator(object):
     """
     Manages communications with YARN cluster scheduler.
+    After changing the capacity of queues, command `yarn rmadmin -refreshQueues` may be useful.
     """
 
     @staticmethod
-    def get_action_set() -> Dict[int, YarnAction]:
+    def get_action_set() -> Dict[int, Action]:
+        """
+        :return: Action dictionary defined in document.
+        """
         return {
-            1: YarnAction(1, 5),
-            2: YarnAction(2, 4),
-            3: YarnAction(3, 3),
-            4: YarnAction(4, 2),
-            5: YarnAction(5, 1)
+            1: Action(1, 5),
+            2: Action(2, 4),
+            3: Action(3, 3),
+            4: Action(4, 2),
+            5: Action(5, 1)
         }
 
-    def act(self, action: int) -> float:
+    def act(self, action: Action) -> float:
         """
-        :return: reward this step got.
+        Apply action and see how many rewards we can get.
+        :return: Reward this step got.
+        """
+        self.save_conf()
+        return 0
+
+    def get_state(self) -> torch.Tensor:
+        """
+        Get raw state of YARN which has a variable length.
         """
         pass
 
-    def get_state(self) -> torch.Tensor:
+    def get_state_trimmed(self) -> torch.Tensor:
+        """
+        Get state of YARN which is trimmed and the of length of it is determined,
+        Which is the ϕ(s) function defined in document.
+        """
         pass
 
     def save_conf(self) -> None:

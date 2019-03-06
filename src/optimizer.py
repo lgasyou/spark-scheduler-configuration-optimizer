@@ -14,7 +14,7 @@ from .test import test
 
 
 def read_data_from_csv(path, index, hour) -> np.ndarray:
-    return np.loadtxt("{}/{}/sls_jobs{}.csv".format(path, index, hour), delimiter=",", dtype=np.uint32)
+    return np.loadtxt("{}/{}/sls_jobs{}.csv".format(path, index, hour), delimiter=",", dtype=np.int32)
 
 
 # Simple ISO 8601 timestamped logger
@@ -54,7 +54,6 @@ class ClusterSchedConfOptimizer(object):
     # Setup Environment
     def __setup_env(self) -> Tuple[IEnv, int]:
         env = RainbowEnv(self.args)
-        env.train()
         action_space = env.action_space()
         return env, action_space
 
@@ -101,7 +100,6 @@ class ClusterSchedConfOptimizer(object):
             if T % self.args.replay_frequency == 0:
                 self.dqn.reset_noise()  # Draw a new set of noisy weights
 
-            # TODO: Need a function to make the length of states always equal to each other (The ϕ(s)).
             action = self.dqn.act(state)  # Choose an action greedily (with noisy weights)
             next_state, reward, done = self.env.step(action)  # Step
             if reward_clip > 0:
@@ -130,7 +128,6 @@ class ClusterSchedConfOptimizer(object):
             state = next_state
 
     # Start to optimize the real scheduler
-    # TODO: need to rewrite the signature of the interfaces of memory or env.
     def start(self) -> None:
         num_training_steps = self.args.T_max
         reward_clip = self.args.reward_clip
@@ -144,7 +141,6 @@ class ClusterSchedConfOptimizer(object):
             if T % self.args.replay_frequency == 0:
                 self.dqn.reset_noise()  # Draw a new set of noisy weights
 
-            # TODO: Need a function to make the length of states always equal to each other (The ϕ(s)).
             action = self.dqn.act(state)  # Choose an action greedily (with noisy weights)
             next_state, reward, done = self.env.step(action)  # Step
             if reward_clip > 0:

@@ -47,7 +47,7 @@ class IAgent(object):
         pass
 
 
-class Agent(IAgent):
+class YarnAgent(IAgent):
     """
     The DRL agent of this project.
     """

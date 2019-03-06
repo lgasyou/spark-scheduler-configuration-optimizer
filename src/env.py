@@ -12,7 +12,7 @@ from .yarn import YarnSchedulerCommunicator
 
 class IEnv(object):
     """
-    The interface of environment
+    The interface of environments.
     """
 
     def reset(self) -> torch.Tensor:
@@ -43,7 +43,7 @@ class IEnv(object):
 
 class YarnEnv(IEnv):
     """
-    Manages communications with YARN cluster scheduler.
+    High level environment implement.
     """
 
     def __init__(self, args: argparse.Namespace):
@@ -52,6 +52,7 @@ class YarnEnv(IEnv):
         self.actions = self.communicator.get_action_set()
         self.training = True    # Consistent with model training mode
 
+    # TODO: How to reset?
     def reset(self) -> torch.Tensor:
         pass
 
@@ -78,6 +79,7 @@ class GoogleTraceEnv(IEnv):
     """
     Used while pre train is running.
     Uses Google traces as its input.
+    TODO: For now, I don't know the significance of the class.
     """
 
     def __init__(self, args: argparse.Namespace):

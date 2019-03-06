@@ -28,7 +28,7 @@ class NoisyLinear(nn.Module):
         self.bias_mu.data.uniform_(-mu_range, mu_range)
         self.bias_sigma.data.fill_(self.std_init / math.sqrt(self.out_features))
 
-    def _scale_noise(self, size):
+    def _scale_noise(self, size) -> torch.Tensor:
         x = torch.randn(size)
         return x.sign().mul_(x.abs().sqrt_())
 
@@ -38,7 +38,7 @@ class NoisyLinear(nn.Module):
         self.weight_epsilon.copy_(epsilon_out.ger(epsilon_in))
         self.bias_epsilon.copy_(epsilon_out)
 
-    def forward(self, input):
+    def forward(self, input) -> torch.Tensor:
         if self.training:
             return F.linear(input, self.weight_mu + self.weight_sigma * self.weight_epsilon,
                             self.bias_mu + self.bias_sigma * self.bias_epsilon)
@@ -59,7 +59,7 @@ class DQN(nn.Module):
         self.fc_z_v = NoisyLinear(args.hidden_size, self.atoms, std_init=args.noisy_std)
         self.fc_z_a = NoisyLinear(args.hidden_size, action_space * self.atoms, std_init=args.noisy_std)
 
-    def forward(self, x, log=False):
+    def forward(self, x, log=False) -> torch.Tensor:
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = x.view(-1, 23104)
