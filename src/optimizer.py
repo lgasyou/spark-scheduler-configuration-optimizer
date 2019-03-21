@@ -6,8 +6,8 @@ from typing import Tuple
 import numpy as np
 from tqdm import tqdm
 
-from src.env.yarn import GoogleTraceParser
 from .agent import IAgent, RainbowAgent
+from .env import GoogleTraceParser
 from .env import RainbowEnv
 from .memory import ReplayMemory
 from .test import test
