@@ -4,6 +4,7 @@ import random
 import torch
 from torch import optim
 
+from .env import Env
 from .memory import ReplayMemory
 from .model import DQN
 
@@ -52,33 +53,63 @@ class YarnAgent(IAgent):
     The DRL agent of this project.
     """
 
-    def reset_noise(self):
-        pass
+    def __init__(self, args, env: Env):
+        self.action_space = env.action_space()
+        self.atoms = args.atoms
+        self.V_min = args.V_min
+        self.V_max = args.V_max
+        self.support = torch.linspace(args.V_min, args.V_max, self.atoms).to(device=args.device)  # Support (range) of z
+        self.delta_z = (args.V_max - args.V_min) / (self.atoms - 1)
+        self.batch_size = args.batch_size
+        self.n = args.multi_step
+        self.discount = args.discount
 
-    # Formula 7
+        self.online_net = DQN(args, self.action_space).to(device=args.device)
+        if args.model and os.path.isfile(args.model):
+            # Always load tensors onto CPU by default, will shift to GPU if necessary
+            self.online_net.load_state_dict(torch.load(args.model, map_location='cpu'))
+        self.online_net.train()
+
+        self.target_net = DQN(args, self.action_space).to(device=args.device)
+        self.update_target_net()
+        self.target_net.train()
+        for param in self.target_net.parameters():
+            param.requires_grad = False
+
+        self.optimiser = optim.Adam(self.online_net.parameters(), lr=args.lr, eps=args.adam_eps)
+
+    def reset_noise(self):
+        self.online_net.reset_noise()
+
+    # TODO: Formula 7
     def act(self, state):
-        pass
+        with torch.no_grad():
+            return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).argmax(1).item()
 
     def act_e_greedy(self, state, epsilon=0.001) -> int:
-        pass
+        return random.randrange(self.action_space) if random.random() < epsilon else self.act(state)
 
+    # TODO:
     def learn(self, mem):
-        pass
+        # Sample transitions
+        idxs, states, actions, returns, next_states, nonterminals, weights = mem.sample(self.batch_size)
 
     def update_target_net(self) -> None:
-        pass
+        self.target_net.load_state_dict(self.online_net.state_dict())
 
     def save(self, path) -> None:
-        pass
+        torch.save(self.online_net.state_dict(), os.path.join(path, 'model.pth'))
 
+    # TODO:
     def evaluate_q(self, state) -> float:
-        pass
+        with torch.no_grad():
+            return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).max(1)[0].item()
 
     def train(self):
-        pass
+        self.online_net.train()
 
     def eval(self):
-        pass
+        self.online_net.eval()
 
 
 class RainbowAgent(IAgent):

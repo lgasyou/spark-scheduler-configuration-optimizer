@@ -4,11 +4,11 @@ from datetime import datetime
 from typing import Tuple
 
 import numpy as np
-import torch
 from tqdm import tqdm
 
+from src.env.yarn import GoogleTraceParser
 from .agent import IAgent, RainbowAgent
-from .env import IEnv, RainbowEnv
+from .env import RainbowEnv
 from .memory import ReplayMemory
 from .test import test
 
@@ -52,7 +52,7 @@ class ClusterSchedConfOptimizer(object):
         self.__read_training_jobs()
 
     # Setup Environment
-    def __setup_env(self) -> Tuple[IEnv, int]:
+    def __setup_env(self) -> Tuple[RainbowEnv, int]:
         env = RainbowEnv(self.args)
         action_space = env.action_space()
         return env, action_space
@@ -80,10 +80,10 @@ class ClusterSchedConfOptimizer(object):
 
     # Read sls_jobs and init the values with None
     def __read_training_jobs(self) -> None:
+        trace_parser = GoogleTraceParser(self.data_path)
         for i in range(1, 13):
-            for j in range(0, 23):
-                np_data = read_data_from_csv(self.data_path, i, j)
-                tensor = torch.from_numpy(np_data)
+            for j in range(12):
+                tensor = trace_parser.parse(i, j)
                 self.mem.append(state=tensor, action=None, reward=None, terminal=False)
 
     # Pre train the DQN model with offline data
@@ -128,7 +128,7 @@ class ClusterSchedConfOptimizer(object):
             state = next_state
 
     # Start to optimize the real scheduler
-    def start(self) -> None:
+    def start_watching(self) -> None:
         num_training_steps = self.args.T_max
         reward_clip = self.args.reward_clip
 

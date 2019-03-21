@@ -7,6 +7,7 @@ from torch.nn import functional as F
 
 # Factorised NoisyLinear layer with bias
 class NoisyLinear(nn.Module):
+
     def __init__(self, in_features, out_features, std_init=0.4):
         super(NoisyLinear, self).__init__()
         self.in_features = in_features
@@ -47,6 +48,7 @@ class NoisyLinear(nn.Module):
 
 
 class DQN(nn.Module):
+
     def __init__(self, args, action_space):
         super().__init__()
         self.atoms = args.atoms

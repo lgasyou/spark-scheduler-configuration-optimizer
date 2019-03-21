@@ -1,4 +1,5 @@
 import argparse
+import logging
 import random
 
 import torch
@@ -6,10 +7,13 @@ import torch
 from src.optimizer import ClusterSchedConfOptimizer
 
 DATA_PATH = "/Users/xenon/Desktop/cluster-scheduler-configuration-optimizer/googleTraceOutputDir"
+logger = logging.getLogger(__name__)
 
 
 def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
+    parser.add_argument('--hadoop-home', type=str, default='/usr/local/hadoop/', help='Hadoop home path')
+
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
     parser.add_argument('--game', type=str, default='space_invaders', help='ATARI game')
@@ -62,12 +66,11 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-# Setup args
-def setup_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
-    args = parser.parse_args()
-    print(' ' * 26 + 'Options')
+# Setup PyTorch args
+def setup_torch_args(args: argparse.Namespace):
+    logger.info(' ' * 26 + 'Options')
     for k, v in vars(args).items():
-        print(' ' * 26 + k + ': ' + str(v))
+        logger.info(' ' * 26 + k + ': ' + str(v))
     random.seed(args.seed)
     torch.manual_seed(random.randint(1, 10000))
     if torch.cuda.is_available() and not args.disable_cuda:
@@ -81,12 +84,20 @@ def setup_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     return args
 
 
-def main():
+def get_args() -> argparse.Namespace:
     parser = setup_arg_parser()
-    args = setup_args(parser)
+    args = parser.parse_args()
+    setup_torch_args(args)
+    return args
+
+
+def main():
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    args = get_args()
+
     optimizer = ClusterSchedConfOptimizer(DATA_PATH, args)
     optimizer.pre_train_model()
-    optimizer.start()
+    optimizer.start_watching()
 
 
 if __name__ == '__main__':
