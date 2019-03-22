@@ -10,6 +10,9 @@ class Communicator(object):
     def act(self, action):
         pass
 
+    def reset(self):
+        pass
+
     def is_done(self):
         pass
 

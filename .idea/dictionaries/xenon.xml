@@ -18,6 +18,7 @@
       <w>softmax</w>
       <w>timestep</w>
       <w>tonexty</w>
+      <w>vcores</w>
       <w>θonline</w>
       <w>θtarget</w>
     </words>

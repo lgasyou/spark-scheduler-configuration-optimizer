@@ -1,24 +1,24 @@
 import json
 from typing import Dict, List
-from xml.etree import ElementTree
 
+import requests
 import torch
 
 from .communicator import Communicator
 
 
 class Job(object):
-    def __init__(self, submit_time, tasks):
+    def __init__(self, submit_time, priority, tasks):
         self.submit_time: int = submit_time
+        self.priority: int = priority
         self.tasks: List[Task] = tasks
 
 
 class Task(object):
-    def __init__(self, platform, start_time, end_time, priority):
+    def __init__(self, platform, start_time, end_time):
         self.platform: str = platform
         self.start_time: int = start_time
         self.end_time: int = end_time
-        self.priority: int = priority
 
 
 class Resource(object):
@@ -51,10 +51,10 @@ class Constraint(object):
 
 
 class State(object):
-    def __init__(self):
-        self.jobs: List[Job] = []
-        self.resources: List[Resource] = []
-        self.constraint: Constraint = Constraint()
+    def __init__(self, jobs: List[Job], resources: List[Resource], constraint: Constraint):
+        self.jobs = jobs
+        self.resources = resources
+        self.constraint = constraint
 
 
 class Action(object):
@@ -65,15 +65,13 @@ class Action(object):
 
 class YarnSchedulerCommunicator(Communicator):
     """
-    Manages communications with YARN cluster scheduler.
-    After changing the capacity of queues, command `yarn rmadmin -refreshQueues` may be useful.
+    Uses RESTFul API to communicate with YARN cluster scheduler.
     """
 
-    def __init__(self, hadoop_home: str):
+    def __init__(self, rm_host: str, hadoop_home: str):
         self.hadoop_etc = hadoop_home + '/etc'
-        conf_dict = self.__read_conf()
-        self.constraints = self.__parse_constraints(conf_dict)
-        self.resources = self.__parse_resources(conf_dict)
+        self.rm_host = rm_host
+        self.state = self.get_state()
 
     @staticmethod
     def get_action_set() -> Dict[int, Action]:
@@ -100,7 +98,10 @@ class YarnSchedulerCommunicator(Communicator):
         """
         Get raw state of YARN.
         """
-        pass
+        jobs = self.__get_jobs()
+        resources = self.__get_resources()
+        constraints = self.__get_constraints()
+        return State(jobs, resources, constraints)
 
     def get_state_tensor(self) -> torch.Tensor:
         """
@@ -112,7 +113,7 @@ class YarnSchedulerCommunicator(Communicator):
 
     def save_conf(self) -> None:
         """
-        Save self.conf as sls-runner.xml and [capacity|fair]-scheduler.xml
+        Save configurations by using RESTFul API.
         """
         pass
 
@@ -124,9 +125,9 @@ class YarnSchedulerCommunicator(Communicator):
 
     def close(self) -> None:
         """
-        Call save_conf function and close the communication.
+        Close the communication.
         """
-        self.save_conf()
+        pass
 
     def reset(self) -> None:
         """
@@ -134,99 +135,58 @@ class YarnSchedulerCommunicator(Communicator):
         """
         pass
 
-    def __read_conf(self) -> Dict[str, object]:
-        """
-        Read YARN scheduler configuration.
-        Read sls-runner.xml first, then sls-nodes.json,
-        then read capacity-scheduler.xml or fair-scheduler.xml according to sls-runner conf.
-        :return: A dictionary contains configuration we get.
-        """
-        yarn_site_conf = self.__read_yarn_site_xml()
-        sls_runner_conf = self.__read_sls_runner_xml()
-        sls_nodes_conf = self.__read_sls_nodes_json()
-        if 'FairScheduler' in yarn_site_conf['yarn.resourcemanager.scheduler.class']:
-            scheduler_conf = self.__read_fair_scheduler_xml()
-        else:
-            scheduler_conf = self.__read_capacity_scheduler_xml()
-        return {
-            'yarn-site': yarn_site_conf,
-            'sls-runner': sls_runner_conf,
-            'sls-nodes': sls_nodes_conf,
-            'scheduler': scheduler_conf
-        }
+    def __get_jobs(self) -> List[Job]:
+        url = self.rm_host + 'ws/v1/cluster/apps'
+        # conf = get_json(url)
+        conf = get_json_test('/Users/xenon/Desktop/SLS/cluster-apps.json')
+        apps = conf['apps']['app']
+        jobs = []
+        for j in apps:
+            if j['state'] != 'WAITING':
+                continue
+            start_time = j['startedTime']
+            priority = j['priority']
+            jobs.append(Job(start_time, priority, []))
+        return jobs
 
-    @staticmethod
-    def __parse_resources(conf_dict: Dict[str, object]) -> List[Resource]:
-        preferences = conf_dict['sls-runner']
-        memory = int(preferences['yarn.sls.nm.memory.mb']) / 1024
-        cpu = preferences['yarn.sls.nm.vcores']
-
-        nodes = conf_dict['sls-nodes']['nodes']
+    def __get_resources(self) -> List[Resource]:
+        url = self.rm_host + 'ws/v1/cluster/nodes'
+        # conf = get_json(url)
+        conf = get_json_test('/Users/xenon/Desktop/SLS/cluster-nodes.json')
+        nodes = conf['nodes']['node']
         resources = []
-        for node in nodes:
-            r = Resource(node['node'], cpu, int(memory))
-            resources.append(r)
-
+        for n in nodes:
+            node_name = n['nodeHostName']
+            memory = (int(n['usedMemoryMB']) + int(n['availMemoryMB'])) / 1024
+            vcores = int(n['usedVirtualCores']) + int(n['availableVirtualCores'])
+            resources.append(Resource(node_name, vcores, int(memory)))
         return resources
 
-    @staticmethod
-    def __parse_constraints(conf_dict: Dict[str, object]):
-        scheduler_conf: Dict[str, object] = conf_dict['scheduler']
-        queue_names = str(scheduler_conf['yarn.scheduler.capacity.root.queues']).split(',')
+    def __get_constraints(self) -> Constraint:
+        url = self.rm_host + 'ws/v1/cluster/scheduler'
+        # conf = get_json(url)
+        conf = get_json_test('/Users/xenon/Desktop/SLS/cluster-scheduler.json')
         constraint = Constraint()
-        for name in queue_names:
-            c = QueueConstraint(name)
-            for key in scheduler_conf.keys():
-                if name in key:
-                    item = key.split('.')[-1]
-                    if item == 'capacity':
-                        c.capacity = scheduler_conf[key]
-                    elif item == 'maximum-capacity':
-                        c.max_capacity = scheduler_conf[key]
-            constraint.add_queue_c(c)
+
+        queues = conf['scheduler']['schedulerInfo']['queues']['queue']
+        for q in queues:
+            capacity = q['capacity']
+            max_capacity = q['maxCapacity']
+            name = q['queueName']
+            queue_c = QueueConstraint(name, capacity, max_capacity)
+            constraint.add_queue_c(queue_c)
 
         return constraint
 
-    def __read_yarn_site_xml(self) -> Dict[str, object]:
-        yarn_site_xml = self.hadoop_etc + '/yarn-site.xml'
-        root = ElementTree.parse(yarn_site_xml).getroot()
-        conf = {}
-        for item in root.findall('property'):
-            name = item.find('name').text
-            value = item.find('value').text
-            conf[name] = value
-        return conf
 
-    def __read_sls_runner_xml(self) -> Dict[str, object]:
-        sls_runner_xml = self.hadoop_etc + '/sls-runner.xml'
-        root = ElementTree.parse(sls_runner_xml).getroot()
-        conf = {}
-        for item in root.findall('property'):
-            name = item.find('name').text
-            value = item.find('value').text
-            conf[name] = value
-        return conf
+def get_json(url: str) -> Dict[str, object]:
+    r = requests.get(url)
+    r.raise_for_status()
+    r.encoding = r.apparent_encoding
+    j = json.loads(r.text)
+    return j
 
-    def __read_sls_nodes_json(self) -> Dict[str, object]:
-        with open(self.hadoop_etc + '/sls-nodes.json') as f:
-            return json.load(f)
 
-    def __read_fair_scheduler_xml(self) -> Dict[str, object]:
-        fair_scheduler_xml = self.hadoop_etc + '/fair-scheduler.xml'
-        root = ElementTree.parse(fair_scheduler_xml).getroot()
-        conf = {}
-        for queue in root.findall('queue'):
-            name = queue.attrib['name']
-            weight = queue.find('weight').text
-            conf[name] = weight
-        return conf
-
-    def __read_capacity_scheduler_xml(self) -> Dict[str, object]:
-        capacity_scheduler_xml = self.hadoop_etc + '/capacity-scheduler.xml'
-        root = ElementTree.parse(capacity_scheduler_xml).getroot()
-        conf = {}
-        for item in root.findall('property'):
-            name = item.find('name').text
-            value = item.find('value').text
-            conf[name] = value
-        return conf
+def get_json_test(filename: str) -> Dict[str, object]:
+    with open(filename) as f:
+        return json.load(f)

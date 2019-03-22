@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
     parser.add_argument('--hadoop-home', type=str, default='/usr/local/hadoop/', help='Hadoop home path')
+    parser.add_argument('--rm-host', type=str, default='http://localhost:8088/', help='Address:port of ResourceManager')
 
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
