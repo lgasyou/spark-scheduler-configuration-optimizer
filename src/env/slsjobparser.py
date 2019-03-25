@@ -11,6 +11,8 @@ class GoogleTraceParser(object):
 
     def __init__(self, directory: str):
         self.dir = directory
+        self.max_job_num = 100
+        self.max_task_num_per_job = 1000
 
     def parse(self, index: int, hour: int, save_as_csv=False) -> torch.Tensor:
         filename_without_extension = "{}/{}/sls_jobs{}".format(self.dir, index, hour)
@@ -18,7 +20,7 @@ class GoogleTraceParser(object):
 
         with open(filename, 'r') as f:
             job_lines = []
-            data = np.zeros(shape=(100, 100), dtype=np.int64)
+            data = np.zeros(shape=(self.max_job_num, self.max_task_num_per_job), dtype=np.int64)
             job_cnt = 0
             for line in f:
                 job_lines.append(line)
@@ -35,9 +37,8 @@ class GoogleTraceParser(object):
 
         return torch.from_numpy(arr)
 
-    @staticmethod
-    def __generate_line(job) -> np.ndarray:
-        a = np.zeros(100, dtype=np.int64)
+    def __generate_line(self, job) -> np.ndarray:
+        a = np.zeros(self.max_task_num_per_job, dtype=np.int64)
         a[0] = job['job.start.ms']
         last_index = 0
         for i, task in enumerate(job['job.tasks']):
