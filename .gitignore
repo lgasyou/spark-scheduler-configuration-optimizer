@@ -3,7 +3,7 @@
 !.idea/dictionaries/
 
 # Input & output directories
-googleTraceOutputDir/
+data/
 results/
 
 # Byte-compiled / optimized / DLL files

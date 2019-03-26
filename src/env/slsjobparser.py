@@ -6,7 +6,7 @@ import torch
 
 class GoogleTraceParser(object):
     """
-    Parse the data in "googleTraceOutputDir"
+    Parse the data in "data/trainingset"
     """
 
     def __init__(self, directory: str):

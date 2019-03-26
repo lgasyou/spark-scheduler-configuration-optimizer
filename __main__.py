@@ -4,16 +4,16 @@ import random
 
 import torch
 
-from src.optimizer import ClusterSchedConfOptimizer
+from src.controller import OptimizationController
 
-DATA_PATH = "/Users/xenon/Desktop/cluster-scheduler-configuration-optimizer/googleTraceOutputDir"
 logger = logging.getLogger(__name__)
 
 
 def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
-    parser.add_argument('--hadoop-home', type=str, default='/usr/local/hadoop/', help='Hadoop home path')
-    parser.add_argument('--rm-host', type=str, default='http://localhost:8088/', help='Address:port of ResourceManager')
+    parser.add_argument('--hadoop-home', type=str, default='/opt/hadoop', help='Hadoop home path')
+    parser.add_argument('--rm-host', type=str, default='http://localhost:18088/', help='Address:port of ResourceManager')
+    parser.add_argument('--train-set', type=str, default='./data/trainingset/')
 
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
@@ -96,9 +96,9 @@ def main():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     args = get_args()
 
-    optimizer = ClusterSchedConfOptimizer(DATA_PATH, args)
-    optimizer.pre_train_model()
-    optimizer.start_watching()
+    controller = OptimizationController(args)
+    # controller.pre_train_model()
+    controller.run()
 
 
 if __name__ == '__main__':

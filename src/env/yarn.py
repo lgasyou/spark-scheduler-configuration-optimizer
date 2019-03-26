@@ -1,4 +1,7 @@
 import json
+import os
+import subprocess
+import time
 from typing import Dict, List
 
 import requests
@@ -59,8 +62,8 @@ class State(object):
 
 class Action(object):
     def __init__(self, a: int, b: int):
-        self.a = a
-        self.b = b
+        self.queue_a_weight = a
+        self.queue_b_weight = b
 
 
 class YarnSchedulerCommunicator(Communicator):
@@ -69,9 +72,13 @@ class YarnSchedulerCommunicator(Communicator):
     """
 
     def __init__(self, rm_host: str, hadoop_home: str):
+        self.hadoop_home = hadoop_home
         self.hadoop_etc = hadoop_home + '/etc'
         self.rm_host = rm_host
-        self.state = self.get_state()
+
+        self.action_set = self.get_action_set()
+        self.state: State = None
+        self.sls_runner: subprocess.Popen = None
 
     @staticmethod
     def get_action_set() -> Dict[int, Action]:
@@ -86,12 +93,14 @@ class YarnSchedulerCommunicator(Communicator):
             5: Action(5, 1)
         }
 
-    def act(self, action: int) -> float:
+    # TODO: reward
+    def act(self, action_index: int) -> float:
         """
         Apply action and see how many rewards we can get.
         :return: Reward this step got.
         """
-        self.save_conf()
+        action = self.action_set[action_index]
+        self.set_queue_weights(action.queue_a_weight, action.queue_b_weight)
         return 0
 
     def get_state(self) -> State:
@@ -111,48 +120,113 @@ class YarnSchedulerCommunicator(Communicator):
         raw_state = self.get_state()
         return torch.Tensor()
 
-    def save_conf(self) -> None:
+    def set_queue_weights(self, queue_a_weight: int, queue_b_weight: int) -> None:
         """
-        Save configurations by using RESTFul API.
+        Set queue weights by using RESTFul API.
         """
-        pass
+
+        conf = """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <sched-conf>
+          <update-queue>
+            <queue-name>root.a</queue-name>
+            <params>
+              <entry>
+                <key>capacity</key>
+                <value>{}</value>
+              </entry>
+            </params>
+          </update-queue>
+          <update-queue>
+            <queue-name>root.b</queue-name>
+            <params>
+              <entry>
+                <key>capacity</key>
+                <value>{}</value>
+              </entry>
+            </params>
+          </update-queue>
+        </sched-conf>
+        """.format(queue_a_weight, queue_b_weight)
+        url = self.rm_host + 'ws/v1/cluster/scheduler-conf'
+
+        r = requests.put(url, conf, headers={
+            'Content-Type': 'application/xml'
+        })
+        r.raise_for_status()
 
     def is_done(self) -> bool:
         """
         Test if all jobs are done.
         """
-        pass
+        return self.sls_runner is None or self.sls_runner.poll() is not None
 
     def close(self) -> None:
         """
         Close the communication.
         """
-        pass
+        if self.sls_runner is not None:
+            self.sls_runner.terminate()
+            self.sls_runner.wait()
 
     def reset(self) -> None:
         """
         Resets the env in order to run this program again.
         """
-        pass
+        self.close()
+        wd = os.getcwd()
+        self.sls_runner = subprocess.Popen([wd + '/start-sls.sh', self.hadoop_home, wd])
+        time.sleep(5)
 
     def __get_jobs(self) -> List[Job]:
-        url = self.rm_host + 'ws/v1/cluster/apps'
-        # conf = get_json(url)
-        conf = get_json_test('/Users/xenon/Desktop/SLS/cluster-apps.json')
-        apps = conf['apps']['app']
+        waiting_jobs = self.__get_waiting_jobs()
+        allocated_jobs = self.__get_allocated_jobs()
+        running_jobs = self.__get_running_jobs()
+        arrived_jobs = self.__get_arrived_jobs()
+        completed_jobs = self.__get_completed_jobs()
+
+        return []
+
+    def __get_jobs_by_states(self, states: str) -> Dict[str, object]:
+        url = self.rm_host + 'ws/v1/cluster/apps?states=' + states
+        return get_json(url)
+
+    @staticmethod
+    def __build_jobs_from_json(j: Dict[str, object]) -> List[Job]:
+        if j['apps'] is None:
+            return []
+
+        apps = j['apps']['app']
         jobs = []
         for j in apps:
-            if j['state'] != 'WAITING':
-                continue
             start_time = j['startedTime']
             priority = j['priority']
             jobs.append(Job(start_time, priority, []))
         return jobs
 
+    def __get_waiting_jobs(self) -> List[Job]:
+        j = self.__get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
+        return self.__build_jobs_from_json(j)
+
+    def __get_allocated_jobs(self) -> List[Job]:
+        j = self.__get_jobs_by_states('ACCEPTED')
+        return self.__build_jobs_from_json(j)
+
+    def __get_running_jobs(self) -> List[Job]:
+        j = self.__get_jobs_by_states('RUNNING')
+        return self.__build_jobs_from_json(j)
+
+    def __get_arrived_jobs(self) -> List[Job]:
+        j = self.__get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
+        return self.__build_jobs_from_json(j)
+
+    def __get_completed_jobs(self) -> List[Job]:
+        j = self.__get_jobs_by_states('FINISHED,FAILED,KILLED')
+        return self.__build_jobs_from_json(j)
+
     def __get_resources(self) -> List[Resource]:
         url = self.rm_host + 'ws/v1/cluster/nodes'
-        # conf = get_json(url)
-        conf = get_json_test('/Users/xenon/Desktop/SLS/cluster-nodes.json')
+        conf = get_json(url)
         nodes = conf['nodes']['node']
         resources = []
         for n in nodes:
@@ -164,8 +238,7 @@ class YarnSchedulerCommunicator(Communicator):
 
     def __get_constraints(self) -> Constraint:
         url = self.rm_host + 'ws/v1/cluster/scheduler'
-        # conf = get_json(url)
-        conf = get_json_test('/Users/xenon/Desktop/SLS/cluster-scheduler.json')
+        conf = get_json(url)
         constraint = Constraint()
 
         queues = conf['scheduler']['schedulerInfo']['queues']['queue']
@@ -185,8 +258,3 @@ def get_json(url: str) -> Dict[str, object]:
     r.encoding = r.apparent_encoding
     j = json.loads(r.text)
     return j
-
-
-def get_json_test(filename: str) -> Dict[str, object]:
-    with open(filename) as f:
-        return json.load(f)

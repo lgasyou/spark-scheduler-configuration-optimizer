@@ -1,1 +1,1 @@
-from .optimizer import ClusterSchedConfOptimizer
+from .controller import OptimizationController

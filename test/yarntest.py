@@ -1,13 +1,13 @@
 import json
-import unittest
 
 import requests
 
 import src.env.yarn as y
+import test
 from src.env.slsjobparser import GoogleTraceParser
 
 
-class YarnTest(unittest.TestCase):
+class YarnTest(test.TestCase):
 
     def test_read_conf(self):
         com = y.YarnSchedulerCommunicator(
@@ -22,7 +22,7 @@ class YarnTest(unittest.TestCase):
         print([r.__dict__ for r in queue_c])
 
     def test_json_reader(self):
-        p = GoogleTraceParser('/Users/xenon/Desktop/cluster-scheduler-configuration-optimizer/googleTraceOutputDir')
+        p = GoogleTraceParser('/Users/xenon/Desktop/cluster-scheduler-configuration-optimizer/trainingset')
         t = p.parse(1, 0, save_as_csv=False)
         print(t)
 
@@ -37,3 +37,10 @@ class YarnTest(unittest.TestCase):
         j = json.loads(s)
         with open('cluster-scheduler.json', 'w') as f:
             json.dump(j, f)
+
+    def test_reset(self):
+        com = y.YarnSchedulerCommunicator(
+            'http://localhost:8088',
+            '/Users/xenon/Desktop/SLS'
+        )
+        com.reset()
