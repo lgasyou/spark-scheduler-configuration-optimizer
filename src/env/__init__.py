@@ -1,17 +1,16 @@
 import argparse
 import random
 from collections import deque
-from typing import Tuple
+from typing import Tuple, Generator
 
 import atari_py
 import cv2  # Note that importing cv2 before torch may cause segfaults?
 import torch
 
 from .communicator import Communicator
-from .slsjobparser import GoogleTraceParser
-from .yarn import YarnSchedulerCommunicator
+from .yarn import YarnSchedulerCommunicator, Action
 
-__all__ = ['Env', 'RainbowEnv', 'GoogleTraceParser']
+__all__ = ['Env', 'GoogleTraceEnv', 'RainbowEnv']
 
 
 class Env(object):
@@ -21,7 +20,8 @@ class Env(object):
 
     def __init__(self, args: argparse.Namespace):
         self.device = args.device
-        self.communicator: Communicator = YarnSchedulerCommunicator(args.rm_host, args.hadoop_home)
+        sls_jobs_json = args.test_set + '/sls-jobs.json'
+        self.communicator: Communicator = YarnSchedulerCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
         self.actions = self.communicator.get_action_set()
         self.training = True    # Consistent with model training mode
 
@@ -53,34 +53,38 @@ class Env(object):
 
 class GoogleTraceEnv(object):
     """
-    Used while pre train is running.
+    Used while pre-train is running.
     Uses Google traces as its input.
-    TODO: For now, I don't know the significance of the class.
     """
 
     def __init__(self, args: argparse.Namespace):
         self.device = args.device
+        self.training_set_path = args.training_set
+        self.communicator = YarnSchedulerCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json='')
 
-    def reset(self) -> torch.Tensor:
-        pass
+    def get_generator(self, index_end: int=13, hour_end: int=12) -> Generator:
+        for i in range(1, index_end):
+            for j in range(hour_end):
+                yield self.step(i, j)
 
-    def step(self, action) -> Tuple[torch.Tensor, int, bool]:
-        pass
+    # TODO: Discuss the solution of jobs' wrong id.
+    def step(self, index: int, hour: int) -> Tuple[torch.Tensor, Action, float, bool]:
+        filename_without_extension = "{}/{}/sls_jobs{}".format(self.training_set_path, index, hour)
+        filename = filename_without_extension + '.json'
+        self.communicator.sls_jobs_json = filename
+        action_set = self.communicator.get_action_set()
 
-    def train(self) -> None:
-        pass
-
-    def eval(self) -> None:
-        pass
-
-    def action_space(self) -> int:
-        pass
-
-    def render(self) -> None:
-        pass
-
-    def close(self) -> None:
-        pass
+        for action_index in action_set.keys():
+            # TODO: Change the configuration before SLS starts
+            self.communicator.act(action_index)
+            self.communicator.reset()
+            done = False
+            while not done:
+                state = self.communicator.get_state_tensor()
+                action = action_set[action_index]
+                reward = self.communicator.get_reward()
+                done = self.communicator.is_done()
+                yield state, action, reward, done
 
 
 class RainbowEnv(object):

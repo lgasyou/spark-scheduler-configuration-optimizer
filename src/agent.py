@@ -33,7 +33,7 @@ class IAgent(object):
     def update_target_net(self) -> None:
         pass
 
-    # Save model parameters on current device (don't move model between devices)
+    # Save model parameters on current device (don'test move model between devices)
     def save(self, path: str) -> None:
         pass
 
@@ -204,7 +204,7 @@ class RainbowAgent(IAgent):
     def update_target_net(self):
         self.target_net.load_state_dict(self.online_net.state_dict())
 
-    # Save model parameters on current device (don't move model between devices)
+    # Save model parameters on current device (don'test move model between devices)
     def save(self, path):
         torch.save(self.online_net.state_dict(), os.path.join(path, 'model.pth'))
 

@@ -81,13 +81,13 @@ class ReplayMemory(object):
         # Store transitions in a wrap-around cyclic buffer within a sum tree for querying priorities
         self.transitions = SegmentTree(capacity)
 
-    # Adds state and action at time t, reward and terminal at time t + 1
+    # Adds state and action at time test, reward and terminal at time test + 1
     def append(self, state, action, reward, terminal):
         # Only store last frame and discretise to save memory
         state = state[-1].mul(255).to(dtype=torch.uint8, device=torch.device('cpu'))
         self.transitions.append(Transition(self.t, state, action, reward, not terminal),
                                 self.transitions.max)  # Store new transition with maximum priority
-        self.t = 0 if terminal else self.t + 1  # Start new episodes with t = 0
+        self.t = 0 if terminal else self.t + 1  # Start new episodes with test = 0
 
     # Returns a transition with blank states where appropriate
     def _get_transition(self, idx):
@@ -117,7 +117,7 @@ class ReplayMemory(object):
                     idx - self.transitions.index) % self.capacity >= self.history and prob != 0:
                 valid = True  # Note that conditions are valid but extra conservative around buffer index 0
 
-        # Retrieve all required transition data (from t - h to t + n)
+        # Retrieve all required transition data (from test - h to test + n)
         transition = self._get_transition(idx)
         # Create un-discretised state and nth next state
         state = torch.stack([trans.state for trans in transition[:self.history]]).to(dtype=torch.float32,

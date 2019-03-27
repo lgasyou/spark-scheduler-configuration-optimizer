@@ -1,13 +1,11 @@
 import argparse
-import random
 from datetime import datetime
 from typing import Tuple
 
 from tqdm import tqdm
 
 from .agent import IAgent, RainbowAgent
-from .env import Env
-from .env import GoogleTraceParser
+from .env import Env, GoogleTraceEnv
 from .memory import ReplayMemory
 from .test import test
 
@@ -39,9 +37,9 @@ class OptimizationController(object):
     """
 
     def __init__(self, args: argparse.Namespace):
-        self.data_path = args.train_set
         self.args = args
         self.env, self.action_space = self.__setup_env()
+        self.train_env = GoogleTraceEnv(args)
         self.dqn, self.mem, self.priority_weight_increase = self.__setup_agent()
         self.val_mem = self.__setup_val_mem()
 
@@ -61,28 +59,31 @@ class OptimizationController(object):
     # Construct validation memory
     def __setup_val_mem(self) -> ReplayMemory:
         val_mem = ReplayMemory(self.args, self.args.evaluation_size)
-        T, done = 0, True
-        while T < self.args.evaluation_size:
-            if done:
-                state, done = self.env.reset(), False
-
-            next_state, _, done = self.env.step(random.randint(0, self.action_space - 1))
-            val_mem.append(state, None, None, done)
-            state = next_state
-            T += 1
+        # T, done = 0, True
+        # while T < self.args.evaluation_size:
+        #     if done:
+        #         state, done = self.env.reset(), False
+        #
+        #     next_state, _, done = self.env.step(random.randint(0, self.action_space - 1))
+        #     val_mem.append(state, None, None, done)
+        #     state = next_state
+        #     T += 1
         return val_mem
 
-    # Pre train the DQN model with offline data
+    # Pre-train DQN model with offline data
     def pre_train_model(self):
-        trace_parser = GoogleTraceParser(self.data_path)
-        for i in range(1, 13):
-            for j in range(12):
-                tensor = trace_parser.parse(i, j)
-                self.mem.append(state=tensor, action=None, reward=None, terminal=False)
+        # Get data generator
+        generator = self.train_env.get_generator()
 
+        # Generate data, then save them into self.mem
+        for step in generator:
+            for (state, action, reward, terminal) in step:
+                self.mem.append(state, action, reward, terminal)
+
+        # Pre-train DQN model by using training set
         self.dqn.learn(self.mem)
 
-    # Start to optimize the real scheduler
+    # Start to optimize YARN scheduler
     def run(self) -> None:
         num_training_steps = self.args.T_max
         reward_clip = self.args.reward_clip
