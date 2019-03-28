@@ -89,7 +89,7 @@ class YarnAgent(IAgent):
     def act_e_greedy(self, state, epsilon=0.001) -> int:
         return random.randrange(self.action_space) if random.random() < epsilon else self.act(state)
 
-    # TODO:
+    # TODO: Implementation
     def learn(self, mem):
         # Sample transitions
         idxs, states, actions, returns, next_states, nonterminals, weights = mem.sample(self.batch_size)
@@ -100,7 +100,7 @@ class YarnAgent(IAgent):
     def save(self, path) -> None:
         torch.save(self.online_net.state_dict(), os.path.join(path, 'model.pth'))
 
-    # TODO:
+    # TODO: Implementation
     def evaluate_q(self, state) -> float:
         with torch.no_grad():
             return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).max(1)[0].item()

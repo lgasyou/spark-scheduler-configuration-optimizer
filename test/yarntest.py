@@ -67,7 +67,7 @@ class YarnTest(unittest.TestCase):
 #     # 1553738228.526
 #     print(time.time())
 
-if __name__ == '__main__':
+def communicator_test():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     sls_jobs_json = '/data/testset/' + 'sls-jobs.json'
     com = y.YarnSchedulerCommunicator(
@@ -79,3 +79,7 @@ if __name__ == '__main__':
     while True:
         com.get_state_tensor()
         com.act(1)
+
+
+if __name__ == '__main__':
+    communicator_test()

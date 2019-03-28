@@ -47,8 +47,8 @@ class QueueConstraint(object):
 
 
 class JobConstraint(object):
-    def __init__(self, job_name, host_node_name):
-        self.job_name = job_name
+    def __init__(self, job_id, host_node_name):
+        self.job_id = job_id
         self.host_node_name = host_node_name
 
 
@@ -90,13 +90,7 @@ class YarnSchedulerCommunicator(Communicator):
         self.rm_host = rm_host
         self.sls_jobs_json = sls_jobs_json
 
-        self.arrived_jobs = []
-        self.running_jobs = []
         self.waiting_jobs = []
-        self.allocated_jobs = []
-
-        self.last_run_time_ms = 0
-        self.current_time_ms = get_current_time_ms()
 
         self.action_set = self.get_action_set()
         self.sls_runner: subprocess.Popen = None
@@ -133,11 +127,10 @@ class YarnSchedulerCommunicator(Communicator):
         """
         Get raw state of YARN.
         """
-        self.current_time_ms = get_current_time_ms()
         wj, rj = self.__get_jobs()
         resources = self.__get_resources()
         constraints = self.__get_constraints()
-        self.last_run_time_ms = self.current_time_ms
+        self.waiting_jobs = wj
         return State(wj, rj, resources, constraints)
 
     # TODO: Transform into tensor
@@ -213,14 +206,12 @@ class YarnSchedulerCommunicator(Communicator):
         self.sls_runner = subprocess.Popen(cmd)
 
         # Wait until web server starts.
-        time.sleep(10)
+        time.sleep(8)
 
     def __get_jobs(self) -> Tuple[List[Job], List[Job]]:
-        self.arrived_jobs = self.__get_arrived_jobs()
-        self.running_jobs = self.__get_running_jobs()
-        self.waiting_jobs = self.__get_waiting_jobs()
-        self.allocated_jobs = self.__get_allocated_jobs()   # Must at last
-        return self.waiting_jobs, self.running_jobs
+        running_jobs = self.__get_running_jobs()
+        waiting_jobs = self.__get_waiting_jobs()
+        return waiting_jobs, running_jobs
 
     def __get_jobs_by_states(self, states: str) -> List[Job]:
         url = self.rm_host + 'ws/v1/cluster/apps?states=' + states
@@ -242,7 +233,6 @@ class YarnSchedulerCommunicator(Communicator):
 
             if 'resourceRequests' in j:
                 resource_requests = j['resourceRequests']
-
                 for req in resource_requests:
                     capability = req['capability']
                     memory = capability['memory']
@@ -254,29 +244,10 @@ class YarnSchedulerCommunicator(Communicator):
         return jobs
 
     def __get_waiting_jobs(self) -> List[Job]:
-        w = set(self.waiting_jobs)
-        al = set(self.allocated_jobs)
-        ar = set(self.arrived_jobs)
-        return list(w.difference(al).union(ar))
-
-    def __get_allocated_jobs(self) -> List[Job]:
-        all_allocated_jobs = self.__get_jobs_by_states('ACCEPTED')
-        allocated_at_current = []
-        for job in all_allocated_jobs:
-            if job.submit_time >= self.last_run_time_ms:
-                allocated_at_current.append(job)
-        return allocated_at_current
+        return self.__get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
 
     def __get_running_jobs(self) -> List[Job]:
         return self.__get_jobs_by_states('RUNNING')
-
-    def __get_arrived_jobs(self) -> List[Job]:
-        all_arrived_jobs = self.__get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED')
-        arrived_at_current = []
-        for job in all_arrived_jobs:
-            if job.submit_time >= self.last_run_time_ms:
-                arrived_at_current.append(job)
-        return arrived_at_current
 
     def __get_resources(self) -> List[Resource]:
         url = self.rm_host + 'ws/v1/cluster/nodes'
@@ -290,7 +261,6 @@ class YarnSchedulerCommunicator(Communicator):
             resources.append(Resource(node_name, vcores, int(memory)))
         return resources
 
-    # TODO: get job constraints
     def __get_constraints(self) -> Constraint:
         url = self.rm_host + 'ws/v1/cluster/scheduler'
         conf = get_json(url)
@@ -304,10 +274,15 @@ class YarnSchedulerCommunicator(Communicator):
             queue_c = QueueConstraint(name, capacity, max_capacity)
             constraint.add_queue_c(queue_c)
 
+        # TODO LATER: Job constraint
         for job in self.waiting_jobs:
-            url = self.rm_host + 'ws/v1/cluster/apps/' + job.application_id
-            job_json = get_json(url)
-            print(job_json)
+            url = "{}ws/v1/cluster/apps/{}/appattempts".format(self.rm_host, job.application_id)
+            attempt_json = get_json(url)
+            attempts = attempt_json['appAttempts']['appAttempt']
+            for a in attempts:
+                http_address = a['nodeHttpAddress']
+                if len(http_address):
+                    constraint.add_job_c(JobConstraint(job.application_id, http_address))
 
         return constraint
 
