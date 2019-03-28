@@ -92,12 +92,13 @@ class YarnSchedulerCommunicator(Communicator):
 
         self.arrived_jobs = []
         self.running_jobs = []
-        self.completed_jobs = []
         self.waiting_jobs = []
         self.allocated_jobs = []
 
+        self.last_run_time_ms = 0
+        self.current_time_ms = get_current_time_ms()
+
         self.action_set = self.get_action_set()
-        self.state: State = None
         self.sls_runner: subprocess.Popen = None
 
     @staticmethod
@@ -124,7 +125,7 @@ class YarnSchedulerCommunicator(Communicator):
         self.set_queue_weights(a, b)
         return self.get_reward()
 
-    # TODO: reward
+    # TODO: Calculate reward
     def get_reward(self) -> float:
         return 0
 
@@ -132,12 +133,14 @@ class YarnSchedulerCommunicator(Communicator):
         """
         Get raw state of YARN.
         """
+        self.current_time_ms = get_current_time_ms()
         wj, rj = self.__get_jobs()
         resources = self.__get_resources()
         constraints = self.__get_constraints()
+        self.last_run_time_ms = self.current_time_ms
         return State(wj, rj, resources, constraints)
 
-    # TODO: transform into tensor
+    # TODO: Transform into tensor
     def get_state_tensor(self) -> torch.Tensor:
         """
         Get state of YARN which is trimmed.
@@ -212,7 +215,6 @@ class YarnSchedulerCommunicator(Communicator):
         # Wait until web server starts.
         time.sleep(10)
 
-    # TODO: fix bugs
     def __get_jobs(self) -> Tuple[List[Job], List[Job]]:
         self.arrived_jobs = self.__get_arrived_jobs()
         self.running_jobs = self.__get_running_jobs()
@@ -258,15 +260,23 @@ class YarnSchedulerCommunicator(Communicator):
         return list(w.difference(al).union(ar))
 
     def __get_allocated_jobs(self) -> List[Job]:
-        all_allocated_jobs = set(self.__get_jobs_by_states('ACCEPTED'))
-        return list(all_allocated_jobs.difference(set(self.allocated_jobs)))
+        all_allocated_jobs = self.__get_jobs_by_states('ACCEPTED')
+        allocated_at_current = []
+        for job in all_allocated_jobs:
+            if job.submit_time >= self.last_run_time_ms:
+                allocated_at_current.append(job)
+        return allocated_at_current
 
     def __get_running_jobs(self) -> List[Job]:
         return self.__get_jobs_by_states('RUNNING')
 
     def __get_arrived_jobs(self) -> List[Job]:
-        all_arrived_jobs = set(self.__get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED'))
-        return list(all_arrived_jobs.difference(set(self.arrived_jobs)))
+        all_arrived_jobs = self.__get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED')
+        arrived_at_current = []
+        for job in all_arrived_jobs:
+            if job.submit_time >= self.last_run_time_ms:
+                arrived_at_current.append(job)
+        return arrived_at_current
 
     def __get_resources(self) -> List[Resource]:
         url = self.rm_host + 'ws/v1/cluster/nodes'
@@ -300,6 +310,10 @@ class YarnSchedulerCommunicator(Communicator):
             print(job_json)
 
         return constraint
+
+
+def get_current_time_ms() -> int:
+    return int(time.time() * 1000)
 
 
 def get_json(url: str) -> Dict[str, object]:

@@ -45,31 +45,37 @@ class YarnTest(unittest.TestCase):
             com.act(1)
 
 
-if __name__ == '__main__':
-    def y1():
-        for i in range(10):
-            yield i
-
-
-    def y2():
-        for i in range(10):
-            yield y1()
-
-
-    g = y2()
-    for i in g:
-        for j in i:
-            print(j)
-
 # if __name__ == '__main__':
-#     logging.basicConfig(level=logging.INFO, format='%(message)s')
-#     sls_jobs_json = '../data/testset/' + 'sls-jobs.json'
-#     com = y.YarnSchedulerCommunicator(
-#         'http://localhost:18088/',
-#         '/opt/hadoop',
-#         sls_jobs_json
-#     )
-#     com.reset('../')
-#     while True:
-#         com.get_state_tensor()
-#         com.act(1)
+#     def y1():
+#         for i in range(10):
+#             yield i
+#
+#
+#     def y2():
+#         for i in range(10):
+#             yield y1()
+#
+#
+#     g = y2()
+#     for i in g:
+#         for j in i:
+#             print(j)
+#
+#     import time
+#     # 1553738104.193
+#     # 1553738161.011
+#     # 1553738228.526
+#     print(time.time())
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    sls_jobs_json = '/data/testset/' + 'sls-jobs.json'
+    com = y.YarnSchedulerCommunicator(
+        'http://localhost:18088/',
+        '/opt/hadoop',
+        sls_jobs_json
+    )
+    com.reset('../')
+    while True:
+        com.get_state_tensor()
+        com.act(1)

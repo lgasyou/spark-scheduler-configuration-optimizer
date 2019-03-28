@@ -67,7 +67,6 @@ class GoogleTraceEnv(object):
             for j in range(hour_end):
                 yield self.step(i, j)
 
-    # TODO: Discuss the solution of jobs' wrong id.
     def step(self, index: int, hour: int) -> Tuple[torch.Tensor, Action, float, bool]:
         filename_without_extension = "{}/{}/sls_jobs{}".format(self.training_set_path, index, hour)
         filename = filename_without_extension + '.json'
@@ -76,7 +75,7 @@ class GoogleTraceEnv(object):
 
         for action_index in action_set.keys():
             # TODO: Change the configuration before SLS starts
-            self.communicator.act(action_index)
+            # self.communicator.act(action_index)
             self.communicator.reset()
             done = False
             while not done:
