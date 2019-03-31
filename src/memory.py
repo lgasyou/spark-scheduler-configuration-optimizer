@@ -1,3 +1,5 @@
+import pathlib
+import pickle
 import random
 from collections import namedtuple
 
@@ -80,6 +82,7 @@ class ReplayMemory(object):
         self.t = 0
         # Store transitions in a wrap-around cyclic buffer within a sum tree for querying priorities
         self.transitions = SegmentTree(capacity)
+        self.save_filename = './results/pre-train-replay-memory.pk'
 
     # Adds state and action at time test, reward and terminal at time test + 1
     def append(self, state, action, reward, terminal):
@@ -156,19 +159,24 @@ class ReplayMemory(object):
         priorities.pow_(self.priority_exponent)
         [self.transitions.update(idx, priority) for idx, priority in zip(idxs, priorities)]
 
-    # TODO: Save and load.
     def save(self):
         """
         Save into a file.
         """
-        pass
+        with open(self.save_filename, 'wb') as f:
+            pickle.dump([self.t, self.transitions], f)
 
     def try_load_from_file(self) -> bool:
         """
         Load from a file.
         :return: Whether load succeed.
         """
-        return False
+        if not pathlib.Path(self.save_filename).exists():
+            return False
+
+        with open(self.save_filename, 'rb') as f:
+            self.t, self.transitions = pickle.load(f)
+            return True
 
     # Set up internal state for iterator
     def __iter__(self):

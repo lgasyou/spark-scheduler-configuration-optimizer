@@ -72,6 +72,7 @@ class OptimizationController(object):
 
     # Pre-train DQN model with offline data
     def pre_train_model(self):
+        self.mem.save()
         # Try to load data from file, if fails run training set and
         # save them into memory.
         if not self.mem.try_load_from_file():
@@ -83,6 +84,7 @@ class OptimizationController(object):
                 for (state, action, reward, terminal) in step:
                     self.mem.append(state, action, reward, terminal)
 
+            # Save data as 'mem.pk'
             self.mem.save()
 
         # Pre-train DQN model by using training set
