@@ -138,9 +138,41 @@ class YarnSchedulerCommunicator(Communicator):
         """
         Get state of YARN which is trimmed.
         Which is defined as the ϕ(s) function defined in document.
+
+        state: {
+            waiting_jobs: [Job, Job, ...],
+            running_jobs: [Job, Job, ...],
+            resources: [Resource, Resource, ...],
+            constraint: {
+                queue: [QueueConstraint, QueueConstraint, ...],
+                job: [JobConstraint, JobConstraint, ...],
+            }
+        }
+
+        Line 1: waiting_jobs
+        Line 2: running_jobs
+        Line 3: resources
+        Line 4: queue
+        Line 5: job
         """
-        raw_state = self.get_state()
-        return torch.Tensor()
+        raw = self.get_state()
+
+        for wj in raw.waiting_jobs:
+            pass
+
+        for rj in raw.running_jobs:
+            pass
+
+        for r in raw.resources:
+            pass
+
+        for c in raw.constraint.queue:
+            pass
+
+        for j in raw.constraint.job:
+            pass
+
+        return torch.Tensor(42, 42)
 
     # TODO: Bug Configuration change only supported by MutableConfScheduler.
     def set_queue_weights(self, queue_a_weight: int, queue_b_weight: int) -> None:

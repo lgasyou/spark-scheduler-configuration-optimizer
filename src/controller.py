@@ -4,7 +4,7 @@ from typing import Tuple
 
 from tqdm import tqdm
 
-from .agent import IAgent, RainbowAgent
+from .agent import Agent
 from .env import Env, GoogleTraceEnv
 from .memory import ReplayMemory
 from .test import test
@@ -50,8 +50,8 @@ class OptimizationController(object):
         return env, action_space
 
     # Setup Agent
-    def __setup_agent(self) -> Tuple[IAgent, ReplayMemory, float]:
-        dqn = RainbowAgent(self.args, self.env)
+    def __setup_agent(self) -> Tuple[Agent, ReplayMemory, float]:
+        dqn = Agent(self.args, self.env)
         mem = ReplayMemory(self.args, self.args.memory_capacity)
         priority_weight_increase = (1 - self.args.priority_weight) / (self.args.T_max - self.args.learn_start)
         return dqn, mem, priority_weight_increase

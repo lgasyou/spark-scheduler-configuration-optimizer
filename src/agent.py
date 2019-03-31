@@ -9,46 +9,7 @@ from .memory import ReplayMemory
 from .model import DQN
 
 
-class IAgent(object):
-    """
-    The interface of Agent
-    """
-
-    # Resets noisy weights in all linear layers (of online net only)
-    def reset_noise(self):
-        pass
-
-    # Acts based on single state (no batch)
-    def act(self, state: torch.Tensor):
-        pass
-
-    # Acts with an ε-greedy policy (used for evaluation only)
-    # High ε can reduce evaluation scores drastically
-    def act_e_greedy(self, state: torch.Tensor, epsilon: int=0.001) -> int:
-        pass
-
-    def learn(self, mem: ReplayMemory):
-        pass
-
-    def update_target_net(self) -> None:
-        pass
-
-    # Save model parameters on current device (don'test move model between devices)
-    def save(self, path: str) -> None:
-        pass
-
-    # Evaluates Q-value based on single state (no batch)
-    def evaluate_q(self, state: torch.Tensor) -> float:
-        pass
-
-    def train(self):
-        pass
-
-    def eval(self):
-        pass
-
-
-class YarnAgent(IAgent):
+class Agent(object):
     """
     The DRL agent of this project.
     """
@@ -78,29 +39,36 @@ class YarnAgent(IAgent):
 
         self.optimiser = optim.Adam(self.online_net.parameters(), lr=args.lr, eps=args.adam_eps)
 
+    # Resets noisy weights in all linear layers (of online net only)
     def reset_noise(self):
         self.online_net.reset_noise()
 
     # TODO: Formula 7
+    # Acts based on single state (no batch)
     def act(self, state):
-        with torch.no_grad():
-            return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).argmax(1).item()
+        return 1
+        # with torch.no_grad():
+        #     return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).argmax(1).item()
 
+    # Acts with an ε-greedy policy (used for evaluation only)
+    # High ε can reduce evaluation scores drastically
     def act_e_greedy(self, state, epsilon=0.001) -> int:
         return random.randrange(self.action_space) if random.random() < epsilon else self.act(state)
 
     # TODO: Implementation
-    def learn(self, mem):
+    def learn(self, mem: ReplayMemory):
         # Sample transitions
         idxs, states, actions, returns, next_states, nonterminals, weights = mem.sample(self.batch_size)
 
     def update_target_net(self) -> None:
         self.target_net.load_state_dict(self.online_net.state_dict())
 
+    # Save model parameters on current device (don't test move model between devices)
     def save(self, path) -> None:
         torch.save(self.online_net.state_dict(), os.path.join(path, 'model.pth'))
 
     # TODO: Implementation
+    # Evaluates Q-value based on single state (no batch)
     def evaluate_q(self, state) -> float:
         with torch.no_grad():
             return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).max(1)[0].item()
@@ -112,7 +80,7 @@ class YarnAgent(IAgent):
         self.online_net.eval()
 
 
-class RainbowAgent(IAgent):
+class RainbowAgent(object):
     """
     The agent used by the example of Rainbow
     """

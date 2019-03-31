@@ -20,21 +20,27 @@ class Env(object):
 
     def __init__(self, args: argparse.Namespace):
         self.device = args.device
+        self.buffer_history_length = args.history_length
+        self.state_buffer = deque([], maxlen=args.history_length)
         sls_jobs_json = args.test_set + '/sls-jobs.json'
         self.communicator: Communicator = YarnSchedulerCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
         self.actions = self.communicator.get_action_set()
         self.training = True    # Consistent with model training mode
 
     def reset(self) -> torch.Tensor:
+        self.__reset_buffer()
         self.communicator.reset()
-        return self.communicator.get_state_tensor()
+        state = self.communicator.get_state_tensor()
+        self.state_buffer.append(state)
+        return torch.stack(list(self.state_buffer), 0)
 
     # Return state, reward, done
     def step(self, action: int) -> Tuple[torch.Tensor, float, bool]:
         reward = self.communicator.act(action)
         done = self.communicator.is_done()
         state = self.communicator.get_state_tensor()
-        return state, reward, done
+        self.state_buffer.append(state)
+        return torch.stack(list(self.state_buffer), 0), reward, done
 
     # Uses loss of life as terminal signal
     def train(self) -> None:
@@ -49,6 +55,10 @@ class Env(object):
 
     def close(self) -> None:
         self.communicator.close()
+
+    def __reset_buffer(self):
+        for _ in range(self.buffer_history_length):
+            self.state_buffer.append(torch.zeros(42, 42, device=self.device))
 
 
 class GoogleTraceEnv(object):
