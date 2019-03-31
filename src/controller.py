@@ -72,13 +72,18 @@ class OptimizationController(object):
 
     # Pre-train DQN model with offline data
     def pre_train_model(self):
-        # Get data generator
-        generator = self.train_env.get_generator()
+        # Try to load data from file, if fails run training set and
+        # save them into memory.
+        if not self.mem.try_load_from_file():
+            # Get data generator
+            generator = self.train_env.get_generator()
 
-        # Generate data, then save them into self.mem
-        for step in generator:
-            for (state, action, reward, terminal) in step:
-                self.mem.append(state, action, reward, terminal)
+            # Generate data, then save them into self.mem
+            for step in generator:
+                for (state, action, reward, terminal) in step:
+                    self.mem.append(state, action, reward, terminal)
+
+            self.mem.save()
 
         # Pre-train DQN model by using training set
         self.dqn.learn(self.mem)

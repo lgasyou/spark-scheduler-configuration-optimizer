@@ -8,6 +8,7 @@ import requests
 import torch
 
 from .communicator import Communicator
+from ..xmlutil import XmlModifier
 
 
 class Job(object):
@@ -108,6 +109,23 @@ class YarnSchedulerCommunicator(Communicator):
             5: Action(5, 1)
         }
 
+    def act_before_start(self, action_index: int):
+        """
+        Act before YARN starts.
+        Override capacity-scheduler.xml or fair-scheduler.xml.
+        """
+        dest = self.hadoop_etc + '/capacity-scheduler.xml'
+        xml_modifier = XmlModifier('./data/capacity-scheduler-template.xml', dest)
+
+        a, b = self.__get_capacities_by_action_index(action_index)
+
+        xml_modifier.modify('yarn.scheduler.capacity.root.queueA.capacity', a)
+        xml_modifier.modify('yarn.scheduler.capacity.root.queueB.capacity', b)
+        xml_modifier.modify('yarn.scheduler.capacity.root.queueA.maximum-capacity', a)
+        xml_modifier.modify('yarn.scheduler.capacity.root.queueB.maximum-capacity', b)
+
+        xml_modifier.save()
+
     def act(self, action_index: int) -> float:
         """
         Apply action and see how many rewards we can get.
@@ -179,7 +197,9 @@ class YarnSchedulerCommunicator(Communicator):
         """
         Set queue weights by using RESTFul API.
         """
-
+        total_weight = queue_a_weight + queue_b_weight
+        a = 100 * queue_a_weight / total_weight
+        b = 100 * queue_b_weight / total_weight
         conf = """
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <sched-conf>
@@ -202,7 +222,7 @@ class YarnSchedulerCommunicator(Communicator):
             </params>
           </update-queue>
         </sched-conf>
-        """.format(queue_a_weight, queue_b_weight)
+        """.format(a, b)
         url = self.rm_host + 'ws/v1/cluster/scheduler-conf'
 
         # r = requests.put(url, conf, headers={
@@ -239,6 +259,15 @@ class YarnSchedulerCommunicator(Communicator):
 
         # Wait until web server starts.
         time.sleep(8)
+
+    def __get_capacities_by_action_index(self, action_index: int) -> Tuple[float, float]:
+        action = self.action_set[action_index]
+        weight_a = action.queue_a_weight
+        weight_b = action.queue_b_weight
+        total_weight = weight_a + weight_b
+        a = 100 * weight_a / total_weight
+        b = 100 * weight_b / total_weight
+        return a, b
 
     def __get_jobs(self) -> Tuple[List[Job], List[Job]]:
         running_jobs = self.__get_running_jobs()

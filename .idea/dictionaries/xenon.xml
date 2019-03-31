@@ -6,6 +6,7 @@
       <w>backpropagate</w>
       <w>conv</w>
       <w>cuda</w>
+      <w>dest</w>
       <w>discretise</w>
       <w>discretised</w>
       <w>idxs</w>
@@ -13,12 +14,15 @@
       <w>nondeterministic</w>
       <w>nonterminal</w>
       <w>nonterminals</w>
+      <w>pretrained</w>
       <w>probs</w>
       <w>resample</w>
       <w>sched</w>
       <w>softmax</w>
+      <w>testset</w>
       <w>timestep</w>
       <w>tonexty</w>
+      <w>trainingset</w>
       <w>vcores</w>
       <w>θonline</w>
       <w>θtarget</w>

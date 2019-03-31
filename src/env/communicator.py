@@ -1,4 +1,7 @@
 class Communicator(object):
+    """
+    The interface of Communicator.
+    """
 
     @staticmethod
     def get_action_set():

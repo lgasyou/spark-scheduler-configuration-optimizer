@@ -1,21 +1,18 @@
 import argparse
-import random
 from collections import deque
 from typing import Tuple, Generator
 
-import atari_py
-import cv2  # Note that importing cv2 before torch may cause segfaults?
 import torch
 
 from .communicator import Communicator
 from .yarn import YarnSchedulerCommunicator, Action
 
-__all__ = ['Env', 'GoogleTraceEnv', 'RainbowEnv']
+__all__ = ['Env', 'GoogleTraceEnv']
 
 
 class Env(object):
     """
-    High level environment implement.
+    High level environment implementation.
     """
 
     def __init__(self, args: argparse.Namespace):
@@ -69,123 +66,36 @@ class GoogleTraceEnv(object):
 
     def __init__(self, args: argparse.Namespace):
         self.device = args.device
+        self.buffer_history_length = args.history_length
+        self.state_buffer = deque([], maxlen=args.history_length)
         self.training_set_path = args.training_set
         self.communicator = YarnSchedulerCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json='')
 
     def get_generator(self, index_end: int=13, hour_end: int=12) -> Generator:
-        for i in range(1, index_end):
-            for j in range(hour_end):
-                yield self.step(i, j)
-
-    def step(self, index: int, hour: int) -> Tuple[torch.Tensor, Action, float, bool]:
-        filename_without_extension = "{}/{}/sls_jobs{}".format(self.training_set_path, index, hour)
-        filename = filename_without_extension + '.json'
-        self.communicator.sls_jobs_json = filename
         action_set = self.communicator.get_action_set()
-
         for action_index in action_set.keys():
-            # TODO: Change the configuration before SLS starts
-            # self.communicator.act(action_index)
-            self.communicator.reset()
-            done = False
-            while not done:
-                state = self.communicator.get_state_tensor()
-                action = action_set[action_index]
-                reward = self.communicator.get_reward()
-                done = self.communicator.is_done()
-                yield state, action, reward, done
+            for i in range(1, index_end):
+                for j in range(hour_end):
+                    action = action_set[action_index]
+                    yield self.step(i, j, action_index, action)
 
+    def step(self, index, hour, action_index: int, action: Action) -> Tuple[torch.Tensor, Action, float, bool]:
+        filename = "{}/{}/sls_jobs{}.json".format(self.training_set_path, index, hour)
+        self.communicator.sls_jobs_json = filename
+        self.communicator.act_before_start(action_index)
+        self.__reset()
+        done = False
 
-class RainbowEnv(object):
-    """
-    The environment used by the example of Rainbow.
-    """
+        while not done:
+            state = self.communicator.get_state_tensor()
+            reward = self.communicator.get_reward()
+            self.state_buffer.append(state)
+            yield torch.stack(list(self.state_buffer), 0), action, reward, done
 
-    def __init__(self, args: argparse.Namespace):
-        self.device = args.device
-        self.ale = atari_py.ALEInterface()
-        self.ale.setInt('random_seed', args.seed)
-        self.ale.setInt('max_num_frames', args.max_episode_length)
-        self.ale.setFloat('repeat_action_probability', 0)  # Disable sticky actions
-        self.ale.setInt('frame_skip', 0)
-        self.ale.setBool('color_averaging', False)
-        self.ale.loadROM(atari_py.get_game_path(args.game))  # ROM loading must be done after setting options
-        actions = self.ale.getMinimalActionSet()
-        self.actions = dict((i, e) for i, e in zip(range(len(actions)), actions))
-        self.lives = 0  # Life counter (used in DeepMind training)
-        self.life_termination = False  # Used to check if resetting only from loss of life
-        self.window = args.history_length  # Number of frames to concatenate
-        self.state_buffer = deque([], maxlen=args.history_length)
-        self.training = True  # Consistent with model training mode
-
-    def _get_state(self):
-        state = cv2.resize(self.ale.getScreenGrayscale(), (42, 42), interpolation=cv2.INTER_LINEAR)
-        return torch.tensor(state, dtype=torch.float32, device=self.device).div_(255)
-
-    def _reset_buffer(self):
-        for _ in range(self.window):
+    def __reset_buffer(self):
+        for _ in range(self.buffer_history_length):
             self.state_buffer.append(torch.zeros(42, 42, device=self.device))
 
-    def reset(self):
-        if self.life_termination:
-            self.life_termination = False  # Reset flag
-            self.ale.act(0)  # Use a no-op after loss of life
-        else:
-            # Reset internals
-            self._reset_buffer()
-            self.ale.reset_game()
-            # Perform up to 30 random no-ops before starting
-            for _ in range(random.randrange(30)):
-                self.ale.act(0)  # Assumes raw action 0 is always no-op
-                if self.ale.game_over():
-                    self.ale.reset_game()
-        # Process and return "initial" state
-        observation = self._get_state()
-        self.state_buffer.append(observation)
-        self.lives = self.ale.lives()
-        return torch.stack(list(self.state_buffer), 0)
-
-    def step(self, action):
-        # Repeat action 4 times, max pool over last 2 frames
-        frame_buffer = torch.zeros(2, 42, 42, device=self.device)
-        reward, done = 0, False
-        for t in range(4):
-            reward += self.ale.act(self.actions.get(action))
-
-            # gain REWARDS depends on the ACTION
-            if t == 2:
-                frame_buffer[0] = self._get_state()
-            elif t == 3:
-                frame_buffer[1] = self._get_state()
-            done = self.ale.game_over()
-            if done:
-                break
-        observation = frame_buffer.max(0)[0]
-        self.state_buffer.append(observation)
-        # Detect loss of life as terminal in training mode
-        if self.training:
-            lives = self.ale.lives()
-            if self.lives > lives > 0:  # Lives > 0 for Q*bert
-                self.life_termination = not done  # Only set flag when not truly done
-                done = True
-            self.lives = lives
-        # Return state, reward, done
-        return torch.stack(list(self.state_buffer), 0), reward, done
-
-    # Uses loss of life as terminal signal
-    def train(self):
-        self.training = True
-
-    # Uses standard terminal signal
-    def eval(self):
-        self.training = False
-
-    def action_space(self):
-        return len(self.actions)
-
-    def render(self):
-        cv2.imshow('screen', self.ale.getScreenRGB()[:, :, ::-1])
-        cv2.waitKey(1)
-
-    def close(self):
-        cv2.destroyAllWindows()
+    def __reset(self):
+        self.__reset_buffer()
+        self.communicator.reset()

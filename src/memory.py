@@ -156,6 +156,20 @@ class ReplayMemory(object):
         priorities.pow_(self.priority_exponent)
         [self.transitions.update(idx, priority) for idx, priority in zip(idxs, priorities)]
 
+    # TODO: Save and load.
+    def save(self):
+        """
+        Save into a file.
+        """
+        pass
+
+    def try_load_from_file(self) -> bool:
+        """
+        Load from a file.
+        :return: Whether load succeed.
+        """
+        return False
+
     # Set up internal state for iterator
     def __iter__(self):
         self.current_idx = 0

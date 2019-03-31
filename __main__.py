@@ -98,7 +98,7 @@ def main():
     args = get_args()
 
     controller = OptimizationController(args)
-    # controller.pre_train_model()
+    controller.pre_train_model()
     controller.run()
 
 
