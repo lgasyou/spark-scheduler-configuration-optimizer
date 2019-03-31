@@ -1,3 +1,6 @@
+from bs4 import BeautifulSoup
+
+
 class XmlModifier(object):
     """
     A XML modifier that helps to modify key-value value of XML.
@@ -7,12 +10,17 @@ class XmlModifier(object):
         self.from_filename = from_filename
         self.to_filename = to_filename
         with open(self.from_filename, 'r') as f:
-            self.data = f.read()
+            text = f.read()
+            self.data = BeautifulSoup(text, features='lxml-xml')
 
-    # TODO: Implementation
     def modify(self, key, value):
-        pass
+        names = self.data.find_all('name')
+        for n in names:
+            if n.string == key:
+                v = n.next_sibling.next_sibling
+                v.string = str(value)
+                return
 
     def save(self):
         with open(self.to_filename, 'w') as f:
-            f.write(self.data)
+            f.write(self.data.prettify())

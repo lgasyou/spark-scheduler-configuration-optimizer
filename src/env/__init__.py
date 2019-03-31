@@ -60,7 +60,7 @@ class Env(object):
 
 class GoogleTraceEnv(object):
     """
-    Used while pre-train is running.
+    Used while pre-train running.
     Uses Google traces as its input.
     """
 

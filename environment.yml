@@ -7,3 +7,5 @@ dependencies:
   - pip:
     - atari-py
     - opencv-python
+    - bs4
+    - lxml
