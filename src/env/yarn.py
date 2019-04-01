@@ -110,10 +110,10 @@ class YarnSchedulerCommunicator(Communicator):
             5: Action(5, 1)
         }
 
-    def act_before_start(self, action_index: int):
+    def override_scheduler_xml_with(self, action_index: int):
         """
-        Act before YARN starts.
-        Override capacity-scheduler.xml or fair-scheduler.xml.
+        Override capacity-scheduler.xml or fair-scheduler-template.xml
+        to change the capacity or weight of queues.
         """
         dest = self.hadoop_etc + '/capacity-scheduler.xml'
         xml_modifier = XmlModifier('./data/capacity-scheduler-template.xml', dest)
@@ -132,10 +132,7 @@ class YarnSchedulerCommunicator(Communicator):
         Apply action and see how many rewards we can get.
         :return: Reward this step gets.
         """
-        action = self.action_set[action_index]
-        a = action.queue_a_weight
-        b = action.queue_b_weight
-        self.set_queue_weights(a, b)
+        self.set_queue_weights(action_index)
         return self.get_reward()
 
     def get_reward(self) -> float:
@@ -159,6 +156,7 @@ class YarnSchedulerCommunicator(Communicator):
         self.waiting_jobs = wj
         return State(wj, rj, resources, constraints)
 
+    # TODO LATER: More effective
     def get_state_tensor(self) -> torch.Tensor:
         """
         Get state of YARN which is trimmed.
@@ -207,43 +205,14 @@ class YarnSchedulerCommunicator(Communicator):
 
         return tensor.reshape(42, 42)
 
-    # TODO: Bug Configuration change only supported by MutableConfScheduler.
-    def set_queue_weights(self, queue_a_weight: int, queue_b_weight: int) -> None:
+    def set_queue_weights(self, action_index: int) -> None:
         """
-        Set queue weights by using RESTFul API.
+        Use script "refresh-queues.sh" to refresh queues' configurations.
         """
-        total_weight = queue_a_weight + queue_b_weight
-        a = 100 * queue_a_weight / total_weight
-        b = 100 * queue_b_weight / total_weight
-        conf = """
-        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-        <sched-conf>
-          <update-queue>
-            <queue-name>root.queueA</queue-name>
-            <params>
-              <entry>
-                <key>capacity</key>
-                <value>{}</value>
-              </entry>
-            </params>
-          </update-queue>
-          <update-queue>
-            <queue-name>root.queueB</queue-name>
-            <params>
-              <entry>
-                <key>capacity</key>
-                <value>{}</value>
-              </entry>
-            </params>
-          </update-queue>
-        </sched-conf>
-        """.format(a, b)
-        url = self.rm_host + 'ws/v1/cluster/scheduler-conf'
-
-        r = requests.put(url, conf, headers={
-            'Context-Type': 'text/xml'
-        })
-        r.raise_for_status()
+        wd = os.getcwd()
+        self.override_scheduler_xml_with(action_index)
+        cmd = [wd + '/bin/refresh-queues.sh', self.hadoop_home]
+        self.sls_runner = subprocess.Popen(cmd)
 
     def is_done(self) -> bool:
         """
@@ -269,7 +238,7 @@ class YarnSchedulerCommunicator(Communicator):
         self.close()
 
         sls_jobs_json = wd + '/' + self.sls_jobs_json
-        cmd = [wd + '/start-sls.sh', self.hadoop_home, wd, sls_jobs_json]
+        cmd = [wd + '/bin/start-sls.sh', self.hadoop_home, wd, sls_jobs_json]
         self.sls_runner = subprocess.Popen(cmd)
 
         # Wait until web server starts.

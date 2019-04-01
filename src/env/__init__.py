@@ -82,7 +82,7 @@ class GoogleTraceEnv(object):
     def step(self, index, hour, action_index: int, action: Action) -> Tuple[torch.Tensor, Action, float, bool]:
         filename = "{}/{}/sls_jobs{}.json".format(self.training_set_path, index, hour)
         self.communicator.sls_jobs_json = filename
-        self.communicator.act_before_start(action_index)
+        self.communicator.override_scheduler_xml_with(action_index)
         self.__reset()
         done = False
 
