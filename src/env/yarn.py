@@ -12,9 +12,10 @@ from ..xmlutil import XmlModifier
 
 
 class Job(object):
-    def __init__(self, application_id, submit_time, priority, tasks):
+    def __init__(self, application_id, submit_time, wait_time, priority, tasks):
         self.application_id = application_id
         self.submit_time: int = submit_time
+        self.wait_time: int = wait_time
         self.priority: int = priority
         self.tasks: List[Task] = tasks
 
@@ -91,7 +92,7 @@ class YarnSchedulerCommunicator(Communicator):
         self.rm_host = rm_host
         self.sls_jobs_json = sls_jobs_json
 
-        self.waiting_jobs = []
+        self.waiting_jobs: List[Job] = []
 
         self.action_set = self.get_action_set()
         self.sls_runner: subprocess.Popen = None
@@ -137,9 +138,16 @@ class YarnSchedulerCommunicator(Communicator):
         self.set_queue_weights(a, b)
         return self.get_reward()
 
-    # TODO: Calculate reward
     def get_reward(self) -> float:
-        return 0
+        job_count = len(self.waiting_jobs)
+        if job_count == 0:
+            return 0
+
+        total_wait_time = 0.0
+        for j in self.waiting_jobs:
+            total_wait_time += j.wait_time
+
+        return total_wait_time / job_count
 
     def get_state(self) -> State:
         """
@@ -289,6 +297,7 @@ class YarnSchedulerCommunicator(Communicator):
         for j in apps:
             application_id = j['id']
             start_time = j['startedTime']
+            wait_time = j['elapsedTime']
             priority = j['priority']
             tasks = []
 
@@ -300,7 +309,7 @@ class YarnSchedulerCommunicator(Communicator):
                     cpu = capability['vCores']
                     tasks.append(Task('', memory, cpu))
 
-            jobs.append(Job(application_id, start_time, priority, tasks))
+            jobs.append(Job(application_id, start_time, wait_time, priority, tasks))
 
         return jobs
 
