@@ -70,7 +70,7 @@ class State(object):
     def __init__(self, waiting_jobs: List[Job], running_jobs: List[Job],
                  resources: List[Resource], constraint: Constraint):
         self.waiting_jobs = waiting_jobs
-        self.running_jobs = running_jobs,
+        self.running_jobs: List[Job] = running_jobs
         self.resources = resources
         self.constraint = constraint
 
@@ -130,7 +130,7 @@ class YarnSchedulerCommunicator(Communicator):
     def act(self, action_index: int) -> float:
         """
         Apply action and see how many rewards we can get.
-        :return: Reward this step got.
+        :return: Reward this step gets.
         """
         action = self.action_set[action_index]
         a = action.queue_a_weight
@@ -159,7 +159,6 @@ class YarnSchedulerCommunicator(Communicator):
         self.waiting_jobs = wj
         return State(wj, rj, resources, constraints)
 
-    # TODO: Transform into tensor
     def get_state_tensor(self) -> torch.Tensor:
         """
         Get state of YARN which is trimmed.
@@ -174,31 +173,39 @@ class YarnSchedulerCommunicator(Communicator):
                 job: [JobConstraint, JobConstraint, ...],
             }
         }
-
-        Line 1: waiting_jobs
-        Line 2: running_jobs
-        Line 3: resources
-        Line 4: queue
-        Line 5: job
         """
         raw = self.get_state()
-
+        tensor = torch.zeros(42 * 42)
+        idx = 0
         for wj in raw.waiting_jobs:
-            pass
+            tensor[idx] = wj.submit_time
+            idx += 1
+            tensor[idx] = wj.priority
+            idx += 1
 
         for rj in raw.running_jobs:
-            pass
+            tensor[idx] = rj.submit_time
+            idx += 1
+            tensor[idx] = rj.priority
+            idx += 1
 
         for r in raw.resources:
-            pass
+            tensor[idx] = r.mem
+            idx += 1
+            tensor[idx] = r.cpu
+            idx += 1
 
         for c in raw.constraint.queue:
+            tensor[idx] = c.max_capacity
+            idx += 1
+            tensor[idx] = c.capacity
+            idx += 1
+
+        # Do nothing
+        for _ in raw.constraint.job:
             pass
 
-        for j in raw.constraint.job:
-            pass
-
-        return torch.Tensor(42, 42)
+        return tensor.reshape(42, 42)
 
     # TODO: Bug Configuration change only supported by MutableConfScheduler.
     def set_queue_weights(self, queue_a_weight: int, queue_b_weight: int) -> None:
@@ -233,10 +240,10 @@ class YarnSchedulerCommunicator(Communicator):
         """.format(a, b)
         url = self.rm_host + 'ws/v1/cluster/scheduler-conf'
 
-        # r = requests.put(url, conf, headers={
-        #     'Context-Type': 'application/xml'
-        # })
-        # r.raise_for_status()
+        r = requests.put(url, conf, headers={
+            'Context-Type': 'text/xml'
+        })
+        r.raise_for_status()
 
     def is_done(self) -> bool:
         """

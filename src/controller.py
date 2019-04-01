@@ -1,4 +1,5 @@
 import argparse
+import time
 from datetime import datetime
 from typing import Tuple
 
@@ -82,6 +83,7 @@ class OptimizationController(object):
             for step in generator:
                 for (state, action, reward, terminal) in step:
                     self.mem.append(state, action, reward, terminal)
+                    time.sleep(5)
 
             # Save data as 'pre-train-replay-memory.pk'
             self.mem.save()
