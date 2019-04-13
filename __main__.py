@@ -34,7 +34,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--V-max', type=float, default=10, metavar='V',
                         help='Maximum of value distribution support')
     parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
-    parser.add_argument('--memory-capacity', type=int, default=int(1152), metavar='CAPACITY',
+    parser.add_argument('--memory-capacity', type=int, default=int(10000), metavar='CAPACITY',
                         help='Experience replay memory capacity')
     parser.add_argument('--replay-frequency', type=int, default=4, metavar='k',
                         help='Frequency of sampling from memory')
@@ -52,10 +52,10 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--lr', type=float, default=0.0000625, metavar='η', help='Learning rate')
     parser.add_argument('--adam-eps', type=float, default=1.5e-4, metavar='ε', help='Adam epsilon')
     parser.add_argument('--batch-size', type=int, default=32, metavar='SIZE', help='Batch size')
-    parser.add_argument('--learn-start', type=int, default=int(900), metavar='STEPS',
+    parser.add_argument('--learn-start', type=int, default=int(50), metavar='STEPS',
                         help='Number of steps before starting training')
     parser.add_argument('--evaluate', action='store_true', help='Evaluate only')
-    parser.add_argument('--evaluation-interval', type=int, default=1152, metavar='STEPS',
+    parser.add_argument('--evaluation-interval', type=int, default=50, metavar='STEPS',
                         help='Number of training steps between evaluations')
     parser.add_argument('--evaluation-episodes', type=int, default=10, metavar='N',
                         help='Number of evaluation episodes to average over')
@@ -98,7 +98,7 @@ def main():
     args = get_args()
 
     controller = OptimizationController(args)
-    # controller.pre_train_model()
+    controller.pre_train_model()
     controller.run()
 
 

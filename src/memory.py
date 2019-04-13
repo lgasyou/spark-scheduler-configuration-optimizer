@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 Transition = namedtuple('Transition', ('timestep', 'state', 'action', 'reward', 'nonterminal'))
-blank_trans = Transition(0, torch.zeros(42, 42, dtype=torch.uint8), None, 0, False)
+blank_trans = Transition(0, torch.zeros(42, 42, dtype=torch.float32), None, 0, False)
 
 
 # Segment tree data structure where parent node values are sum/max of children node values
@@ -124,9 +124,9 @@ class ReplayMemory(object):
         transition = self._get_transition(idx)
         # Create un-discretised state and nth next state
         state = torch.stack([trans.state for trans in transition[:self.history]]).to(dtype=torch.float32,
-                                                                                     device=self.device).div_(255)
+                                                                                     device=self.device)
         next_state = torch.stack([trans.state for trans in transition[self.n:self.n + self.history]]).to(
-            dtype=torch.float32, device=self.device).div_(255)
+            dtype=torch.float32, device=self.device)
 
         # Discrete action to be used as index
         action = torch.tensor([transition[self.history - 1].action], dtype=torch.int64, device=self.device)
@@ -159,22 +159,25 @@ class ReplayMemory(object):
         priorities.pow_(self.priority_exponent)
         [self.transitions.update(idx, priority) for idx, priority in zip(idxs, priorities)]
 
-    def save(self):
+    def save(self, filename: str=None):
         """
         Save into a file.
         """
-        with open(self.save_filename, 'wb') as f:
+        filename = filename or self.save_filename
+        with open(filename, 'wb') as f:
             pickle.dump([self.t, self.transitions], f)
 
-    def try_load_from_file(self) -> bool:
+    def try_load_from_file(self, filename: str=None) -> bool:
         """
         Load from a file.
         :return: Whether load succeed.
         """
-        if not pathlib.Path(self.save_filename).exists():
+        filename = filename or self.save_filename
+
+        if not pathlib.Path(filename).exists():
             return False
 
-        with open(self.save_filename, 'rb') as f:
+        with open(filename, 'rb') as f:
             self.t, self.transitions = pickle.load(f)
             return True
 

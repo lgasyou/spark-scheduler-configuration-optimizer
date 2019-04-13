@@ -2,12 +2,15 @@ import json
 import os
 import subprocess
 import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
+import pandas as pd
 import requests
 import torch
+from requests.exceptions import ConnectionError
 
 from .communicator import Communicator
+from .exceptions import StateInvalidException
 from ..xmlutil import XmlModifier
 
 
@@ -88,7 +91,7 @@ class YarnSchedulerCommunicator(Communicator):
 
     def __init__(self, rm_host: str, hadoop_home: str, sls_jobs_json: str):
         self.hadoop_home = hadoop_home
-        self.hadoop_etc = hadoop_home + '/etc'
+        self.hadoop_etc = hadoop_home + '/etc/hadoop'
         self.rm_host = rm_host
         self.sls_jobs_json = sls_jobs_json
 
@@ -97,17 +100,19 @@ class YarnSchedulerCommunicator(Communicator):
         self.action_set = self.get_action_set()
         self.sls_runner: subprocess.Popen = None
 
+        self.copy_conf_file()
+
     @staticmethod
     def get_action_set() -> Dict[int, Action]:
         """
         :return: Action dictionary defined in document.
         """
         return {
+            0: Action(3, 3),
             1: Action(1, 5),
             2: Action(2, 4),
-            3: Action(3, 3),
-            4: Action(4, 2),
-            5: Action(5, 1)
+            3: Action(4, 2),
+            4: Action(5, 1)
         }
 
     def override_scheduler_xml_with(self, action_index: int):
@@ -144,20 +149,28 @@ class YarnSchedulerCommunicator(Communicator):
         for j in self.waiting_jobs:
             total_wait_time += j.wait_time
 
-        return total_wait_time / job_count
+        average_wait_time = total_wait_time / job_count
+        return 10000 / average_wait_time
 
     def get_state(self) -> State:
         """
         Get raw state of YARN.
         """
-        wj, rj = self.__get_jobs()
-        resources = self.__get_resources()
-        constraints = self.__get_constraints()
-        self.waiting_jobs = wj
-        return State(wj, rj, resources, constraints)
+        try:
+            wj, rj = self.__get_jobs()
+            resources = self.__get_resources()
+            constraints = self.__get_constraints()
+            self.waiting_jobs = wj
+            return State(wj, rj, resources, constraints)
+        except ConnectionError:
+            raise StateInvalidException()
+        except TypeError:
+            raise StateInvalidException()
+        except requests.exceptions.HTTPError:
+            raise StateInvalidException()
 
     # TODO LATER: More effective
-    def get_state_tensor(self) -> torch.Tensor:
+    def get_state_tensor(self) -> Union[torch.Tensor, None]:
         """
         Get state of YARN which is trimmed.
         Which is defined as the ϕ(s) function defined in document.
@@ -173,44 +186,79 @@ class YarnSchedulerCommunicator(Communicator):
         }
         """
         raw = self.get_state()
-        tensor = torch.zeros(42 * 42)
-        idx = 0
+        tensor = torch.zeros(42, 42)
+        idx, row = 0, 0
         for wj in raw.waiting_jobs:
-            tensor[idx] = wj.submit_time
+            if idx == 42:
+                row += 1
+                idx = 0
+            tensor[row][idx] = wj.submit_time
             idx += 1
-            tensor[idx] = wj.priority
+            tensor[row][idx] = wj.priority
             idx += 1
+            for t in wj.tasks:
+                if idx == 42:
+                    row += 1
+                    idx = 0
+                tensor[row][idx] = t.memory
+                idx += 1
+                if idx == 42:
+                    row += 1
+                    idx = 0
+                tensor[row][idx] = t.cpu
+                idx += 1
 
+        row += 1
+        idx = 0
         for rj in raw.running_jobs:
-            tensor[idx] = rj.submit_time
+            if idx == 42:
+                row += 1
+                idx = 0
+            tensor[row][idx] = rj.submit_time
             idx += 1
-            tensor[idx] = rj.priority
+            tensor[row][idx] = rj.priority
             idx += 1
+            for t in rj.tasks:
+                if idx == 42:
+                    row += 1
+                    idx = 0
+                tensor[row][idx] = t.memory
+                idx += 1
+                if idx == 42:
+                    row += 1
+                    idx = 0
+                tensor[row][idx] = t.cpu
+                idx += 1
 
+        row += 1
+        idx = 0
         for r in raw.resources:
-            tensor[idx] = r.mem
+            tensor[row][idx] = r.mem
             idx += 1
-            tensor[idx] = r.cpu
+            tensor[row][idx] = r.cpu
             idx += 1
 
+        row += 1
+        idx = 0
         for c in raw.constraint.queue:
-            tensor[idx] = c.max_capacity
+            tensor[row][idx] = c.max_capacity
             idx += 1
-            tensor[idx] = c.capacity
+            tensor[row][idx] = c.capacity
             idx += 1
 
         # Do nothing
         for _ in raw.constraint.job:
             pass
 
-        return tensor.reshape(42, 42)
+        return tensor
 
     def set_queue_weights(self, action_index: int) -> None:
         """
         Use script "refresh-queues.sh" to refresh queues' configurations.
         """
-        wd = os.getcwd()
         self.override_scheduler_xml_with(action_index)
+
+        wd = os.getcwd()
         cmd = [wd + '/bin/refresh-queues.sh', self.hadoop_home]
         self.sls_runner = subprocess.Popen(cmd)
 
@@ -227,6 +275,7 @@ class YarnSchedulerCommunicator(Communicator):
         if self.sls_runner is not None:
             self.sls_runner.terminate()
             self.sls_runner.wait()
+            self.sls_runner = None
 
     def reset(self, wd=None) -> None:
         """
@@ -242,7 +291,20 @@ class YarnSchedulerCommunicator(Communicator):
         self.sls_runner = subprocess.Popen(cmd)
 
         # Wait until web server starts.
-        time.sleep(8)
+        time.sleep(20)
+
+    def copy_conf_file(self):
+        with open('./data/capacity-scheduler.xml', 'r') as src:
+            with open(self.hadoop_etc + '/capacity-scheduler.xml', 'w') as dest:
+                dest.write(src.read())
+
+    def get_total_time_cost(self):
+        data = pd.read_csv('./results/logs/jobruntime.csv')
+        end_time = data['simulate_end_time']
+        start_time = data['simulate_start_time']
+        time_costs = end_time - start_time
+        sum_time_cost = time_costs.sum()
+        return time_costs, sum_time_cost
 
     def __get_capacities_by_action_index(self, action_index: int) -> Tuple[float, float]:
         action = self.action_set[action_index]

@@ -4,6 +4,7 @@
       <w>appattempts</w>
       <w>argmax</w>
       <w>backpropagate</w>
+      <w>connectable</w>
       <w>conv</w>
       <w>cuda</w>
       <w>dest</w>

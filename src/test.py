@@ -1,14 +1,20 @@
+import logging
 import os
+import time
 
+import numpy as np
+import pandas as pd
 import plotly
 import torch
 from plotly.graph_objs import Scatter
 from plotly.graph_objs.scatter import Line
 
 from .env import Env
+from .env.exceptions import StateInvalidException
 
 # Globals
 Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10
+logger = logging.getLogger(__name__)
 
 
 # Test DQN
@@ -18,23 +24,36 @@ def test(args, T, dqn, val_mem, evaluate=False):
     env.eval()
     Ts.append(T)
     T_rewards, T_Qs = [], []
+    total_time_cost_ms = 0
+    time_costs = np.zeros(shape=(args.evaluation_episodes, 31), dtype=int)
 
     # Test performance over several episodes
-    done = True
-    for _ in range(args.evaluation_episodes):
+    done, reward_sum, state = True, 0, None
+    for i in range(args.evaluation_episodes):
         while True:
+            logger.info('Evaluation Loop %d' % i)
             if done:
                 state, reward_sum, done = env.reset(), 0, False
 
             action = dqn.act_e_greedy(state)  # Choose an action ε-greedily
-            state, reward, done = env.step(action)  # Step
-            reward_sum += reward
-            if args.render:
-                env.render()
+            try:
+                state, reward, done = env.step(action)  # Step
+                reward_sum += reward
+                time.sleep(5)
+            except StateInvalidException:
+                done = True
 
             if done:
                 T_rewards.append(reward_sum)
+                time.sleep(30)
+                costs, time_cost_ms = env.get_total_time_cost()
+                print('Iteration', i, 'Time Cost:', costs)
+                time_costs[i] = list(costs)
+                total_time_cost_ms += time_cost_ms
                 break
+
+    print('Total Time Cost :', total_time_cost_ms, 'ms')
+    pd.DataFrame(time_costs).to_csv('./results/time_costs.csv')
     env.close()
 
     # Test Q-values over validation memory
@@ -57,7 +76,7 @@ def test(args, T, dqn, val_mem, evaluate=False):
             dqn.save('results')
 
     # Return average reward and Q-value
-    return avg_reward, avg_Q
+    return avg_reward, avg_Q, total_time_cost_ms
 
 
 # Plots min, max and mean + standard deviation bars of a population over time

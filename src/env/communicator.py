@@ -1,3 +1,6 @@
+from typing import Tuple
+
+import pandas as pd
 import torch
 
 
@@ -20,6 +23,9 @@ class Communicator(object):
         pass
 
     def is_done(self) -> bool:
+        pass
+
+    def get_total_time_cost(self) -> Tuple[pd.DataFrame, int]:
         pass
 
     def close(self) -> None:
