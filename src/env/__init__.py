@@ -7,7 +7,8 @@ import torch
 
 from .communicator import Communicator
 from .exceptions import StateInvalidException
-from .yarn import YarnSchedulerCommunicator, Action
+from .yarn import YarnCommunicator, Action
+from ..hyperparameters import STATE_SHAPE
 
 __all__ = ['Env', 'GoogleTraceEnv']
 
@@ -22,7 +23,7 @@ class Env(object):
         self.buffer_history_length = args.history_length
         self.state_buffer = deque([], maxlen=args.history_length)
         sls_jobs_json = args.test_set + '/sls-jobs.json'
-        self.communicator: Communicator = YarnSchedulerCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
+        self.communicator: Communicator = YarnCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
         self.actions = self.communicator.get_action_set()
         self.training = True    # Consistent with model training mode
 
@@ -41,7 +42,7 @@ class Env(object):
         self.state_buffer.append(state)
         return torch.stack(list(self.state_buffer), 0), reward, done
 
-    def get_total_time_cost(self) -> int:
+    def get_total_time_cost(self) -> tuple:
         return self.communicator.get_total_time_cost()
 
     # Uses loss of life as terminal signal
@@ -60,7 +61,7 @@ class Env(object):
 
     def __reset_buffer(self):
         for _ in range(self.buffer_history_length):
-            self.state_buffer.append(torch.zeros(42, 42, device=self.device))
+            self.state_buffer.append(torch.zeros(*STATE_SHAPE, device=self.device))
 
 
 class GoogleTraceEnv(object):
@@ -74,7 +75,7 @@ class GoogleTraceEnv(object):
         self.buffer_history_length = args.history_length
         self.state_buffer = deque([], maxlen=args.history_length)
         self.training_set_path = args.training_set
-        self.communicator = YarnSchedulerCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json='')
+        self.communicator = YarnCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json='')
 
     def get_generator(self, index_end: int=13, hour_end: int=23) -> Generator:
         action_set = self.communicator.get_action_set()
@@ -107,7 +108,7 @@ class GoogleTraceEnv(object):
 
     def __reset_buffer(self):
         for _ in range(self.buffer_history_length):
-            self.state_buffer.append(torch.zeros(42, 42, device=self.device))
+            self.state_buffer.append(torch.zeros(*STATE_SHAPE, device=self.device))
 
     def __reset(self):
         self.__reset_buffer()

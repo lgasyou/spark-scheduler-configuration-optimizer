@@ -19,7 +19,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
     parser.add_argument('--game', type=str, default='space_invaders', help='ATARI game')
-    parser.add_argument('--T-max', type=int, default=int(5000), metavar='STEPS',
+    parser.add_argument('--T-max', type=int, default=int(6005), metavar='STEPS',
                         help='Number of training steps (4x number of frames)')
     parser.add_argument('--max-episode-length', type=int, default=int(12), metavar='LENGTH',
                         help='Max episode length (0 to disable)')
@@ -52,10 +52,10 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--lr', type=float, default=0.0000625, metavar='η', help='Learning rate')
     parser.add_argument('--adam-eps', type=float, default=1.5e-4, metavar='ε', help='Adam epsilon')
     parser.add_argument('--batch-size', type=int, default=32, metavar='SIZE', help='Batch size')
-    parser.add_argument('--learn-start', type=int, default=int(50), metavar='STEPS',
+    parser.add_argument('--learn-start', type=int, default=int(900), metavar='STEPS',
                         help='Number of steps before starting training')
     parser.add_argument('--evaluate', action='store_true', help='Evaluate only')
-    parser.add_argument('--evaluation-interval', type=int, default=50, metavar='STEPS',
+    parser.add_argument('--evaluation-interval', type=int, default=2000, metavar='STEPS',
                         help='Number of training steps between evaluations')
     parser.add_argument('--evaluation-episodes', type=int, default=10, metavar='N',
                         help='Number of evaluation episodes to average over')

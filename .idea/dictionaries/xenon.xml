@@ -21,6 +21,7 @@
       <w>resample</w>
       <w>sched</w>
       <w>softmax</w>
+      <w>tanh</w>
       <w>testset</w>
       <w>timestep</w>
       <w>tonexty</w>

@@ -6,7 +6,7 @@ import src.env.yarn as y
 def communicator_test():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     sls_jobs_json = '/data/testset/' + 'sls-jobs.json'
-    com = y.YarnSchedulerCommunicator(
+    com = y.YarnCommunicator(
         'http://localhost:18088/',
         '/opt/hadoop',
         sls_jobs_json

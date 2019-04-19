@@ -43,7 +43,6 @@ class Agent(object):
     def reset_noise(self):
         self.online_net.reset_noise()
 
-    # TODO LATER: Formula 7
     # Acts based on single state (no batch)
     def act(self, state):
         with torch.no_grad():
@@ -54,7 +53,6 @@ class Agent(object):
     def act_e_greedy(self, state, epsilon=0.001) -> int:
         return random.randrange(self.action_space) if random.random() < epsilon else self.act(state)
 
-    # TODO LATER: Implementation
     def learn(self, mem: ReplayMemory):
         # Sample transitions
         idxs, states, actions, returns, next_states, nonterminals, weights = mem.sample(self.batch_size)
@@ -75,8 +73,8 @@ class Agent(object):
             pns_a = pns[range(self.batch_size), argmax_indices_ns]
 
             # Compute Tz (Bellman operator T applied to z)
-            Tz = returns.unsqueeze(1) + nonterminals * (self.discount ** self.n) * self.support.unsqueeze(
-                0)  # Tz = R^n + (γ^n)z (accounting for terminal states)
+            # Tz = R^n + (γ^n)z (accounting for terminal states)
+            Tz = returns.unsqueeze(1) + nonterminals * (self.discount ** self.n) * self.support.unsqueeze(0)
             Tz = Tz.clamp(min=self.V_min, max=self.V_max)  # Clamp between supported values
             # Compute L2 projection of Tz onto fixed support z
             b = (Tz - self.V_min) / self.delta_z  # b = (Tz - V_min) / Δz
@@ -108,7 +106,6 @@ class Agent(object):
     def save(self, path) -> None:
         torch.save(self.online_net.state_dict(), os.path.join(path, 'model.pth'))
 
-    # TODO LATER: Implementation
     # Evaluates Q-value based on single state (no batch)
     def evaluate_q(self, state) -> float:
         with torch.no_grad():

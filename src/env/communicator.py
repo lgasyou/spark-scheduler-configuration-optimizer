@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 import pandas as pd
 import torch
@@ -13,7 +13,7 @@ class Communicator(object):
     def get_action_set() -> dict:
         pass
 
-    def get_state_tensor(self) -> torch.Tensor:
+    def get_state_tensor(self) -> Optional[torch.Tensor]:
         pass
 
     def act(self, action) -> float:

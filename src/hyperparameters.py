@@ -1,0 +1,1 @@
+STATE_SHAPE = (42, 42)

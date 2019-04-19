@@ -40,6 +40,12 @@ class OptimizationController(object):
     12.         f = f + 1
     13.	 	end for
     14.	end for
+
+    When raises the exception "StateInvalidException",
+    the state is invalid so state, action, reward of this step, signal terminate
+    won't be saved into the memory.
+    This will cause a problem: non-terminate signal will always be True.
+    TODO: See description above.
     """
 
     def __init__(self, args: argparse.Namespace):

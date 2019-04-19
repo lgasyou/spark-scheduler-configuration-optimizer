@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import subprocess
 import time
@@ -11,6 +12,7 @@ from requests.exceptions import ConnectionError
 
 from .communicator import Communicator
 from .exceptions import StateInvalidException
+from ..hyperparameters import STATE_SHAPE
 from ..xmlutil import XmlModifier
 
 
@@ -72,7 +74,7 @@ class Constraint(object):
 class State(object):
     def __init__(self, waiting_jobs: List[Job], running_jobs: List[Job],
                  resources: List[Resource], constraint: Constraint):
-        self.waiting_jobs = waiting_jobs
+        self.awaiting_jobs = waiting_jobs
         self.running_jobs: List[Job] = running_jobs
         self.resources = resources
         self.constraint = constraint
@@ -84,7 +86,7 @@ class Action(object):
         self.queue_b_weight = b
 
 
-class YarnSchedulerCommunicator(Communicator):
+class YarnCommunicator(Communicator):
     """
     Uses RESTFul API to communicate with YARN cluster scheduler.
     """
@@ -95,7 +97,7 @@ class YarnSchedulerCommunicator(Communicator):
         self.rm_host = rm_host
         self.sls_jobs_json = sls_jobs_json
 
-        self.waiting_jobs: List[Job] = []
+        self.awaiting_jobs: List[Job] = []
 
         self.action_set = self.get_action_set()
         self.sls_runner: subprocess.Popen = None
@@ -141,16 +143,19 @@ class YarnSchedulerCommunicator(Communicator):
         return self.get_reward()
 
     def get_reward(self) -> float:
-        job_count = len(self.waiting_jobs)
+        job_count = len(self.awaiting_jobs)
         if job_count == 0:
             return 0
 
         total_wait_time = 0.0
-        for j in self.waiting_jobs:
+        for j in self.awaiting_jobs:
             total_wait_time += j.wait_time
-
         average_wait_time = total_wait_time / job_count
-        return 10000 / average_wait_time
+
+        # TODO: Try -math.tanh(RATE * (average_wait_time - BIAS))
+        cost = math.tanh(0.00001 * average_wait_time)
+        print('\n', 'Cost:', cost)
+        return -cost
 
     def get_state(self) -> State:
         """
@@ -160,7 +165,7 @@ class YarnSchedulerCommunicator(Communicator):
             wj, rj = self.__get_jobs()
             resources = self.__get_resources()
             constraints = self.__get_constraints()
-            self.waiting_jobs = wj
+            self.awaiting_jobs = wj
             return State(wj, rj, resources, constraints)
         except ConnectionError:
             raise StateInvalidException()
@@ -169,14 +174,13 @@ class YarnSchedulerCommunicator(Communicator):
         except requests.exceptions.HTTPError:
             raise StateInvalidException()
 
-    # TODO LATER: More effective
     def get_state_tensor(self) -> Union[torch.Tensor, None]:
         """
         Get state of YARN which is trimmed.
         Which is defined as the ϕ(s) function defined in document.
 
         state: {
-            waiting_jobs: [Job, Job, ...],
+            awaiting_jobs: [Job, Job, ...],
             running_jobs: [Job, Job, ...],
             resources: [Resource, Resource, ...],
             constraint: {
@@ -186,71 +190,56 @@ class YarnSchedulerCommunicator(Communicator):
         }
         """
         raw = self.get_state()
-        tensor = torch.zeros(42, 42)
-        idx, row = 0, 0
-        for wj in raw.waiting_jobs:
-            if idx == 42:
-                row += 1
-                idx = 0
-            tensor[row][idx] = wj.submit_time
+        tensor = torch.zeros(14, 126)
+
+        # Line 0-4: awaiting jobs and their tasks
+        for i, wj in enumerate(raw.awaiting_jobs[:5]):
+            idx = 0
+            tensor[i][idx] = wj.submit_time
             idx += 1
-            tensor[row][idx] = wj.priority
+            tensor[i][idx] = wj.priority
             idx += 1
             for t in wj.tasks:
-                if idx == 42:
-                    row += 1
-                    idx = 0
-                tensor[row][idx] = t.memory
+                tensor[i][idx] = t.memory
                 idx += 1
-                if idx == 42:
-                    row += 1
-                    idx = 0
-                tensor[row][idx] = t.cpu
+                tensor[i][idx] = t.cpu
                 idx += 1
 
-        row += 1
-        idx = 0
-        for rj in raw.running_jobs:
-            if idx == 42:
-                row += 1
-                idx = 0
+        # Line 5-9: running jobs and their tasks
+        for i, rj in enumerate(raw.running_jobs[:5]):
+            idx = 0
+            row = i + 5
             tensor[row][idx] = rj.submit_time
             idx += 1
             tensor[row][idx] = rj.priority
             idx += 1
             for t in rj.tasks:
-                if idx == 42:
-                    row += 1
-                    idx = 0
                 tensor[row][idx] = t.memory
                 idx += 1
-                if idx == 42:
-                    row += 1
-                    idx = 0
                 tensor[row][idx] = t.cpu
                 idx += 1
 
-        row += 1
-        idx = 0
+        # Line 10: resources of cluster
+        row, idx = 10, 0
         for r in raw.resources:
             tensor[row][idx] = r.mem
             idx += 1
             tensor[row][idx] = r.cpu
             idx += 1
 
-        row += 1
-        idx = 0
+        # Line 11: queue constraints
+        row, idx = 11, 0
         for c in raw.constraint.queue:
             tensor[row][idx] = c.max_capacity
             idx += 1
             tensor[row][idx] = c.capacity
             idx += 1
 
-        # Do nothing
+        # Line 12: job constraints(leave empty for now)
         for _ in raw.constraint.job:
             pass
 
-        return tensor
+        return tensor.reshape(*STATE_SHAPE)
 
     def set_queue_weights(self, action_index: int) -> None:
         """
@@ -260,7 +249,7 @@ class YarnSchedulerCommunicator(Communicator):
 
         wd = os.getcwd()
         cmd = [wd + '/bin/refresh-queues.sh', self.hadoop_home]
-        self.sls_runner = subprocess.Popen(cmd)
+        subprocess.Popen(cmd)
 
     def is_done(self) -> bool:
         """
@@ -275,6 +264,7 @@ class YarnSchedulerCommunicator(Communicator):
         if self.sls_runner is not None:
             self.sls_runner.terminate()
             self.sls_runner.wait()
+            time.sleep(5)
             self.sls_runner = None
 
     def reset(self, wd=None) -> None:
@@ -287,8 +277,8 @@ class YarnSchedulerCommunicator(Communicator):
         self.close()
 
         sls_jobs_json = wd + '/' + self.sls_jobs_json
-        cmd = [wd + '/bin/start-sls.sh', self.hadoop_home, wd, sls_jobs_json]
-        self.sls_runner = subprocess.Popen(cmd)
+        cmd = "{}/bin/start-sls.sh {} {} {}".format(wd, self.hadoop_home, wd, sls_jobs_json)
+        self.sls_runner = subprocess.Popen(cmd.split(' '))
 
         # Wait until web server starts.
         time.sleep(20)
@@ -351,6 +341,7 @@ class YarnSchedulerCommunicator(Communicator):
 
         return jobs
 
+    # TODO: Get wait time of these jobs in order to estimate the effect of this algorithm.
     def __get_waiting_jobs(self) -> List[Job]:
         return self.__get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
 
@@ -383,14 +374,17 @@ class YarnSchedulerCommunicator(Communicator):
             constraint.add_queue_c(queue_c)
 
         # TODO LATER: Job constraint
-        for job in self.waiting_jobs:
-            url = "{}ws/v1/cluster/apps/{}/appattempts".format(self.rm_host, job.application_id)
-            attempt_json = get_json(url)
-            attempts = attempt_json['appAttempts']['appAttempt']
-            for a in attempts:
-                http_address = a['nodeHttpAddress']
-                if len(http_address):
-                    constraint.add_job_c(JobConstraint(job.application_id, http_address))
+        for job in self.awaiting_jobs:
+            try:
+                url = "{}ws/v1/cluster/apps/{}/appattempts".format(self.rm_host, job.application_id)
+                attempt_json = get_json(url)
+                attempts = attempt_json['appAttempts']['appAttempt']
+                for a in attempts:
+                    http_address = a['nodeHttpAddress']
+                    if len(http_address):
+                        constraint.add_job_c(JobConstraint(job.application_id, http_address))
+            except requests.exceptions.HTTPError:
+                pass
 
         return constraint
 
