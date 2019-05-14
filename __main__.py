@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
-    parser.add_argument('--hadoop-home', type=str, default='/opt/hadoop', help='Hadoop home path')
+    parser.add_argument('--hadoop-home', type=str, default='/home/num2/library/hadoop', help='Hadoop home path')
     parser.add_argument('--rm-host', type=str, default='http://localhost:18088/', help='Address:port of ResourceManager')
     parser.add_argument('--training-set', type=str, default='data/trainingset')
     parser.add_argument('--test-set', type=str, default='data/testset')
@@ -98,8 +98,12 @@ def main():
     args = get_args()
 
     controller = OptimizationController(args)
-    controller.pre_train_model()
-    controller.run()
+    try:
+        controller.pre_train_model()
+        controller.run()
+        # controller.test_without_optimize()
+    except KeyboardInterrupt:
+        controller.env.close()
 
 
 if __name__ == '__main__':

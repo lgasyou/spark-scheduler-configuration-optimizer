@@ -45,7 +45,7 @@ def test(args, T, dqn, val_mem, evaluate=False):
 
             if done:
                 T_rewards.append(reward_sum)
-                time.sleep(30)
+                time.sleep(10)
                 costs, time_cost_ms = env.get_total_time_cost()
                 print('Iteration', i, 'Time Cost:', costs)
                 time_costs[i] = list(costs)

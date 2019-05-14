@@ -161,7 +161,7 @@ class ReplayMemory(object):
         priorities.pow_(self.priority_exponent)
         [self.transitions.update(idx, priority) for idx, priority in zip(idxs, priorities)]
 
-    def save(self, filename: str=None):
+    def save(self, filename: str = None):
         """
         Save into a file.
         """
@@ -169,7 +169,7 @@ class ReplayMemory(object):
         with open(filename, 'wb') as f:
             pickle.dump([self.t, self.transitions], f)
 
-    def try_load_from_file(self, filename: str=None) -> bool:
+    def try_load_from_file(self, filename: str = None) -> bool:
         """
         Load from a file.
         :return: Whether load succeed.
@@ -203,6 +203,6 @@ class ReplayMemory(object):
                 state_stack[t] = self.transitions.data[self.current_idx + t - self.history + 1].state
                 prev_timestep -= 1
         # Agent will turn into batch
-        state = torch.stack(state_stack, 0).to(dtype=torch.float32, device=self.device).div_(255)
+        state = torch.stack(state_stack, 0).to(dtype=torch.float32, device=self.device)
         self.current_idx += 1
         return state

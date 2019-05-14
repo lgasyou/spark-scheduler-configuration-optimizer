@@ -77,7 +77,7 @@ class GoogleTraceEnv(object):
         self.training_set_path = args.training_set
         self.communicator = YarnCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json='')
 
-    def get_generator(self, index_end: int=13, hour_end: int=23) -> Generator:
+    def get_generator(self, index_end: int = 13, hour_end: int = 23) -> Generator:
         action_set = self.communicator.get_action_set()
         for action_index in action_set.keys():
             for i in range(1, index_end):

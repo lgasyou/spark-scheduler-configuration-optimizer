@@ -4,6 +4,9 @@ channels:
 dependencies:
   - plotly
   - pytorch
+  - psutil
+  - pandas
+  - tqdm
   - pip:
     - atari-py
     - opencv-python

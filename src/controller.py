@@ -116,7 +116,6 @@ class OptimizationController(object):
                     T += 1
                     self.mem.append(state, action, reward, terminal)
                     time.sleep(5)
-
             # Save data as 'pre-train-replay-memory.pk'
             self.mem.save()
 
