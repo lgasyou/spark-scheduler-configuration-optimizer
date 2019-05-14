@@ -4,7 +4,7 @@ import os
 import signal
 import subprocess
 import time
-from typing import Dict, List, Tuple, Union, Optional
+from typing import Dict, Tuple, Union, Optional
 
 import pandas as pd
 import psutil
@@ -14,77 +14,8 @@ from requests.exceptions import ConnectionError
 
 from .communicator import Communicator
 from .exceptions import StateInvalidException
-from ..xmlutil import XmlModifier
-
-
-class Job(object):
-    def __init__(self, application_id, submit_time, wait_time, priority, tasks):
-        self.application_id = application_id
-        self.submit_time: int = submit_time
-        self.wait_time: int = wait_time
-        self.priority: int = priority
-        self.tasks: List[Task] = tasks
-
-    def __eq__(self, other):
-        return self.application_id == other.application_id
-
-    # Use application_id to identity a Job
-    def __hash__(self):
-        return hash(self.application_id)
-
-
-class Task(object):
-    def __init__(self, platform, memory, cpu):
-        self.platform: str = platform
-        self.memory: int = memory
-        self.cpu: int = cpu
-
-
-class Resource(object):
-    def __init__(self, platform: str, cpu: int, mem: int):
-        self.node_name: str = platform   # Node Name
-        self.cpu: int = cpu              # CPU Cores
-        self.mem: int = mem              # Memory(GB)
-
-
-class QueueConstraint(object):
-    def __init__(self, name, capacity=100, max_capacity=100):
-        self.name = name
-        self.capacity = capacity
-        self.max_capacity = max_capacity
-
-
-class JobConstraint(object):
-    def __init__(self, job_id, host_node_name):
-        self.job_id = job_id
-        self.host_node_name = host_node_name
-
-
-class Constraint(object):
-    def __init__(self):
-        self.queue: List[QueueConstraint] = []
-        self.job = []
-
-    def add_queue_c(self, c: QueueConstraint):
-        self.queue.append(c)
-
-    def add_job_c(self, c: JobConstraint):
-        self.job.append(c)
-
-
-class State(object):
-    def __init__(self, waiting_jobs: List[Job], running_jobs: List[Job],
-                 resources: List[Resource], constraint: Constraint):
-        self.awaiting_jobs = waiting_jobs
-        self.running_jobs: List[Job] = running_jobs
-        self.resources = resources
-        self.constraint = constraint
-
-
-class Action(object):
-    def __init__(self, a: int, b: int):
-        self.queue_a_weight = a
-        self.queue_b_weight = b
+from .xmlutil import XmlModifier
+from .yarnmodel import *
 
 
 class YarnCommunicator(Communicator):
@@ -126,7 +57,7 @@ class YarnCommunicator(Communicator):
         dest = self.hadoop_etc + '/capacity-scheduler.xml'
         xml_modifier = XmlModifier('./data/capacity-scheduler-template.xml', dest)
 
-        a, b = self.__get_capacities_by_action_index(action_index)
+        a, b = self._get_capacities_by_action_index(action_index)
 
         xml_modifier.modify('yarn.scheduler.capacity.root.queueA.capacity', a)
         xml_modifier.modify('yarn.scheduler.capacity.root.queueB.capacity', b)
@@ -163,9 +94,9 @@ class YarnCommunicator(Communicator):
         Get raw state of YARN.
         """
         try:
-            wj, rj = self.__get_jobs()
-            resources = self.__get_resources()
-            constraints = self.__get_constraints()
+            wj, rj = self._get_jobs()
+            resources = self._get_resources()
+            constraints = self._get_constraints()
             self.awaiting_jobs = wj
             return State(wj, rj, resources, constraints)
         except ConnectionError:
@@ -345,7 +276,7 @@ class YarnCommunicator(Communicator):
         Close the communication.
         """
         if self.sls_runner is not None:
-            kill_processes(self.sls_runner.pid)
+            kill_process_family(self.sls_runner.pid)
             self.sls_runner.wait()
             self.sls_runner = None
 
@@ -376,7 +307,7 @@ class YarnCommunicator(Communicator):
         sum_time_cost = time_costs.sum()
         return time_costs, sum_time_cost
 
-    def __get_capacities_by_action_index(self, action_index: int) -> Tuple[float, float]:
+    def _get_capacities_by_action_index(self, action_index: int) -> Tuple[float, float]:
         action = self.action_set[action_index]
         weight_a = action.queue_a_weight
         weight_b = action.queue_b_weight
@@ -385,18 +316,18 @@ class YarnCommunicator(Communicator):
         b = 100 * weight_b / total_weight
         return a, b
 
-    def __get_jobs(self) -> Tuple[List[Job], List[Job]]:
-        running_jobs = self.__get_running_jobs()
-        waiting_jobs = self.__get_waiting_jobs()
+    def _get_jobs(self) -> Tuple[List[Job], List[Job]]:
+        running_jobs = self._get_running_jobs()
+        waiting_jobs = self._get_waiting_jobs()
         return waiting_jobs, running_jobs
 
-    def __get_jobs_by_states(self, states: str) -> List[Job]:
+    def _get_jobs_by_states(self, states: str) -> List[Job]:
         url = self.rm_host + 'ws/v1/cluster/apps?states=' + states
         job_json = get_json(url)
-        return self.__build_jobs_from_json(job_json)
+        return self._build_jobs_from_json(job_json)
 
     @staticmethod
-    def __build_jobs_from_json(j: Dict[str, object]) -> List[Job]:
+    def _build_jobs_from_json(j: Dict[str, object]) -> List[Job]:
         if j['apps'] is None:
             return []
 
@@ -422,13 +353,13 @@ class YarnCommunicator(Communicator):
         return jobs
 
     # TODO: Get wait time of these jobs in order to estimate the effect of this algor
-    def __get_waiting_jobs(self) -> List[Job]:
-        return self.__get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
+    def _get_waiting_jobs(self) -> List[Job]:
+        return self._get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
 
-    def __get_running_jobs(self) -> List[Job]:
-        return self.__get_jobs_by_states('RUNNING')
+    def _get_running_jobs(self) -> List[Job]:
+        return self._get_jobs_by_states('RUNNING')
 
-    def __get_resources(self) -> List[Resource]:
+    def _get_resources(self) -> List[Resource]:
         url = self.rm_host + 'ws/v1/cluster/nodes'
         conf = get_json(url)
         nodes = conf['nodes']['node']
@@ -440,7 +371,7 @@ class YarnCommunicator(Communicator):
             resources.append(Resource(node_name, vcores, int(memory)))
         return resources
 
-    def __get_constraints(self) -> Constraint:
+    def _get_constraints(self) -> Constraint:
         url = self.rm_host + 'ws/v1/cluster/scheduler'
         conf = get_json(url)
         constraint = Constraint()
@@ -481,9 +412,9 @@ def get_json(url: str) -> Dict[str, object]:
     return j
 
 
-def kill_processes(pid, sig=signal.SIGTERM):
+def kill_process_family(parent_pid, sig=signal.SIGTERM):
     try:
-        parent = psutil.Process(pid)
+        parent = psutil.Process(parent_pid)
         children = parent.children(recursive=True)
         for process in children:
             process.send_signal(sig)

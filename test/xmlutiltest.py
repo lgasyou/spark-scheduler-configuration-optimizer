@@ -1,6 +1,6 @@
 import unittest
 
-from src.xmlutil import XmlModifier
+from src.env.xmlutil import XmlModifier
 
 
 class XmlUtilTest(unittest.TestCase):

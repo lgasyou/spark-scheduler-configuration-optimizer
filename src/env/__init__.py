@@ -7,7 +7,7 @@ import torch
 
 from .communicator import Communicator
 from .exceptions import StateInvalidException
-from .yarn import YarnCommunicator, Action
+from .yarncommunicator import YarnCommunicator, Action
 from ..hyperparameters import STATE_SHAPE
 
 __all__ = ['Env', 'GoogleTraceEnv']
@@ -23,12 +23,12 @@ class Env(object):
         self.buffer_history_length = args.history_length
         self.state_buffer = deque([], maxlen=args.history_length)
         sls_jobs_json = args.test_set + '/sls-jobs.json'
-        self.communicator: Communicator = YarnCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
+        self.communicator = YarnCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
         self.actions = self.communicator.get_action_set()
         self.training = True    # Consistent with model training mode
 
     def reset(self) -> torch.Tensor:
-        self.__reset_buffer()
+        self._reset_buffer()
         self.communicator.reset()
         state = self.communicator.get_state_tensor().to(self.device)
         self.state_buffer.append(state)
@@ -59,7 +59,7 @@ class Env(object):
     def close(self) -> None:
         self.communicator.close()
 
-    def __reset_buffer(self):
+    def _reset_buffer(self):
         for _ in range(self.buffer_history_length):
             self.state_buffer.append(torch.zeros(*STATE_SHAPE, device=self.device))
 
@@ -87,12 +87,12 @@ class GoogleTraceEnv(object):
                         continue
 
                     yield self.step(filename, action_index)
-            break
+            break   # For fasten test. Should be removed finally.
 
     def step(self, filename, action_index: int) -> Tuple[torch.Tensor, Action, float, bool]:
         self.communicator.sls_jobs_json = filename
         self.communicator.override_scheduler_xml_with(action_index)
-        self.__reset()
+        self._reset()
         done = False
 
         while not done:
@@ -106,10 +106,10 @@ class GoogleTraceEnv(object):
             self.state_buffer.append(state)
             yield torch.stack(list(self.state_buffer), 0), action_index, reward, done
 
-    def __reset_buffer(self):
+    def _reset_buffer(self):
         for _ in range(self.buffer_history_length):
             self.state_buffer.append(torch.zeros(*STATE_SHAPE, device=self.device))
 
-    def __reset(self):
-        self.__reset_buffer()
+    def _reset(self):
+        self._reset_buffer()
         self.communicator.reset()
