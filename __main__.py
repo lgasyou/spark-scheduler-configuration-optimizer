@@ -4,7 +4,7 @@ import random
 
 import torch
 
-from src.controller import OptimizationController
+from optimizer.evaluation.controller import EvaluationController
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--V-max', type=float, default=10, metavar='V',
                         help='Maximum of value distribution support')
     parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
-    parser.add_argument('--memory-capacity', type=int, default=int(10000), metavar='CAPACITY',
+    parser.add_argument('--memory-capacity', type=int, default=int(4000), metavar='CAPACITY',
                         help='Experience replay memory capacity')
     parser.add_argument('--replay-frequency', type=int, default=4, metavar='k',
                         help='Frequency of sampling from memory')
@@ -97,11 +97,10 @@ def main():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     args = get_args()
 
-    controller = OptimizationController(args)
+    controller = EvaluationController(args)
     try:
         controller.pre_train_model()
         controller.run()
-        # controller.test_without_optimize()
     except KeyboardInterrupt:
         controller.env.close()
 

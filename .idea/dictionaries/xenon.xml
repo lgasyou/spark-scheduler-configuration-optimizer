@@ -19,6 +19,7 @@
       <w>pretrained</w>
       <w>probs</w>
       <w>resample</w>
+      <w>resetable</w>
       <w>sched</w>
       <w>softmax</w>
       <w>tanh</w>

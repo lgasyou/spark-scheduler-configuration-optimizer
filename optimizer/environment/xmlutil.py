@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 class XmlModifier(object):
     """
-    A XML modifier that helps to modify key-value value of XML.
+    A XML modifier who helps to modify the value of key-value type in XML file.
     """
 
     def __init__(self, from_filename: str, to_filename: str):

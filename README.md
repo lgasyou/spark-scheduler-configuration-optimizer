@@ -22,7 +22,7 @@ Requirements
 - [Plotly](https://plot.ly/)
 - [PyTorch](http://pytorch.org/)
 
-To install all dependencies with Anaconda run `conda env create -f environment.yml` and use `source activate rainbow` to activate the environment.
+To install all dependencies with Anaconda run `conda environment create -f environment.yml` and use `source activate rainbow` to activate the environment.
 
 Acknowledgements
 ----------------

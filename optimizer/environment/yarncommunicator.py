@@ -1,10 +1,11 @@
+import abc
 import json
 import math
 import os
 import signal
 import subprocess
 import time
-from typing import Dict, Tuple, Union, Optional
+from typing import Dict, Tuple, Optional
 
 import pandas as pd
 import psutil
@@ -12,27 +13,27 @@ import requests
 import torch
 from requests.exceptions import ConnectionError
 
-from .communicator import Communicator
+from .communicator import ICommunicator, IResetableCommunicator
 from .exceptions import StateInvalidException
 from .xmlutil import XmlModifier
 from .yarnmodel import *
+from ..hyperparameters import STATE_SHAPE
 
 
-class YarnCommunicator(Communicator):
+class AbstractYarnCommunicator(ICommunicator):
     """
     Uses RESTFul API to communicate with YARN cluster scheduler.
     """
 
-    def __init__(self, rm_host: str, hadoop_home: str, sls_jobs_json: str):
+    def __init__(self, rm_host: str, hadoop_home: str):
         self.hadoop_home = hadoop_home
         self.hadoop_etc = hadoop_home + '/etc/hadoop'
         self.rm_host = rm_host
-        self.sls_jobs_json = sls_jobs_json
+        self.start_time = timestamp()
 
         self.awaiting_jobs: List[Job] = []
 
         self.action_set = self.get_action_set()
-        self.sls_runner: Optional[subprocess.Popen] = None
 
         self.copy_conf_file()
 
@@ -106,95 +107,13 @@ class YarnCommunicator(Communicator):
         except requests.exceptions.HTTPError:
             raise StateInvalidException()
 
-    def get_state_tensor(self) -> Union[torch.Tensor, None]:
-        """
-        Get state of YARN which is trimmed.
-        Which is defined as the ϕ(s) function defined in document.
-
-        state: {
-            waiting_jobs: [Job, Job, ...],
-            running_jobs: [Job, Job, ...],
-            resources: [Resource, Resource, ...],
-            constraint: {
-                queue: [QueueConstraint, QueueConstraint, ...],
-                job: [JobConstraint, JobConstraint, ...],
-            }
-        }
-        """
-        raw = self.get_state()
-        tensor = torch.zeros(42, 42)
-        idx, row = 0, 0
-        for wj in raw.awaiting_jobs:
-            if idx == 42:
-                row += 1
-                idx = 0
-            tensor[row][idx] = wj.submit_time
-            idx += 1
-            tensor[row][idx] = wj.priority
-            idx += 1
-            for t in wj.tasks:
-                if idx == 42:
-                    row += 1
-                    idx = 0
-                tensor[row][idx] = t.memory
-                idx += 1
-                if idx == 42:
-                    row += 1
-                    idx = 0
-                tensor[row][idx] = t.cpu
-                idx += 1
-
-        row += 1
-        idx = 0
-        for rj in raw.running_jobs:
-            if idx == 42:
-                row += 1
-                idx = 0
-            tensor[row][idx] = rj.submit_time
-            idx += 1
-            tensor[row][idx] = rj.priority
-            idx += 1
-            for t in rj.tasks:
-                if idx == 42:
-                    row += 1
-                    idx = 0
-                tensor[row][idx] = t.memory
-                idx += 1
-                if idx == 42:
-                    row += 1
-                    idx = 0
-                tensor[row][idx] = t.cpu
-                idx += 1
-
-        row += 1
-        idx = 0
-        for r in raw.resources:
-            tensor[row][idx] = r.mem
-            idx += 1
-            tensor[row][idx] = r.cpu
-            idx += 1
-
-        row += 1
-        idx = 0
-        for c in raw.constraint.queue:
-            tensor[row][idx] = c.max_capacity
-            idx += 1
-            tensor[row][idx] = c.capacity
-            idx += 1
-
-        # Do nothing
-        for _ in raw.constraint.job:
-            pass
-
-        return tensor
-
     # def get_state_tensor(self) -> Union[torch.Tensor, None]:
     #     """
     #     Get state of YARN which is trimmed.
     #     Which is defined as the ϕ(s) function defined in document.
     #
     #     state: {
-    #         awaiting_jobs: [Job, Job, ...],
+    #         waiting_jobs: [Job, Job, ...],
     #         running_jobs: [Job, Job, ...],
     #         resources: [Resource, Resource, ...],
     #         constraint: {
@@ -204,56 +123,138 @@ class YarnCommunicator(Communicator):
     #     }
     #     """
     #     raw = self.get_state()
-    #     tensor = torch.zeros(14, 126)
-    #
-    #     # Line 0-4: awaiting jobs and their tasks
-    #     for i, wj in enumerate(raw.awaiting_jobs[:5]):
-    #         idx = 0
-    #         tensor[i][idx] = wj.submit_time
+    #     tensor = torch.zeros(42, 42)
+    #     idx, row = 0, 0
+    #     for wj in raw.awaiting_jobs:
+    #         if idx == 42:
+    #             row += 1
+    #             idx = 0
+    #         tensor[row][idx] = wj.submit_time
     #         idx += 1
-    #         tensor[i][idx] = wj.priority
+    #         tensor[row][idx] = wj.priority
     #         idx += 1
-    #         for t in wj.tasks[:62]:
-    #             tensor[i][idx] = t.memory
+    #         for t in wj.tasks:
+    #             if idx == 42:
+    #                 row += 1
+    #                 idx = 0
+    #             tensor[row][idx] = t.memory
     #             idx += 1
-    #             tensor[i][idx] = t.cpu
+    #             if idx == 42:
+    #                 row += 1
+    #                 idx = 0
+    #             tensor[row][idx] = t.cpu
     #             idx += 1
     #
-    #     # Line 5-9: running jobs and their tasks
-    #     for i, rj in enumerate(raw.running_jobs[:5]):
-    #         idx = 0
-    #         row = i + 5
+    #     row += 1
+    #     idx = 0
+    #     for rj in raw.running_jobs:
+    #         if idx == 42:
+    #             row += 1
+    #             idx = 0
     #         tensor[row][idx] = rj.submit_time
     #         idx += 1
     #         tensor[row][idx] = rj.priority
     #         idx += 1
-    #         for t in rj.tasks[:62]:
+    #         for t in rj.tasks:
+    #             if idx == 42:
+    #                 row += 1
+    #                 idx = 0
     #             tensor[row][idx] = t.memory
     #             idx += 1
+    #             if idx == 42:
+    #                 row += 1
+    #                 idx = 0
     #             tensor[row][idx] = t.cpu
     #             idx += 1
     #
-    #     # Line 10: resources of cluster
-    #     row, idx = 10, 0
-    #     for r in raw.resources[:63]:
+    #     row += 1
+    #     idx = 0
+    #     for r in raw.resources:
     #         tensor[row][idx] = r.mem
     #         idx += 1
     #         tensor[row][idx] = r.cpu
     #         idx += 1
     #
-    #     # Line 11: queue constraints
-    #     row, idx = 11, 0
-    #     for c in raw.constraint.queue[:63]:
+    #     row += 1
+    #     idx = 0
+    #     for c in raw.constraint.queue:
     #         tensor[row][idx] = c.max_capacity
     #         idx += 1
     #         tensor[row][idx] = c.capacity
     #         idx += 1
     #
-    #     # Line 12: job constraints(leave empty for now)
+    #     # Do nothing
     #     for _ in raw.constraint.job:
     #         pass
     #
-    #     return tensor.reshape(*STATE_SHAPE)
+    #     return tensor
+
+    def get_state_tensor(self) -> torch.Tensor:
+        """
+        Get state of YARN which is trimmed.
+        Which is defined as the ϕ(s) function defined in document.
+
+        state: {
+            awaiting_jobs: [Job, Job, ...],
+            running_jobs: [Job, Job, ...],
+            resources: [Resource, Resource, ...],
+            constraint: {
+                queue: [QueueConstraint, QueueConstraint, ...],
+                job: [JobConstraint, JobConstraint, ...],
+            }
+        }
+        """
+        raw = self.get_state()
+        tensor = torch.zeros(14, 126)
+
+        # Line 0-4: awaiting jobs and their tasks
+        for i, wj in enumerate(raw.awaiting_jobs[:5]):
+            idx = 0
+            tensor[i][idx] = wj.submit_time
+            idx += 1
+            tensor[i][idx] = wj.priority
+            idx += 1
+            for t in wj.tasks[:62]:
+                tensor[i][idx] = t.memory
+                idx += 1
+                tensor[i][idx] = t.cpu
+                idx += 1
+
+        # Line 5-9: running jobs and their tasks
+        for i, rj in enumerate(raw.running_jobs[:5]):
+            idx = 0
+            row = i + 5
+            tensor[row][idx] = rj.submit_time
+            idx += 1
+            tensor[row][idx] = rj.priority
+            idx += 1
+            for t in rj.tasks[:62]:
+                tensor[row][idx] = t.memory
+                idx += 1
+                tensor[row][idx] = t.cpu
+                idx += 1
+
+        # Line 10: resources of cluster
+        row, idx = 10, 0
+        for r in raw.resources[:63]:
+            tensor[row][idx] = r.mem
+            idx += 1
+            tensor[row][idx] = r.cpu
+            idx += 1
+
+        # Line 11: queue constraints
+        row, idx = 11, 0
+        for c in raw.constraint.queue[:63]:
+            tensor[row][idx] = c.max_capacity
+            idx += 1
+            tensor[row][idx] = c.capacity
+            idx += 1
+
+        # Line 12: job constraints(leave empty for now)
+        for _ in raw.constraint.job:
+            pass
+
+        return tensor.reshape(*STATE_SHAPE)
 
     def set_queue_weights(self, action_index: int) -> None:
         """
@@ -262,50 +263,20 @@ class YarnCommunicator(Communicator):
         self.override_scheduler_xml_with(action_index)
 
         wd = os.getcwd()
-        cmd = [wd + '/bin/refresh-queues.sh', self.hadoop_home]
+        cmd = [os.path.join(wd, 'bin', 'refresh-queues.sh'), self.hadoop_home]
         subprocess.Popen(cmd)
 
+    @abc.abstractmethod
     def is_done(self) -> bool:
         """
         Test if all jobs are done.
         """
-        return self.sls_runner is None or self.sls_runner.poll() is not None
-
-    def close(self) -> None:
-        """
-        Close the communication.
-        """
-        if self.sls_runner is not None:
-            kill_process_family(self.sls_runner.pid)
-            self.sls_runner.wait()
-            self.sls_runner = None
-
-    def reset(self) -> None:
-        """
-        Resets the env in order to run this program again.
-        """
-        self.close()
-
-        wd = os.getcwd()
-        sls_jobs_json = './' + self.sls_jobs_json
-        cmd = "{}/bin/start-sls.sh {} {} {}".format(wd, self.hadoop_home, wd, sls_jobs_json)
-        self.sls_runner = subprocess.Popen(cmd, shell=True)
-
-        # Wait until web server starts.
-        time.sleep(20)
+        pass
 
     def copy_conf_file(self):
         with open('./data/capacity-scheduler.xml', 'r') as src:
             with open(self.hadoop_etc + '/capacity-scheduler.xml', 'w') as dest:
                 dest.write(src.read())
-
-    def get_total_time_cost(self):
-        data = pd.read_csv('./results/logs/jobruntime.csv')
-        end_time = data['simulate_end_time']
-        start_time = data['simulate_start_time']
-        time_costs = end_time - start_time
-        sum_time_cost = time_costs.sum()
-        return time_costs, sum_time_cost
 
     def _get_capacities_by_action_index(self, action_index: int) -> Tuple[float, float]:
         action = self.action_set[action_index]
@@ -326,8 +297,7 @@ class YarnCommunicator(Communicator):
         job_json = get_json(url)
         return self._build_jobs_from_json(job_json)
 
-    @staticmethod
-    def _build_jobs_from_json(j: Dict[str, object]) -> List[Job]:
+    def _build_jobs_from_json(self, j: Dict[str, object]) -> List[Job]:
         if j['apps'] is None:
             return []
 
@@ -335,7 +305,7 @@ class YarnCommunicator(Communicator):
         jobs = []
         for j in apps:
             application_id = j['id']
-            start_time = j['startedTime']
+            start_time = j['startedTime'] - self.start_time
             wait_time = j['elapsedTime']
             priority = j['priority']
             tasks = []
@@ -352,7 +322,7 @@ class YarnCommunicator(Communicator):
 
         return jobs
 
-    # TODO: Get wait time of these jobs in order to estimate the effect of this algor
+    # TODO: Get wait time of these jobs in order to estimate the effect of this algorithm
     def _get_waiting_jobs(self) -> List[Job]:
         return self._get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
 
@@ -400,8 +370,56 @@ class YarnCommunicator(Communicator):
         return constraint
 
 
-def get_current_time_ms() -> int:
-    return int(time.time() * 1000)
+class YarnCommunicator(AbstractYarnCommunicator):
+
+    def __init__(self, rm_host: str, hadoop_home: str):
+        super().__init__(rm_host, hadoop_home)
+
+    def is_done(self) -> bool:
+        return False
+
+
+class YarnSlsCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
+
+    def __init__(self, rm_host: str, hadoop_home: str, sls_jobs_json: str):
+        super().__init__(rm_host, hadoop_home)
+        self.sls_jobs_json = sls_jobs_json
+        self.sls_runner: Optional[subprocess.Popen] = None
+
+    def reset(self) -> None:
+        """
+        Resets the environment in order to run this program again.
+        """
+        self.close()
+
+        wd = os.getcwd()
+        sls_jobs_json = './' + self.sls_jobs_json
+        cmd = "%s/bin/start-sls.sh %s %s %s" % (wd, self.hadoop_home, wd, sls_jobs_json)
+        self.sls_runner = subprocess.Popen(cmd, shell=True)
+
+        # Wait until web server starts.
+        time.sleep(10)
+
+    def close(self) -> None:
+        """
+        Close the communication.
+        """
+        if self.sls_runner is not None:
+            kill_process_family(self.sls_runner.pid)
+            self.sls_runner.wait()
+            self.sls_runner = None
+            time.sleep(5)
+
+    def is_done(self) -> bool:
+        return self.sls_runner is None or self.sls_runner.poll() is not None
+
+    def get_total_time_cost(self):
+        data = pd.read_csv('./results/logs/jobruntime.csv')
+        end_time = data['simulate_end_time']
+        start_time = data['simulate_start_time']
+        time_costs = end_time - start_time
+        sum_time_cost = time_costs.sum()
+        return time_costs, sum_time_cost
 
 
 def get_json(url: str) -> Dict[str, object]:
@@ -410,6 +428,10 @@ def get_json(url: str) -> Dict[str, object]:
     r.encoding = r.apparent_encoding
     j = json.loads(r.text)
     return j
+
+
+def timestamp() -> int:
+    return int(time.time() * 1000)
 
 
 def kill_process_family(parent_pid, sig=signal.SIGTERM):

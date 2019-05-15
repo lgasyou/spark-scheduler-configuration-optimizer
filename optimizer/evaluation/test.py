@@ -9,8 +9,8 @@ import torch
 from plotly.graph_objs import Scatter
 from plotly.graph_objs.scatter import Line
 
-from .env import Env
-from .env.exceptions import StateInvalidException
+from .env import EvaluationEnv
+from ..environment.exceptions import StateInvalidException
 
 # Globals
 Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Test DQN
 def test(args, T, dqn, val_mem, evaluate=False):
     global Ts, rewards, Qs, best_avg_reward
-    env = Env(args)
+    env = EvaluationEnv(args)
     env.eval()
     Ts.append(T)
     T_rewards, T_Qs = [], []
