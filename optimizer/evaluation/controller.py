@@ -53,6 +53,7 @@ class EvaluationController(AbstractController):
                 next_state, reward, done = env.step(action)  # Step
                 if reward_clip > 0:
                     reward = max(min(reward, reward_clip), -reward_clip)  # Clip rewards
+                print('Reward:', reward)
                 mem.append(state, action, reward, done)  # Append transition to memory
                 time.sleep(1)
                 T += 1
@@ -103,6 +104,7 @@ class EvaluationController(AbstractController):
 
                 try:
                     state, reward, done = env.step(action_index)  # Step
+                    print('Reward:', reward)
                     reward_sum += reward
                     time.sleep(5)
                 except StateInvalidException:
@@ -119,6 +121,9 @@ class EvaluationController(AbstractController):
         print('Total Time Cost :', total_time_cost_ms, 'ms')
         pd.DataFrame(time_costs).to_csv('./results/time_costs.csv')
         env.close()
+
+    def _env(self, args: argparse.Namespace):
+        return EvaluationEnv(args)
 
     # Construct validation memory
     def _setup_val_mem(self) -> ReplayMemory:

@@ -3,20 +3,18 @@ from typing import Tuple
 
 import torch
 
-from ..environment import ReadOnlyEnv
+from ..environment import AbstractEnv
 from ..environment.yarncommunicator import YarnSlsCommunicator
 from ..hyperparameters import STATE_SHAPE
 
 
-class EvaluationEnv(ReadOnlyEnv):
+class EvaluationEnv(AbstractEnv):
     """
-        High level environment implementation.
-        """
+    High level environment implementation.
+    """
 
     def __init__(self, args: argparse.Namespace):
-        sls_jobs_json = args.test_set + '/sls-jobs.json'
-        communicator = YarnSlsCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
-        super().__init__(args, communicator)
+        super().__init__(args)
         self.training = True  # Consistent with model training mode
 
     def reset(self) -> torch.Tensor:
@@ -46,6 +44,10 @@ class EvaluationEnv(ReadOnlyEnv):
 
     def close(self) -> None:
         self.communicator.close()
+
+    def _communicator(self, args: argparse.Namespace):
+        sls_jobs_json = args.test_set + '/sls-jobs.json'
+        return YarnSlsCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
 
     def _reset_buffer(self):
         for _ in range(self.buffer_history_length):

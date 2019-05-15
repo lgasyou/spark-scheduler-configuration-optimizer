@@ -5,7 +5,7 @@ import torch
 from torch import optim
 
 from .drlmodel import DQN
-from .evaluation.env import EvaluationEnv
+from .environment import AbstractEnv
 from .memory import ReplayMemory
 
 
@@ -14,7 +14,7 @@ class Agent(object):
     The DRL agent of this project.
     """
 
-    def __init__(self, args, env: EvaluationEnv):
+    def __init__(self, args, env: AbstractEnv):
         self.action_space = env.action_space()
         self.atoms = args.atoms
         self.V_min = args.V_min

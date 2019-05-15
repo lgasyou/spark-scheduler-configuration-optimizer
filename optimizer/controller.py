@@ -4,9 +4,9 @@ import logging
 import time
 
 from .agent import Agent
+from .environment import Env
 from .environment import PreTrainEnv
 from .environment.exceptions import StateInvalidException
-from .evaluation.env import EvaluationEnv
 from .memory import ReplayMemory
 
 
@@ -41,7 +41,7 @@ class AbstractController(object):
         self.args = args
         self.logger = logging.getLogger(__name__)
 
-        self.env = EvaluationEnv(self.args)
+        self.env = self._env(args)
         self.action_space = self.env.action_space()
         self.mem = ReplayMemory(self.args, self.args.memory_capacity)
         self.dqn = Agent(self.args, self.env)
@@ -62,16 +62,24 @@ class AbstractController(object):
             # Generate data, then save them into self.mem
             for step in generator:
                 for (state, action, reward, terminal) in step:
-                    print('Iteration %d' % T)
-                    T += 1
+                    print('Iteration: %d, Reward: %f' % (T, reward))
                     self.mem.append(state, action, reward, terminal)
                     time.sleep(5)
+                    T += 1
+
             # Save data as 'pre-train-replay-memory.pk'
             self.mem.save()
 
         # Pre-train DQN model by using training set
         self.dqn.learn(self.mem)
         self.logger.info('Pre-training DQN model finished.')
+
+    @abc.abstractmethod
+    def _env(self, args: argparse.Namespace):
+        """
+        Get Environment instance.
+        """
+        pass
 
     @abc.abstractmethod
     def run(self):
@@ -90,7 +98,7 @@ class OptimizationController(AbstractController):
         reward_clip = args.reward_clip
 
         T = 0
-        state = env.state_tensor
+        state = env.get_state()
         while True:
             action = dqn.act(state)
 
@@ -122,3 +130,6 @@ class OptimizationController(AbstractController):
                 if T % args.target_update == 0:
                     dqn.update_target_net()
             state = next_state
+
+    def _env(self, args: argparse.Namespace):
+        return Env(args)

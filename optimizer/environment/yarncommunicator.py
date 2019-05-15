@@ -15,9 +15,9 @@ from requests.exceptions import ConnectionError
 
 from .communicator import ICommunicator, IResetableCommunicator
 from .exceptions import StateInvalidException
-from .xmlutil import XmlModifier
 from .yarnmodel import *
 from ..hyperparameters import STATE_SHAPE
+from ..util.xmlmodifier import XmlModifier
 
 
 class AbstractYarnCommunicator(ICommunicator):
@@ -87,7 +87,6 @@ class AbstractYarnCommunicator(ICommunicator):
 
         average_wait_time = total_wait_time / job_count
         cost = math.tanh(0.00001 * average_wait_time)
-        print('\n', 'Cost:', cost)
         return -cost
 
     def get_state(self) -> State:
@@ -101,93 +100,11 @@ class AbstractYarnCommunicator(ICommunicator):
             self.awaiting_jobs = wj
             return State(wj, rj, resources, constraints)
         except ConnectionError:
-            raise StateInvalidException()
+            raise StateInvalidException
         except TypeError:
-            raise StateInvalidException()
+            raise StateInvalidException
         except requests.exceptions.HTTPError:
-            raise StateInvalidException()
-
-    # def get_state_tensor(self) -> Union[torch.Tensor, None]:
-    #     """
-    #     Get state of YARN which is trimmed.
-    #     Which is defined as the ϕ(s) function defined in document.
-    #
-    #     state: {
-    #         waiting_jobs: [Job, Job, ...],
-    #         running_jobs: [Job, Job, ...],
-    #         resources: [Resource, Resource, ...],
-    #         constraint: {
-    #             queue: [QueueConstraint, QueueConstraint, ...],
-    #             job: [JobConstraint, JobConstraint, ...],
-    #         }
-    #     }
-    #     """
-    #     raw = self.get_state()
-    #     tensor = torch.zeros(42, 42)
-    #     idx, row = 0, 0
-    #     for wj in raw.awaiting_jobs:
-    #         if idx == 42:
-    #             row += 1
-    #             idx = 0
-    #         tensor[row][idx] = wj.submit_time
-    #         idx += 1
-    #         tensor[row][idx] = wj.priority
-    #         idx += 1
-    #         for t in wj.tasks:
-    #             if idx == 42:
-    #                 row += 1
-    #                 idx = 0
-    #             tensor[row][idx] = t.memory
-    #             idx += 1
-    #             if idx == 42:
-    #                 row += 1
-    #                 idx = 0
-    #             tensor[row][idx] = t.cpu
-    #             idx += 1
-    #
-    #     row += 1
-    #     idx = 0
-    #     for rj in raw.running_jobs:
-    #         if idx == 42:
-    #             row += 1
-    #             idx = 0
-    #         tensor[row][idx] = rj.submit_time
-    #         idx += 1
-    #         tensor[row][idx] = rj.priority
-    #         idx += 1
-    #         for t in rj.tasks:
-    #             if idx == 42:
-    #                 row += 1
-    #                 idx = 0
-    #             tensor[row][idx] = t.memory
-    #             idx += 1
-    #             if idx == 42:
-    #                 row += 1
-    #                 idx = 0
-    #             tensor[row][idx] = t.cpu
-    #             idx += 1
-    #
-    #     row += 1
-    #     idx = 0
-    #     for r in raw.resources:
-    #         tensor[row][idx] = r.mem
-    #         idx += 1
-    #         tensor[row][idx] = r.cpu
-    #         idx += 1
-    #
-    #     row += 1
-    #     idx = 0
-    #     for c in raw.constraint.queue:
-    #         tensor[row][idx] = c.max_capacity
-    #         idx += 1
-    #         tensor[row][idx] = c.capacity
-    #         idx += 1
-    #
-    #     # Do nothing
-    #     for _ in raw.constraint.job:
-    #         pass
-    #
-    #     return tensor
+            raise StateInvalidException
 
     def get_state_tensor(self) -> torch.Tensor:
         """
@@ -381,10 +298,13 @@ class YarnCommunicator(AbstractYarnCommunicator):
 
 class YarnSlsCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
 
-    def __init__(self, rm_host: str, hadoop_home: str, sls_jobs_json: str):
+    def __init__(self, rm_host: str, hadoop_home: str, sls_jobs_json: str = None):
         super().__init__(rm_host, hadoop_home)
         self.sls_jobs_json = sls_jobs_json
         self.sls_runner: Optional[subprocess.Popen] = None
+
+    def set_sls_jobs_json(self, filename: str):
+        self.sls_jobs_json = filename
 
     def reset(self) -> None:
         """
@@ -426,8 +346,7 @@ def get_json(url: str) -> Dict[str, object]:
     r = requests.get(url)
     r.raise_for_status()
     r.encoding = r.apparent_encoding
-    j = json.loads(r.text)
-    return j
+    return json.loads(r.text)
 
 
 def timestamp() -> int:

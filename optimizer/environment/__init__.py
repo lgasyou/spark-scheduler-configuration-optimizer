@@ -1,3 +1,4 @@
+import abc
 import argparse
 import pathlib
 from collections import deque
@@ -10,16 +11,16 @@ from .yarncommunicator import YarnCommunicator, YarnSlsCommunicator
 from .yarnmodel import Action
 from ..hyperparameters import STATE_SHAPE
 
-__all__ = ['ReadOnlyEnv', 'PreTrainEnv']
+__all__ = ['AbstractEnv', 'Env', 'PreTrainEnv']
 
 
-class ReadOnlyEnv(object):
+class AbstractEnv(object):
 
-    def __init__(self, args: argparse.Namespace, env_communicator):
+    def __init__(self, args: argparse.Namespace):
         self.device = args.device
         self.buffer_history_length = args.history_length
         self.state_buffer = deque([], maxlen=args.history_length)
-        self.communicator = env_communicator
+        self.communicator = self._communicator(args)
         self.actions = self.communicator.get_action_set()
 
     def get_state(self) -> torch.Tensor:
@@ -30,16 +31,28 @@ class ReadOnlyEnv(object):
     def action_space(self) -> int:
         return len(self.actions)
 
+    @abc.abstractmethod
+    def _communicator(self, args: argparse.Namespace):
+        """
+        Get Communicator instance.
+        """
+        pass
 
-class PreTrainEnv(ReadOnlyEnv):
+
+class Env(AbstractEnv):
+
+    def _communicator(self, args: argparse.Namespace):
+        return YarnCommunicator(args.rm_host, args.hadoop_home)
+
+
+class PreTrainEnv(AbstractEnv):
     """
-    Used while pre-train running.
+    Used while pre-training.
     Uses Google traces as its input.
     """
 
     def __init__(self, args: argparse.Namespace):
-        env_communicator = YarnSlsCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json='')
-        super().__init__(args, env_communicator)
+        super().__init__(args)
         self.training_set_path = args.training_set
 
     def get_generator(self, index_end: int = 13, hour_end: int = 23) -> Generator:
@@ -52,10 +65,10 @@ class PreTrainEnv(ReadOnlyEnv):
                         continue
 
                     yield self.step(filename, action_index)
-            break   # For fasten test. Should be removed finally.
+            break   # TODO: For fasten test. Should be removed finally.
 
     def step(self, filename, action_index: int) -> Tuple[torch.Tensor, Action, float, bool]:
-        self.communicator.sls_jobs_json = filename
+        self.communicator.set_sls_jobs_json(filename)
         self.communicator.override_scheduler_xml_with(action_index)
         self._reset()
         done = False
@@ -70,6 +83,9 @@ class PreTrainEnv(ReadOnlyEnv):
             done = self.communicator.is_done()
             self.state_buffer.append(state)
             yield torch.stack(list(self.state_buffer), 0), action_index, reward, done
+
+    def _communicator(self, args: argparse.Namespace):
+        return YarnSlsCommunicator(args.rm_host, args.hadoop_home)
 
     def _reset_buffer(self):
         for _ in range(self.buffer_history_length):
