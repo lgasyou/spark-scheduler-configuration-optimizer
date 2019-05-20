@@ -1,5 +1,4 @@
 import abc
-import json
 import math
 import os
 import signal
@@ -15,9 +14,10 @@ from requests.exceptions import ConnectionError
 
 from .communicator import ICommunicator, IResetableCommunicator
 from .exceptions import StateInvalidException
+from .schedulerstrategy import CapacitySchedulerStrategy
 from .yarnmodel import *
 from ..hyperparameters import STATE_SHAPE
-from ..util.xmlmodifier import XmlModifier
+from ..util.jsongetting import get_json
 
 
 class AbstractYarnCommunicator(ICommunicator):
@@ -29,13 +29,14 @@ class AbstractYarnCommunicator(ICommunicator):
         self.hadoop_home = hadoop_home
         self.hadoop_etc = hadoop_home + '/etc/hadoop'
         self.rm_host = rm_host
-        self.start_time = timestamp()
 
+        self.start_time = timestamp()
+        self.action_set = self.get_action_set()
         self.awaiting_jobs: List[Job] = []
 
-        self.action_set = self.get_action_set()
-
-        self.copy_conf_file()
+        self.scheduler_strategy = CapacitySchedulerStrategy(rm_host, self.hadoop_etc, self.action_set)
+        # self.scheduler_strategy = FairSchedulerStrategy(rm_host, self.hadoop_etc, self.action_set)
+        self.scheduler_strategy.copy_conf_file()
 
     @staticmethod
     def get_action_set() -> Dict[int, Action]:
@@ -43,29 +44,12 @@ class AbstractYarnCommunicator(ICommunicator):
         :return: Action dictionary defined in document.
         """
         return {
-            0: Action(3, 3),
-            1: Action(1, 5),
-            2: Action(2, 4),
+            0: Action(1, 5),
+            1: Action(2, 4),
+            2: Action(3, 3),
             3: Action(4, 2),
             4: Action(5, 1)
         }
-
-    def override_scheduler_xml_with(self, action_index: int):
-        """
-        Override capacity-scheduler.xml or fair-scheduler-template.xml
-        to change the capacity or weight of queues.
-        """
-        dest = self.hadoop_etc + '/capacity-scheduler.xml'
-        xml_modifier = XmlModifier('./data/capacity-scheduler-template.xml', dest)
-
-        a, b = self._get_capacities_by_action_index(action_index)
-
-        xml_modifier.modify('yarn.scheduler.capacity.root.queueA.capacity', a)
-        xml_modifier.modify('yarn.scheduler.capacity.root.queueB.capacity', b)
-        xml_modifier.modify('yarn.scheduler.capacity.root.queueA.maximum-capacity', a)
-        xml_modifier.modify('yarn.scheduler.capacity.root.queueB.maximum-capacity', b)
-
-        xml_modifier.save()
 
     def act(self, action_index: int) -> float:
         """
@@ -177,11 +161,8 @@ class AbstractYarnCommunicator(ICommunicator):
         """
         Use script "refresh-queues.sh" to refresh queues' configurations.
         """
-        self.override_scheduler_xml_with(action_index)
-
-        wd = os.getcwd()
-        cmd = [os.path.join(wd, 'bin', 'refresh-queues.sh'), self.hadoop_home]
-        subprocess.Popen(cmd)
+        self.scheduler_strategy.override_configuration(action_index)
+        subprocess.Popen([os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), self.hadoop_home])
 
     @abc.abstractmethod
     def is_done(self) -> bool:
@@ -190,24 +171,13 @@ class AbstractYarnCommunicator(ICommunicator):
         """
         pass
 
-    def copy_conf_file(self):
-        with open('./data/capacity-scheduler.xml', 'r') as src:
-            with open(self.hadoop_etc + '/capacity-scheduler.xml', 'w') as dest:
-                dest.write(src.read())
-
-    def _get_capacities_by_action_index(self, action_index: int) -> Tuple[float, float]:
-        action = self.action_set[action_index]
-        weight_a = action.queue_a_weight
-        weight_b = action.queue_b_weight
-        total_weight = weight_a + weight_b
-        a = 100 * weight_a / total_weight
-        b = 100 * weight_b / total_weight
-        return a, b
+    def override_configuration(self, action_index: int):
+        self.scheduler_strategy.override_configuration(action_index)
 
     def _get_jobs(self) -> Tuple[List[Job], List[Job]]:
         running_jobs = self._get_running_jobs()
-        waiting_jobs = self._get_waiting_jobs()
-        return waiting_jobs, running_jobs
+        awaiting_jobs = self._get_awaiting_jobs()
+        return awaiting_jobs, running_jobs
 
     def _get_jobs_by_states(self, states: str) -> List[Job]:
         url = self.rm_host + 'ws/v1/cluster/apps?states=' + states
@@ -222,7 +192,8 @@ class AbstractYarnCommunicator(ICommunicator):
         jobs = []
         for j in apps:
             application_id = j['id']
-            start_time = j['startedTime'] - self.start_time
+            start_time_ms = j['startedTime'] - self.start_time
+            start_time = int(start_time_ms / 1000)
             wait_time = j['elapsedTime']
             priority = j['priority']
             tasks = []
@@ -239,8 +210,7 @@ class AbstractYarnCommunicator(ICommunicator):
 
         return jobs
 
-    # TODO: Get wait time of these jobs in order to estimate the effect of this algorithm
-    def _get_waiting_jobs(self) -> List[Job]:
+    def _get_awaiting_jobs(self) -> List[Job]:
         return self._get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
 
     def _get_running_jobs(self) -> List[Job]:
@@ -259,18 +229,12 @@ class AbstractYarnCommunicator(ICommunicator):
         return resources
 
     def _get_constraints(self) -> Constraint:
-        url = self.rm_host + 'ws/v1/cluster/scheduler'
-        conf = get_json(url)
         constraint = Constraint()
+        self.scheduler_strategy.get_queue_constraints(constraint)
+        self._get_job_constraints(constraint)
+        return constraint
 
-        queues = conf['scheduler']['schedulerInfo']['queues']['queue']
-        for q in queues:
-            capacity = q['capacity']
-            max_capacity = q['maxCapacity']
-            name = q['queueName']
-            queue_c = QueueConstraint(name, capacity, max_capacity)
-            constraint.add_queue_c(queue_c)
-
+    def _get_job_constraints(self, constraint: Constraint):
         # TODO LATER: Job constraint
         for job in self.awaiting_jobs:
             try:
@@ -283,8 +247,6 @@ class AbstractYarnCommunicator(ICommunicator):
                         constraint.add_job_c(JobConstraint(job.application_id, http_address))
             except requests.exceptions.HTTPError:
                 pass
-
-        return constraint
 
 
 class YarnCommunicator(AbstractYarnCommunicator):
@@ -340,13 +302,6 @@ class YarnSlsCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
         time_costs = end_time - start_time
         sum_time_cost = time_costs.sum()
         return time_costs, sum_time_cost
-
-
-def get_json(url: str) -> Dict[str, object]:
-    r = requests.get(url)
-    r.raise_for_status()
-    r.encoding = r.apparent_encoding
-    return json.loads(r.text)
 
 
 def timestamp() -> int:

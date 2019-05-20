@@ -55,21 +55,18 @@ class PreTrainEnv(AbstractEnv):
         super().__init__(args)
         self.training_set_path = args.training_set
 
-    def get_generator(self, index_end: int = 13, hour_end: int = 23) -> Generator:
-        action_set = self.communicator.get_action_set()
-        for action_index in action_set.keys():
+    def get_generator(self, index_end: int = 24) -> Generator:
+        for action_index in [2]:
             for i in range(1, index_end):
-                for j in range(hour_end):
-                    filename = "{}/{}/sls_jobs{}.json".format(self.training_set_path, i, j)
-                    if not pathlib.Path(filename).exists():
-                        continue
+                filename = "{}/sls-jobs{}.json".format(self.training_set_path, i)
+                if not pathlib.Path(filename).exists():
+                    continue
 
-                    yield self.step(filename, action_index)
-            break   # TODO: For fasten test. Should be removed finally.
+                yield self.step(filename, action_index), action_index, i
 
     def step(self, filename, action_index: int) -> Tuple[torch.Tensor, Action, float, bool]:
         self.communicator.set_sls_jobs_json(filename)
-        self.communicator.override_scheduler_xml_with(action_index)
+        self.communicator.override_configuration(action_index)
         self._reset()
         done = False
 

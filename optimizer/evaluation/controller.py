@@ -3,8 +3,6 @@ import logging
 import random
 import time
 
-import numpy as np
-import pandas as pd
 from tqdm import tqdm
 
 from .env import EvaluationEnv
@@ -92,7 +90,6 @@ class EvaluationController(AbstractController):
         env = EvaluationEnv(self.args)
         env.eval()
         total_time_cost_ms = 0
-        time_costs = np.zeros(shape=(self.args.evaluation_episodes, 31), dtype=int)
 
         # Test performance over several episodes
         done, reward_sum, state = True, 0, None
@@ -114,12 +111,10 @@ class EvaluationController(AbstractController):
                     time.sleep(30)
                     costs, time_cost_ms = env.get_total_time_cost()
                     print('Iteration', T, 'Time Cost:', costs)
-                    time_costs[T] = list(costs)
                     total_time_cost_ms += time_cost_ms
                     break
 
         print('Total Time Cost :', total_time_cost_ms, 'ms')
-        pd.DataFrame(time_costs).to_csv('./results/time_costs.csv')
         env.close()
 
     def _env(self, args: argparse.Namespace):
@@ -141,7 +136,8 @@ class EvaluationController(AbstractController):
                 state, done = self.env.reset(), False
 
             try:
-                next_state, _, done = self.env.step(random.randint(0, self.action_space - 1))
+                next_state, reward, done = self.env.step(random.randint(0, self.action_space - 1))
+                print('Reward: %f' % reward)
                 time.sleep(5)
             except StateInvalidException:
                 done = True

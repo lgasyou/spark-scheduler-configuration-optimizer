@@ -69,4 +69,3 @@ class Action(object):
     def __init__(self, a: int, b: int):
         self.queue_a_weight = a
         self.queue_b_weight = b
-

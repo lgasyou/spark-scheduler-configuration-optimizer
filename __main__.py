@@ -34,7 +34,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--V-max', type=float, default=10, metavar='V',
                         help='Maximum of value distribution support')
     parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
-    parser.add_argument('--memory-capacity', type=int, default=int(4000), metavar='CAPACITY',
+    parser.add_argument('--memory-capacity', type=int, default=int(10000), metavar='CAPACITY',
                         help='Experience replay memory capacity')
     parser.add_argument('--replay-frequency', type=int, default=4, metavar='k',
                         help='Frequency of sampling from memory')

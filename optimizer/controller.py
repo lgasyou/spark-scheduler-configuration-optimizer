@@ -56,16 +56,18 @@ class AbstractController(object):
         if not self.mem.try_load_from_file():
             train_env = PreTrainEnv(self.args)
             # Get data generator
-            generator = train_env.get_generator(2, 1)
+            generator = train_env.get_generator()
 
             T = 0
             # Generate data, then save them into self.mem
-            for step in generator:
+            for step, action_index, hour in generator:
                 for (state, action, reward, terminal) in step:
                     print('Iteration: %d, Reward: %f' % (T, reward))
                     self.mem.append(state, action, reward, terminal)
                     time.sleep(5)
                     T += 1
+
+                self.mem.save('./results/pre-train-replay-memory-%d-%d.pk' % (action_index, hour))
 
             # Save data as 'pre-train-replay-memory.pk'
             self.mem.save()

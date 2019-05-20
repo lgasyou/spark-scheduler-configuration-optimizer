@@ -2,8 +2,6 @@ import logging
 import os
 import time
 
-import numpy as np
-import pandas as pd
 import plotly
 import torch
 from plotly.graph_objs import Scatter
@@ -25,7 +23,6 @@ def test(args, T, dqn, val_mem, evaluate=False):
     Ts.append(T)
     T_rewards, T_Qs = [], []
     total_time_cost_ms = 0
-    time_costs = np.zeros(shape=(args.evaluation_episodes, 31), dtype=int)
 
     # Test performance over several episodes
     done, reward_sum, state = True, 0, None
@@ -36,8 +33,10 @@ def test(args, T, dqn, val_mem, evaluate=False):
                 state, reward_sum, done = env.reset(), 0, False
 
             action = dqn.act_e_greedy(state)  # Choose an action ε-greedily
+            print("Action:", action)
             try:
                 state, reward, done = env.step(action)  # Step
+                print('Reward:', reward)
                 reward_sum += reward
                 time.sleep(5)
             except StateInvalidException:
@@ -48,12 +47,10 @@ def test(args, T, dqn, val_mem, evaluate=False):
                 time.sleep(10)
                 costs, time_cost_ms = env.get_total_time_cost()
                 print('Iteration', i, 'Time Cost:', costs)
-                time_costs[i] = list(costs)
                 total_time_cost_ms += time_cost_ms
                 break
 
     print('Total Time Cost :', total_time_cost_ms, 'ms')
-    pd.DataFrame(time_costs).to_csv('./results/time_costs.csv')
     env.close()
 
     # Test Q-values over validation memory
