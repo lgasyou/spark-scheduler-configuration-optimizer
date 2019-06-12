@@ -3,8 +3,8 @@ from typing import Tuple
 
 import torch
 
-from ..environment import AbstractEnv
-from ..environment.yarncommunicator import YarnSlsCommunicator
+from . import AbstractEnv
+from .communicator import YarnSlsCommunicator
 from ..hyperparameters import STATE_SHAPE
 
 
@@ -12,6 +12,8 @@ class EvaluationEnv(AbstractEnv):
     """
     High level environment implementation.
     """
+
+    TEST_SET = 'data/testset'
 
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
@@ -46,7 +48,7 @@ class EvaluationEnv(AbstractEnv):
         self.communicator.close()
 
     def _communicator(self, args: argparse.Namespace):
-        sls_jobs_json = args.test_set + '/sls-jobs.json'
+        sls_jobs_json = self.TEST_SET + '/sls-jobs.json'
         return YarnSlsCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
 
     def _reset_buffer(self):

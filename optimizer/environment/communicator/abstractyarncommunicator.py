@@ -1,23 +1,20 @@
 import abc
 import math
 import os
-import signal
 import subprocess
 import time
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple
 
-import pandas as pd
-import psutil
 import requests
 import torch
 from requests.exceptions import ConnectionError
 
-from .communicator import ICommunicator, IResetableCommunicator
-from .exceptions import StateInvalidException
+from .iresetablecommunicator import ICommunicator
 from .schedulerstrategy import CapacitySchedulerStrategy
 from .yarnmodel import *
-from ..hyperparameters import STATE_SHAPE
-from ..util.jsongetting import get_json
+from ..stateinvalidexception import StateInvalidException
+from ...hyperparameters import STATE_SHAPE
+from ...util import jsonutil
 
 
 class AbstractYarnCommunicator(ICommunicator):
@@ -25,16 +22,16 @@ class AbstractYarnCommunicator(ICommunicator):
     Uses RESTFul API to communicate with YARN cluster scheduler.
     """
 
-    def __init__(self, rm_host: str, hadoop_home: str):
+    def __init__(self, api_url: str, hadoop_home: str):
         self.hadoop_home = hadoop_home
         self.hadoop_etc = hadoop_home + '/etc/hadoop'
-        self.rm_host = rm_host
+        self.api_url = api_url
 
         self.start_time = timestamp()
         self.action_set = self.get_action_set()
         self.awaiting_jobs: List[Job] = []
 
-        self.scheduler_strategy = CapacitySchedulerStrategy(rm_host, self.hadoop_etc, self.action_set)
+        self.scheduler_strategy = CapacitySchedulerStrategy(api_url, self.hadoop_etc, self.action_set)
         # self.scheduler_strategy = FairSchedulerStrategy(rm_host, self.hadoop_etc, self.action_set)
         self.scheduler_strategy.copy_conf_file()
 
@@ -59,7 +56,6 @@ class AbstractYarnCommunicator(ICommunicator):
         self.set_queue_weights(action_index)
         return self.get_reward()
 
-    # TODO: Try -math.tanh(RATE * (average_wait_time - BIAS))
     def get_reward(self) -> float:
         job_count = len(self.awaiting_jobs)
         if job_count == 0:
@@ -176,12 +172,12 @@ class AbstractYarnCommunicator(ICommunicator):
 
     def _get_jobs(self) -> Tuple[List[Job], List[Job]]:
         running_jobs = self._get_running_jobs()
-        awaiting_jobs = self._get_awaiting_jobs()
+        awaiting_jobs = self._get_waiting_jobs()
         return awaiting_jobs, running_jobs
 
     def _get_jobs_by_states(self, states: str) -> List[Job]:
-        url = self.rm_host + 'ws/v1/cluster/apps?states=' + states
-        job_json = get_json(url)
+        url = self.api_url + 'ws/v1/cluster/apps?states=' + states
+        job_json = jsonutil.get_json(url)
         return self._build_jobs_from_json(job_json)
 
     def _build_jobs_from_json(self, j: Dict[str, object]) -> List[Job]:
@@ -210,15 +206,15 @@ class AbstractYarnCommunicator(ICommunicator):
 
         return jobs
 
-    def _get_awaiting_jobs(self) -> List[Job]:
+    def _get_waiting_jobs(self) -> List[Job]:
         return self._get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
 
     def _get_running_jobs(self) -> List[Job]:
         return self._get_jobs_by_states('RUNNING')
 
     def _get_resources(self) -> List[Resource]:
-        url = self.rm_host + 'ws/v1/cluster/nodes'
-        conf = get_json(url)
+        url = self.api_url + 'ws/v1/cluster/nodes'
+        conf = jsonutil.get_json(url)
         nodes = conf['nodes']['node']
         resources = []
         for n in nodes:
@@ -235,11 +231,10 @@ class AbstractYarnCommunicator(ICommunicator):
         return constraint
 
     def _get_job_constraints(self, constraint: Constraint):
-        # TODO LATER: Job constraint
         for job in self.awaiting_jobs:
             try:
-                url = "{}ws/v1/cluster/apps/{}/appattempts".format(self.rm_host, job.application_id)
-                attempt_json = get_json(url)
+                url = "{}ws/v1/cluster/apps/{}/appattempts".format(self.api_url, job.application_id)
+                attempt_json = jsonutil.get_json(url)
                 attempts = attempt_json['appAttempts']['appAttempt']
                 for a in attempts:
                     http_address = a['nodeHttpAddress']
@@ -249,71 +244,5 @@ class AbstractYarnCommunicator(ICommunicator):
                 pass
 
 
-class YarnCommunicator(AbstractYarnCommunicator):
-
-    def __init__(self, rm_host: str, hadoop_home: str):
-        super().__init__(rm_host, hadoop_home)
-
-    def is_done(self) -> bool:
-        return False
-
-
-class YarnSlsCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
-
-    def __init__(self, rm_host: str, hadoop_home: str, sls_jobs_json: str = None):
-        super().__init__(rm_host, hadoop_home)
-        self.sls_jobs_json = sls_jobs_json
-        self.sls_runner: Optional[subprocess.Popen] = None
-
-    def set_sls_jobs_json(self, filename: str):
-        self.sls_jobs_json = filename
-
-    def reset(self) -> None:
-        """
-        Resets the environment in order to run this program again.
-        """
-        self.close()
-
-        wd = os.getcwd()
-        sls_jobs_json = './' + self.sls_jobs_json
-        cmd = "%s/bin/start-sls.sh %s %s %s" % (wd, self.hadoop_home, wd, sls_jobs_json)
-        self.sls_runner = subprocess.Popen(cmd, shell=True)
-
-        # Wait until web server starts.
-        time.sleep(10)
-
-    def close(self) -> None:
-        """
-        Close the communication.
-        """
-        if self.sls_runner is not None:
-            kill_process_family(self.sls_runner.pid)
-            self.sls_runner.wait()
-            self.sls_runner = None
-            time.sleep(5)
-
-    def is_done(self) -> bool:
-        return self.sls_runner is None or self.sls_runner.poll() is not None
-
-    def get_total_time_cost(self):
-        data = pd.read_csv('./results/logs/jobruntime.csv')
-        end_time = data['simulate_end_time']
-        start_time = data['simulate_start_time']
-        time_costs = end_time - start_time
-        sum_time_cost = time_costs.sum()
-        return time_costs, sum_time_cost
-
-
 def timestamp() -> int:
     return int(time.time() * 1000)
-
-
-def kill_process_family(parent_pid, sig=signal.SIGTERM):
-    try:
-        parent = psutil.Process(parent_pid)
-        children = parent.children(recursive=True)
-        for process in children:
-            process.send_signal(sig)
-        parent.send_signal(sig)
-    except psutil.NoSuchProcess:
-        return

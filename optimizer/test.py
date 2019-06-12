@@ -7,8 +7,8 @@ import torch
 from plotly.graph_objs import Scatter
 from plotly.graph_objs.scatter import Line
 
-from .env import EvaluationEnv
-from ..environment.exceptions import StateInvalidException
+from optimizer.environment import EvaluationEnv, StateInvalidException
+from optimizer.hyperparameters import TEST_LOOP_INTERNAL
 
 # Globals
 Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10
@@ -23,6 +23,7 @@ def test(args, T, dqn, val_mem, evaluate=False):
     Ts.append(T)
     T_rewards, T_Qs = [], []
     total_time_cost_ms = 0
+    arr = []
 
     # Test performance over several episodes
     done, reward_sum, state = True, 0, None
@@ -38,7 +39,7 @@ def test(args, T, dqn, val_mem, evaluate=False):
                 state, reward, done = env.step(action)  # Step
                 print('Reward:', reward)
                 reward_sum += reward
-                time.sleep(5)
+                time.sleep(TEST_LOOP_INTERNAL)
             except StateInvalidException:
                 done = True
 
@@ -47,10 +48,13 @@ def test(args, T, dqn, val_mem, evaluate=False):
                 time.sleep(10)
                 costs, time_cost_ms = env.get_total_time_cost()
                 print('Iteration', i, 'Time Cost:', costs)
+                arr.append(list(costs))
+
                 total_time_cost_ms += time_cost_ms
                 break
 
     print('Total Time Cost :', total_time_cost_ms, 'ms')
+    print(arr)
     env.close()
 
     # Test Q-values over validation memory

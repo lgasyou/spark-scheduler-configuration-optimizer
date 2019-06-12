@@ -4,9 +4,9 @@ import random
 import torch
 from torch import optim
 
-from .drlmodel import DQN
 from .environment import AbstractEnv
-from .memory import ReplayMemory
+from .nn import DQN
+from .replaymemory import ReplayMemory
 
 
 class Agent(object):

@@ -4,7 +4,7 @@ import random
 
 import torch
 
-from optimizer.evaluation.controller import EvaluationController
+from optimizer import EvaluationController, OptimizationController
 
 logger = logging.getLogger(__name__)
 
@@ -13,8 +13,6 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
     parser.add_argument('--hadoop-home', type=str, default='/home/num2/library/hadoop', help='Hadoop home path')
     parser.add_argument('--rm-host', type=str, default='http://localhost:18088/', help='Address:port of ResourceManager')
-    parser.add_argument('--training-set', type=str, default='data/trainingset')
-    parser.add_argument('--test-set', type=str, default='data/testset')
 
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
@@ -97,7 +95,12 @@ def main():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     args = get_args()
 
-    controller = EvaluationController(args)
+    args.evaluate = True
+    if args.evaluate:
+        controller = EvaluationController(args)
+    else:
+        controller = OptimizationController(args)
+
     try:
         controller.pre_train_model()
         controller.run()

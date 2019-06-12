@@ -13,12 +13,19 @@ class XmlModifier(object):
             text = f.read()
             self.data = BeautifulSoup(text, features='lxml-xml')
 
-    def modify(self, key, value):
+    def modify_kv_type(self, key, value):
         names = self.data.find_all('name')
         for n in names:
             if n.string == key:
                 v = n.next_sibling.next_sibling
                 v.string = str(value)
+                return
+
+    def modify_property(self, name, pro):
+        names = self.data.find_all('queue')
+        for n in names:
+            if n['name'] == name:
+                n.weight.string = str(pro)
                 return
 
     def save(self):

@@ -1,6 +1,3 @@
-from typing import Tuple
-
-import pandas as pd
 import torch
 
 
@@ -20,16 +17,4 @@ class ICommunicator(object):
         pass
 
     def is_done(self) -> bool:
-        pass
-
-
-class IResetableCommunicator(ICommunicator):
-
-    def reset(self):
-        pass
-
-    def close(self):
-        pass
-
-    def get_total_time_cost(self) -> Tuple[pd.DataFrame, int]:
         pass
