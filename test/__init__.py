@@ -5,7 +5,11 @@
 # print(r.text)
 
 from optimizer.environment.yarnenvironment.actionparser import ActionParser
+from optimizer.environment.yarnenvironment.schedulerstrategy import SchedulerStrategyFactory
 
 ap = ActionParser()
-print(ap.actions)
-print(ap.action_space)
+actions = ap.parse()
+
+f = SchedulerStrategyFactory()
+s = f.create("CapacityScheduler", "", "", actions)
+print(s.action_set)

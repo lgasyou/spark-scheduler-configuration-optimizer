@@ -69,16 +69,6 @@ class CapacitySchedulerStrategy(ISchedulerStrategy):
     def copy_conf_file(self):
         fileutil.file_copy('./data/capacity-scheduler.xml', self.hadoop_etc + '/capacity-scheduler.xml')
 
-    @staticmethod
-    def _convert_weight_to_capacity(old_action_set: dict):
-        action_set = copy.deepcopy(old_action_set)
-        total_weight = sum(action_set.get(0).values())
-        for index, action in action_set.items():
-            for queue_name, weight in action.items():
-                capacity = 100 * weight / total_weight
-                action[queue_name] = capacity
-        return action_set
-
     def get_queue_constraints(self, constraint: Constraint):
         url = self.rm_host + 'ws/v1/cluster/scheduler'
         conf = jsonutil.get_json(url)
@@ -91,15 +81,28 @@ class CapacitySchedulerStrategy(ISchedulerStrategy):
             queue_c = QueueConstraint(name, capacity, max_capacity)
             constraint.add_queue_c(queue_c)
 
+    @staticmethod
+    def _convert_weight_to_capacity(old_action_set: dict):
+        action_set = copy.deepcopy(old_action_set)
+        for index, action in action_set.items():
+            total_weight = sum(action.values())
+            for queue_name, weight in action.items():
+                capacity = 100 * weight / total_weight
+                action[queue_name] = round(capacity, 2)
+        return action_set
+
 
 class SchedulerStrategyFactory(object):
 
+    STR_STRATEGY_MAP = {
+        'FairScheduler': FairSchedulerStrategy,
+        'CapacityScheduler': CapacitySchedulerStrategy
+    }
+
     @staticmethod
-    def create(scheduler_type: str, rm_host: str, hadoop_etc: str, action_set: str) -> ISchedulerStrategy:
-        if scheduler_type == "FairScheduler":
-            cls = FairSchedulerStrategy
-        elif scheduler_type == "CapacityScheduler":
-            cls = CapacitySchedulerStrategy
-        else:
+    def create(scheduler_type: str, rm_host: str, hadoop_etc: str, action_set: dict) -> ISchedulerStrategy:
+        cls = SchedulerStrategyFactory.STR_STRATEGY_MAP.get(scheduler_type)
+        if cls is None:
             raise RuntimeError
+
         return cls(rm_host, hadoop_etc, action_set)
