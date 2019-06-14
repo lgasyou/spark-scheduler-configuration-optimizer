@@ -8,3 +8,6 @@ class YarnCommunicator(AbstractYarnCommunicator):
 
     def is_done(self) -> bool:
         return False
+
+    def get_scheduler_type(self) -> str:
+        return "CapacityScheduler"

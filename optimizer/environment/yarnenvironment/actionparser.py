@@ -1,4 +1,4 @@
-from .hyperparameters import QUEUES
+from ...hyperparameters import QUEUES
 
 
 class ActionParser(object):
@@ -12,8 +12,8 @@ class ActionParser(object):
             action = self._build_action(i, queue_names, actions)
             self.actions[i] = action
 
-    def get_action(self, index: int):
-        return self.actions[index]
+    def parse(self):
+        return self.actions
 
     @staticmethod
     def _build_action(index: int, queue_names: list, actions: dict):

@@ -25,7 +25,7 @@ class PreTrainEnv(AbstractEnv):
             print("File:", filename, "doesn't exist.")
 
         self.communicator.set_dataset(filename)
-        self.communicator.override_configuration(action_index)
+        self.communicator.override_config(action_index)
         self._reset()
 
     def step(self):

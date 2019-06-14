@@ -29,15 +29,14 @@ class YarnSlsCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
 
         wd = os.getcwd()
         sls_jobs_json = './' + self.current_dataset
-        cmd = "%s/bin/start-sls.sh %s %s %s" % (wd, self.hadoop_home, wd, sls_jobs_json)
-        self.sls_runner = subprocess.Popen(cmd, shell=True)
+        self.sls_runner = start_sls_process(wd, self.hadoop_home, sls_jobs_json)
 
         # Wait until web server starts.
         time.sleep(10)
 
     def close(self) -> None:
         """
-        Close the communication.
+        Kills SLS process.
         """
         if self.sls_runner is not None:
             kill_process_family(self.sls_runner.pid)
@@ -47,6 +46,9 @@ class YarnSlsCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
 
     def is_done(self) -> bool:
         return self.sls_runner is None or self.sls_runner.poll() is not None
+
+    def get_scheduler_type(self) -> str:
+        return "CapacityScheduler"
 
     def get_total_time_cost(self):
         data = pd.read_csv('./results/logs/jobruntime.csv')
@@ -66,3 +68,8 @@ def kill_process_family(parent_pid, sig=signal.SIGTERM):
         parent.send_signal(sig)
     except psutil.NoSuchProcess:
         return
+
+
+def start_sls_process(wd: str, hadoop_home: str, sls_jobs_json: str):
+    cmd = "%s/bin/start-sls.sh %s %s %s" % (wd, hadoop_home, wd, sls_jobs_json)
+    return subprocess.Popen(cmd, shell=True)

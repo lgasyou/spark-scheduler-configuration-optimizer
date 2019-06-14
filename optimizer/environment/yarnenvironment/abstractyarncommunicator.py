@@ -9,8 +9,9 @@ import requests
 import torch
 from requests.exceptions import ConnectionError
 
+from .actionparser import ActionParser
 from .iresetablecommunicator import ICommunicator
-from .schedulerstrategy import CapacitySchedulerStrategy
+from .schedulerstrategy import SchedulerStrategyFactory
 from .yarnmodel import *
 from ..stateinvalidexception import StateInvalidException
 from ...hyperparameters import STATE_SHAPE
@@ -28,32 +29,20 @@ class AbstractYarnCommunicator(ICommunicator):
         self.api_url = api_url
 
         self.start_time = timestamp()
-        self.action_set = self.get_action_set()
+        self.action_set = ActionParser().parse()
         self.awaiting_jobs: List[Job] = []
 
-        self.scheduler_strategy = CapacitySchedulerStrategy(api_url, self.hadoop_etc, self.action_set)
-        # self.scheduler_strategy = FairSchedulerStrategy(rm_host, self.hadoop_etc, self.action_set)
+        scheduler_type = self.get_scheduler_type()
+        self.scheduler_strategy = SchedulerStrategyFactory.create(scheduler_type, api_url,
+                                                                  self.hadoop_etc, self.action_set)
         self.scheduler_strategy.copy_conf_file()
-
-    @staticmethod
-    def get_action_set() -> Dict[int, Action]:
-        """
-        :return: Action dictionary defined in document.
-        """
-        return {
-            0: Action(1, 5),
-            1: Action(2, 4),
-            2: Action(3, 3),
-            3: Action(4, 2),
-            4: Action(5, 1)
-        }
 
     def act(self, action_index: int) -> float:
         """
         Apply action and see how many rewards we can get.
         :return: Reward this step gets.
         """
-        self.set_queue_weights(action_index)
+        self.set_and_refresh_queue_config(action_index)
         return self.get_reward()
 
     def get_reward(self) -> float:
@@ -153,12 +142,12 @@ class AbstractYarnCommunicator(ICommunicator):
 
         return tensor.reshape(*STATE_SHAPE)
 
-    def set_queue_weights(self, action_index: int) -> None:
+    def set_and_refresh_queue_config(self, action_index: int) -> None:
         """
-        Use script "refresh-queues.sh" to refresh queues' configurations.
+        Use script "refresh-queues.sh" to refresh the configurations of queues.
         """
-        self.scheduler_strategy.override_configuration(action_index)
-        subprocess.Popen([os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), self.hadoop_home])
+        self.scheduler_strategy.override_config(action_index)
+        refresh_queues(self.hadoop_home)
 
     @abc.abstractmethod
     def is_done(self) -> bool:
@@ -167,8 +156,12 @@ class AbstractYarnCommunicator(ICommunicator):
         """
         pass
 
-    def override_configuration(self, action_index: int):
-        self.scheduler_strategy.override_configuration(action_index)
+    @abc.abstractmethod
+    def get_scheduler_type(self) -> str:
+        pass
+
+    def override_config(self, action_index: int):
+        self.scheduler_strategy.override_config(action_index)
 
     def _get_jobs(self) -> Tuple[List[Job], List[Job]]:
         running_jobs = self._get_running_jobs()
@@ -246,3 +239,7 @@ class AbstractYarnCommunicator(ICommunicator):
 
 def timestamp() -> int:
     return int(time.time() * 1000)
+
+
+def refresh_queues(hadoop_home: str):
+    subprocess.Popen([os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), hadoop_home])
