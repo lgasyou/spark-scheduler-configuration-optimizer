@@ -1,10 +1,9 @@
 import os
 from typing import Tuple
 
-from optimizer.environment.communicator.yarnmodel import *
-from optimizer.util import fileutil
-from optimizer.util import jsonutil
-from optimizer.util.xmlmodifier import XmlModifier
+from .yarnmodel import *
+from ...util import fileutil, jsonutil
+from ...util.xmlmodifier import XmlModifier
 
 
 class FairSchedulerStrategy(object):

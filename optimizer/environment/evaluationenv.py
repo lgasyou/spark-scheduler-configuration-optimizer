@@ -4,7 +4,7 @@ from typing import Tuple
 import torch
 
 from . import AbstractEnv
-from .communicator import YarnSlsCommunicator
+from .yarnenvironment import YarnSlsCommunicator
 from ..hyperparameters import STATE_SHAPE
 
 

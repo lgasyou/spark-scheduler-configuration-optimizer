@@ -4,7 +4,7 @@ import pathlib
 import torch
 
 from .abstractenv import AbstractEnv
-from .communicator.yarnslscommunicator import YarnSlsCommunicator
+from .yarnenvironment.yarnslscommunicator import YarnSlsCommunicator
 from ..hyperparameters import STATE_SHAPE
 
 

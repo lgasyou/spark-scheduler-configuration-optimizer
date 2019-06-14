@@ -1,7 +1,7 @@
 import argparse
 
 from .abstractenv import AbstractEnv
-from .communicator import YarnCommunicator
+from .yarnenvironment import YarnCommunicator
 
 
 class Env(AbstractEnv):
