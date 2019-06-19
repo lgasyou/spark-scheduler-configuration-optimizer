@@ -14,7 +14,6 @@ from .iresetablecommunicator import ICommunicator
 from .schedulerstrategy import SchedulerStrategyFactory
 from .yarnmodel import *
 from ..stateinvalidexception import StateInvalidException
-from ...hyperparameters import STATE_SHAPE
 from ...util import jsonutil
 
 
@@ -29,7 +28,7 @@ class AbstractYarnCommunicator(ICommunicator):
         self.api_url = api_url
 
         self.start_time = timestamp()
-        self.action_set = ActionParser().parse()
+        self.action_set = ActionParser.parse()
         self.awaiting_jobs: List[Job] = []
 
         scheduler_type = self.get_scheduler_type()
@@ -91,56 +90,59 @@ class AbstractYarnCommunicator(ICommunicator):
         }
         """
         raw = self.get_state()
-        tensor = torch.zeros(14, 126)
+        tensor = torch.zeros(5042, 5000)
 
-        # Line 0-4: awaiting jobs and their tasks
-        for i, wj in enumerate(raw.awaiting_jobs[:5]):
+        # Line 0-2499: awaiting jobs and their tasks
+        for i, wj in enumerate(raw.awaiting_jobs[:2500]):
             idx = 0
             tensor[i][idx] = wj.submit_time
             idx += 1
             tensor[i][idx] = wj.priority
             idx += 1
-            for t in wj.tasks[:62]:
+            for t in wj.tasks[:2499]:
                 tensor[i][idx] = t.memory
                 idx += 1
                 tensor[i][idx] = t.cpu
                 idx += 1
 
-        # Line 5-9: running jobs and their tasks
-        for i, rj in enumerate(raw.running_jobs[:5]):
+        # Line 2500-4999: running jobs and their tasks
+        for i, rj in enumerate(raw.running_jobs[:2500]):
             idx = 0
-            row = i + 5
+            row = i + 2500
             tensor[row][idx] = rj.submit_time
             idx += 1
             tensor[row][idx] = rj.priority
             idx += 1
-            for t in rj.tasks[:62]:
+            for t in rj.tasks[:2499]:
                 tensor[row][idx] = t.memory
                 idx += 1
                 tensor[row][idx] = t.cpu
                 idx += 1
 
-        # Line 10: resources of cluster
-        row, idx = 10, 0
-        for r in raw.resources[:63]:
+        # Line 5000-5039: resources of cluster
+        row, idx = 5000, 0
+        for r in raw.resources[:100000]:
             tensor[row][idx] = r.mem
             idx += 1
             tensor[row][idx] = r.cpu
             idx += 1
+            if idx == 5000:
+                row += 1
+                idx = 0
 
-        # Line 11: queue constraints
-        row, idx = 11, 0
-        for c in raw.constraint.queue[:63]:
+        # Line 5040: queue constraints
+        row, idx = 5040, 0
+        for c in raw.constraint.queue[:2500]:
             tensor[row][idx] = c.max_capacity
             idx += 1
             tensor[row][idx] = c.capacity
             idx += 1
 
-        # Line 12: job constraints(leave empty for now)
+        # Line 5041: job constraints(leave empty for now)
         for _ in raw.constraint.job:
             pass
 
-        return tensor.reshape(*STATE_SHAPE)
+        return tensor
 
     def set_and_refresh_queue_config(self, action_index: int) -> None:
         """

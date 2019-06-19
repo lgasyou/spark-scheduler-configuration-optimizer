@@ -3,17 +3,17 @@ from ...hyperparameters import QUEUES
 
 class ActionParser(object):
 
-    def __init__(self):
+    @staticmethod
+    def parse():
         queue_names = QUEUES.get("names")
-        actions = QUEUES.get("actions")
-        self.action_space = len(actions)
-        self.actions = {}
-        for i in range(self.action_space):
-            action = self._build_action(i, queue_names, actions)
-            self.actions[i] = action
+        raw_actions = QUEUES.get("actions")
+        action_space = len(raw_actions)
+        actions = {}
+        for i in range(action_space):
+            action = ActionParser._build_action(i, queue_names, raw_actions)
+            actions[i] = action
 
-    def parse(self):
-        return self.actions
+        return actions
 
     @staticmethod
     def _build_action(index: int, queue_names: list, actions: dict):

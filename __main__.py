@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
-    parser.add_argument('--hadoop-home', type=str, default='/home/num2/library/hadoop', help='Hadoop home path')
+    parser.add_argument('--hadoop-home', type=str, default='/home/lzq/library/hadoop', help='Hadoop home path')
     parser.add_argument('--rm-host', type=str, default='http://localhost:18088/', help='Address:port of ResourceManager')
 
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
@@ -74,6 +74,7 @@ def setup_torch_args(args: argparse.Namespace):
     random.seed(args.seed)
     torch.manual_seed(random.randint(1, 10000))
     if torch.cuda.is_available() and not args.disable_cuda:
+        torch.cuda.set_device(6)
         args.device = torch.device('cuda')
         torch.cuda.manual_seed(random.randint(1, 10000))
         # Disable nondeterministic ops (not sure if critical but better safe than sorry)

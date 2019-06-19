@@ -12,7 +12,7 @@ class AbstractEnv(object):
         self.buffer_history_length = args.history_length
         self.state_buffer = deque([], maxlen=args.history_length)
         self.communicator = self._communicator(args)
-        self.actions = self.communicator.get_action_set()
+        self.actions = self.communicator.action_set
 
     def get_state(self) -> torch.Tensor:
         state = self.communicator.get_state_tensor().to(self.device)
