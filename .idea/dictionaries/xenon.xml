@@ -6,6 +6,7 @@
       <w>backpropagate</w>
       <w>connectable</w>
       <w>conv</w>
+      <w>convs</w>
       <w>cuda</w>
       <w>dest</w>
       <w>discretise</w>

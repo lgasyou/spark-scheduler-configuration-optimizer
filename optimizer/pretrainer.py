@@ -58,7 +58,7 @@ class PreTrainer(object):
                 done = True
 
     def _mark(self, action_index: int, file_index: int):
-        with open(self.MARK_FILENAME) as f:
+        with open(self.MARK_FILENAME, 'w') as f:
             f.write('%d,%d' % (action_index, file_index))
 
     def _get_mark(self):

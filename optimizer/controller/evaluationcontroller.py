@@ -70,7 +70,7 @@ class EvaluationController(AbstractController):
                     done = True
 
                     agent.eval()  # Set DQN (online network) to evaluation mode
-                    avg_reward, avg_Q, time_cost = self.validator.evaluate_agent(T)  # Test
+                    avg_reward, avg_Q, time_cost = self.validator.evaluate(T)  # Test
                     self.logger.info('T = ' + str(T) + ' / ' + str(num_training_steps) +
                                      ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q) +
                                      ' | Total Time Cost: ' + str(time_cost) + 'ms')
@@ -106,7 +106,7 @@ class EvaluationController(AbstractController):
                     done = True
 
                 if done:
-                    time.sleep(180)
+                    time.sleep(EVALUATION_LOOP_INTERNAL)
                     costs, time_cost_ms = env.get_total_time_cost()
                     print('Iteration', T, 'Time Cost:', costs)
                     arr.append(costs)

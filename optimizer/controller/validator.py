@@ -27,7 +27,7 @@ class Validator(object):
         self.logger = logging.getLogger(__name__)
         self.val_mem = self._setup_val_mem()
 
-    def evaluate_agent(self, T, evaluate=False):
+    def evaluate(self, T, evaluate=False):
         args = self.args
         dqn = self.agent
         val_mem = self.val_mem

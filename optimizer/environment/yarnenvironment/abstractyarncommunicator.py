@@ -1,14 +1,15 @@
 import abc
-import math
 import os
 import subprocess
 import time
 from typing import Dict, Tuple
 
+import math
 import requests
 import torch
 from requests.exceptions import ConnectionError
 
+from optimizer.hyperparameters import STATE_SHAPE
 from .actionparser import ActionParser
 from .iresetablecommunicator import ICommunicator
 from .schedulerstrategy import SchedulerStrategyFactory
@@ -90,55 +91,56 @@ class AbstractYarnCommunicator(ICommunicator):
         }
         """
         raw = self.get_state()
-        tensor = torch.zeros(5042, 5000)
+        height, width = STATE_SHAPE
+        tensor = torch.zeros(height, width)
 
-        # Line 0-2499: awaiting jobs and their tasks
-        for i, wj in enumerate(raw.awaiting_jobs[:2500]):
+        # Line 0-74: awaiting jobs and their tasks
+        for i, wj in enumerate(raw.awaiting_jobs[:75]):
             idx = 0
             tensor[i][idx] = wj.submit_time
             idx += 1
             tensor[i][idx] = wj.priority
             idx += 1
-            for t in wj.tasks[:2499]:
+            for t in wj.tasks[:199]:
                 tensor[i][idx] = t.memory
                 idx += 1
                 tensor[i][idx] = t.cpu
                 idx += 1
 
-        # Line 2500-4999: running jobs and their tasks
-        for i, rj in enumerate(raw.running_jobs[:2500]):
+        # Line 75-149: running jobs and their tasks
+        for i, rj in enumerate(raw.running_jobs[:75]):
             idx = 0
-            row = i + 2500
+            row = i + 75
             tensor[row][idx] = rj.submit_time
             idx += 1
             tensor[row][idx] = rj.priority
             idx += 1
-            for t in rj.tasks[:2499]:
+            for t in rj.tasks[:199]:
                 tensor[row][idx] = t.memory
                 idx += 1
                 tensor[row][idx] = t.cpu
                 idx += 1
 
-        # Line 5000-5039: resources of cluster
-        row, idx = 5000, 0
-        for r in raw.resources[:100000]:
+        # Line 150-197: resources of cluster
+        row, idx = 150, 0
+        for r in raw.resources[:4800]:
             tensor[row][idx] = r.mem
             idx += 1
             tensor[row][idx] = r.cpu
             idx += 1
-            if idx == 5000:
+            if idx == 200:
                 row += 1
                 idx = 0
 
-        # Line 5040: queue constraints
-        row, idx = 5040, 0
-        for c in raw.constraint.queue[:2500]:
+        # Line 198: queue constraints
+        row, idx = 198, 0
+        for c in raw.constraint.queue[:100]:
             tensor[row][idx] = c.max_capacity
             idx += 1
             tensor[row][idx] = c.capacity
             idx += 1
 
-        # Line 5041: job constraints(leave empty for now)
+        # Line 199: job constraints(leave empty for now)
         for _ in raw.constraint.job:
             pass
 
