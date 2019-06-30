@@ -1,6 +1,6 @@
 import pickle
 
-from .memory import ReplayMemory
+from . import ReplayMemoryProxy
 from ..util import fileutil
 
 
@@ -8,8 +8,8 @@ class MemorySerializer(object):
 
     FINAL_SAVE_FILENAME = './results/pre-train-replay-memory.pk'
 
-    def __init__(self, memory: ReplayMemory):
-        self.memory = memory
+    def __init__(self, proxy: ReplayMemoryProxy):
+        self.mem = proxy.memory
 
     def try_load(self, filename: str = None):
         """
@@ -17,7 +17,7 @@ class MemorySerializer(object):
         :return: Whether load succeed.
         """
         filename = filename or self.FINAL_SAVE_FILENAME
-        mem = self.memory
+        mem = self.mem
 
         if not fileutil.file_exists(filename):
             print('File: ', filename, "doesn't exist.")
@@ -32,8 +32,7 @@ class MemorySerializer(object):
         Save into a file.
         """
         filename = filename or self.FINAL_SAVE_FILENAME
-        mem = self.memory
+        mem = self.mem
 
         with open(filename, 'wb') as f:
             pickle.dump([mem.t, mem.transitions], f)
-

@@ -1,2 +1,2 @@
-from .memory import ReplayMemory
+from .memoryproxy import ReplayMemoryProxy
 from .memoryserializer import MemorySerializer

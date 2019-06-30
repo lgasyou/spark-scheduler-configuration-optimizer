@@ -54,6 +54,7 @@ class EvaluationController(AbstractController):
                 T += 1
             except StateInvalidException:
                 done = True
+                mem.terminate()
                 continue
 
             # Train and test

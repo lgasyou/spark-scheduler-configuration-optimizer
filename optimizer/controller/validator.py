@@ -11,7 +11,7 @@ from plotly.graph_objs.scatter import Line
 
 from ..environment import EvaluationEnv, StateInvalidException
 from ..hyperparameters import TEST_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
-from ..replaymemory import MemorySerializer, ReplayMemory
+from ..replaymemory import MemorySerializer, ReplayMemoryProxy
 
 # Globals
 Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10
@@ -122,9 +122,9 @@ class Validator(object):
         }, filename=os.path.join(path, title + '.html'), auto_open=False)
 
     # Construct validation memory
-    def _setup_val_mem(self) -> ReplayMemory:
+    def _setup_val_mem(self) -> ReplayMemoryProxy:
         self.logger.info('Setting up validation memory...')
-        val_mem = ReplayMemory(self.args, self.args.evaluation_size)
+        val_mem = ReplayMemoryProxy(self.args, self.args.evaluation_size)
         memory_serializer = MemorySerializer(val_mem)
 
         if memory_serializer.try_load('./results/validation-replay-memory.pk'):

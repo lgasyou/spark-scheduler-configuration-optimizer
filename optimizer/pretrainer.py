@@ -4,7 +4,7 @@ import time
 from .agent import Agent
 from .environment import PreTrainEnv, StateInvalidException
 from .hyperparameters import PRE_TRAIN_LOOP_INTERNAL
-from .replaymemory import ReplayMemory
+from .replaymemory import ReplayMemoryProxy
 from .replaymemory.memoryserializer import MemorySerializer
 from .util import fileutil
 
@@ -14,7 +14,7 @@ class PreTrainer(object):
     MARK_FILENAME = './results/pre-train-mark'
     MEMORY_FILENAME_TEMPLATE = './results/pre-train-replay-memory-%d-%d.pk'
 
-    def __init__(self, memory: ReplayMemory, agent: Agent,  args):
+    def __init__(self, memory: ReplayMemoryProxy, agent: Agent,  args):
         self.mem = memory
         self.memory_serializer = MemorySerializer(memory)
         self.dqn = agent

@@ -30,6 +30,7 @@ class OptimizationController(AbstractController):
                 time.sleep(TRAIN_LOOP_INTERNAL)
                 T += 1
             except StateInvalidException:
+                mem.terminate()
                 break
 
             if done:

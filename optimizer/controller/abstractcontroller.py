@@ -4,7 +4,7 @@ import logging
 
 from ..agent import Agent
 from ..pretrainer import PreTrainer
-from ..replaymemory import ReplayMemory
+from ..replaymemory import ReplayMemoryProxy
 
 
 class AbstractController(object):
@@ -27,11 +27,8 @@ class AbstractController(object):
     13.	 	end for
     14.	end for
 
-    When raises the exception "StateInvalidException",
-    the state is invalid so state, action, reward of this step, signal terminate
-    won't be saved into the memory.
-    This will cause a problem: non-terminate signal will always be True.
-    TODO: See description above.
+    TODO: Discuss the design of Reward function.
+    TODO: Test and get the result.
     """
 
     def __init__(self, args: argparse.Namespace):
@@ -40,7 +37,7 @@ class AbstractController(object):
 
         self.env = self._env(args)
         self.action_space = self.env.action_space()
-        self.mem = ReplayMemory(self.args, self.args.memory_capacity)
+        self.mem = ReplayMemoryProxy(self.args, self.args.memory_capacity)
         self.agent = Agent(self.args, self.env)
         self.priority_weight_increase = (1 - self.args.priority_weight) / (self.args.T_max - self.args.learn_start)
 

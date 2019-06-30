@@ -6,7 +6,7 @@ from torch import optim
 
 from .environment import AbstractEnv
 from .nn import DQN
-from .replaymemory import ReplayMemory
+from .replaymemory import ReplayMemoryProxy
 
 
 class Agent(object):
@@ -53,7 +53,7 @@ class Agent(object):
     def act_e_greedy(self, state, epsilon=0.001) -> int:
         return random.randrange(self.action_space) if random.random() < epsilon else self.act(state)
 
-    def learn(self, mem: ReplayMemory):
+    def learn(self, mem: ReplayMemoryProxy):
         # Sample transitions
         idxs, states, actions, returns, next_states, nonterminals, weights = mem.sample(self.batch_size)
 
