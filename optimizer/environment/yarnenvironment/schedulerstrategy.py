@@ -2,8 +2,8 @@ import copy
 import os
 
 from .yarnmodel import *
-from ...util import fileutil, jsonutil
-from ...util.xmlmodifier import XmlModifier
+from optimizer.util import fileutil, jsonutil
+from optimizer.util.xmlmodifier import XmlModifier
 
 
 class ISchedulerStrategy(object):

@@ -15,7 +15,7 @@ from .iresetablecommunicator import ICommunicator
 from .schedulerstrategy import SchedulerStrategyFactory
 from .yarnmodel import *
 from ..stateinvalidexception import StateInvalidException
-from ...util import jsonutil
+from optimizer.util import jsonutil
 
 
 class AbstractYarnCommunicator(ICommunicator):
@@ -68,11 +68,7 @@ class AbstractYarnCommunicator(ICommunicator):
             constraints = self._get_constraints()
             self.awaiting_jobs = wj
             return State(wj, rj, resources, constraints)
-        except ConnectionError:
-            raise StateInvalidException
-        except TypeError:
-            raise StateInvalidException
-        except requests.exceptions.HTTPError:
+        except (ConnectionError, TypeError, requests.exceptions.HTTPError):
             raise StateInvalidException
 
     def get_state_tensor(self) -> torch.Tensor:
@@ -155,9 +151,7 @@ class AbstractYarnCommunicator(ICommunicator):
 
     @abc.abstractmethod
     def is_done(self) -> bool:
-        """
-        Test if all jobs are done.
-        """
+        """Test if all jobs are done."""
         pass
 
     @abc.abstractmethod

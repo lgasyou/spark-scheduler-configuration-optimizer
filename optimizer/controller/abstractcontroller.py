@@ -9,24 +9,6 @@ from ..replaymemory import ReplayMemoryProxy
 
 class AbstractController(object):
     """
-    Cluster Scheduler's Configuration Optimizer
-    -----------------------------------------
-    算法流程：
-    1.	用随机权重初始化价值函数；
-    2.	预训练DQN模型；
-    3.	f设置为0；
-    4.	for 片段(episode) 1 to
-    5.	    for 时间片 1 to
-    6.	       	在状态下用贪婪算法选一个动作；
-    7.	 		执行动作并让调度器去观察奖励和下一个状态
-    8.	 		把样本加到中；
-    9.	 		if (f % F == 0)
-    10.	 			使用中的样本训练深度学习模型DQN；
-    11.	 		end if
-    12.         f = f + 1
-    13.	 	end for
-    14.	end for
-
     TODO: Discuss the design of Reward function.
     TODO: Test and get the result.
     """
@@ -43,7 +25,7 @@ class AbstractController(object):
 
     # Pre-train DQN model with offline data
     def pre_train_model(self):
-        pre_trainer = PreTrainer(self.mem, self.agent, self.args)
+        pre_trainer = PreTrainer(self.args, self.mem, self.agent)
         pre_trainer.start_pre_train()
 
     @abc.abstractmethod

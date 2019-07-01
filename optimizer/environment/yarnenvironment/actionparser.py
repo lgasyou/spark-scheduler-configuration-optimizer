@@ -1,4 +1,4 @@
-from ...hyperparameters import QUEUES
+from optimizer.hyperparameters import QUEUES
 
 
 class ActionParser(object):

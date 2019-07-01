@@ -24,7 +24,5 @@ class AbstractEnv(object):
 
     @abc.abstractmethod
     def _communicator(self, args: argparse.Namespace):
-        """
-        Get Communicator instance.
-        """
+        """Get Communicator instance."""
         pass

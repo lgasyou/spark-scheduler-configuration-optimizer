@@ -5,7 +5,7 @@ from .memory import ReplayMemory
 
 class ReplayMemoryProxy(object):
     """
-    Is the proxy of Replay Memory.
+    The proxy of Replay Memory.
     To solve a problem which is caused when StateInvalidException raises.
     """
 
@@ -30,6 +30,14 @@ class ReplayMemoryProxy(object):
     @property
     def memory(self):
         return self._mem
+
+    @property
+    def priority_weight(self):
+        return self._mem.priority_weight
+
+    @priority_weight.setter
+    def priority_weight(self, value):
+        self._mem.priority_weight = value
 
     def _flush_cache(self):
         if self._cache is not None:

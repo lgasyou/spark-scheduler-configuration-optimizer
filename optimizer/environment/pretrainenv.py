@@ -5,7 +5,7 @@ import torch
 
 from .abstractenv import AbstractEnv
 from .yarnenvironment.yarnslscommunicator import YarnSlsCommunicator
-from ..hyperparameters import STATE_SHAPE
+from optimizer.hyperparameters import STATE_SHAPE
 
 
 class PreTrainEnv(AbstractEnv):

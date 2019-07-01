@@ -14,11 +14,11 @@ class PreTrainer(object):
     MARK_FILENAME = './results/pre-train-mark'
     MEMORY_FILENAME_TEMPLATE = './results/pre-train-replay-memory-%d-%d.pk'
 
-    def __init__(self, memory: ReplayMemoryProxy, agent: Agent,  args):
+    def __init__(self, args, memory: ReplayMemoryProxy, agent: Agent):
+        self.args = args
         self.mem = memory
         self.memory_serializer = MemorySerializer(memory)
         self.dqn = agent
-        self.args = args
         self.logger = logging.getLogger(__name__)
 
     def start_pre_train(self):

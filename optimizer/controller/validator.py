@@ -12,6 +12,7 @@ from plotly.graph_objs.scatter import Line
 from ..environment import EvaluationEnv, StateInvalidException
 from ..hyperparameters import TEST_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
 from ..replaymemory import MemorySerializer, ReplayMemoryProxy
+from optimizer.util import excelutil
 
 # Globals
 Ts, rewards, Qs, best_avg_reward = [], [], [], -1e10
@@ -24,6 +25,7 @@ class Validator(object):
         self.env = env
         self.agent = agent
         self.action_space = action_space
+        self.evaluate_cnt = 0
         self.logger = logging.getLogger(__name__)
         self.val_mem = self._setup_val_mem()
 
@@ -70,6 +72,8 @@ class Validator(object):
 
         print('Total Time Cost :', total_time_cost_ms, 'ms')
         print(arr)
+        excelutil.list2excel(arr, './results/evaluate_%d.xlsx' % self.evaluate_cnt)
+        self.evaluate_cnt += 1
         env.close()
 
         # Test Q-values over validation memory

@@ -5,7 +5,7 @@ import torch
 
 from . import AbstractEnv
 from .yarnenvironment import YarnSlsCommunicator
-from ..hyperparameters import STATE_SHAPE
+from optimizer.hyperparameters import STATE_SHAPE
 
 
 class EvaluationEnv(AbstractEnv):

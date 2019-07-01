@@ -6,8 +6,9 @@ from tqdm import tqdm
 
 from .abstractcontroller import AbstractController
 from .validator import Validator
-from ..environment import EvaluationEnv, StateInvalidException
-from ..hyperparameters import TRAIN_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
+from optimizer.environment import EvaluationEnv, StateInvalidException
+from optimizer.hyperparameters import TRAIN_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
+from optimizer.util import excelutil
 
 
 class EvaluationController(AbstractController):
@@ -116,6 +117,7 @@ class EvaluationController(AbstractController):
 
         print('Total Time Cost :', total_time_cost_ms, 'ms')
         print(arr)
+        excelutil.list2excel(arr, './results/no_optimization.xlsx')
         env.close()
 
     def _env(self, args: argparse.Namespace):
