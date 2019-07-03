@@ -12,7 +12,6 @@ from .util import fileutil
 class PreTrainer(object):
 
     MARK_FILENAME = './results/pre-train-mark'
-    MEMORY_FILENAME_TEMPLATE = './results/pre-train-replay-memory-%d-%d.pk'
 
     def __init__(self, args, memory: ReplayMemoryProxy, agent: Agent):
         self.args = args
@@ -29,7 +28,7 @@ class PreTrainer(object):
         if not self.memory_serializer.try_load():
             for action_index, file_index in self._train_range():
                 self.train_once(action_index, file_index)
-                self.memory_serializer.save(self.MEMORY_FILENAME_TEMPLATE % (action_index, file_index))
+                self.memory_serializer.save(action_index, file_index)
                 self._mark(action_index, file_index)
 
             # Save data
@@ -40,7 +39,20 @@ class PreTrainer(object):
         self.logger.info('Pre-training DQN model finished.')
 
     def start_from_breakpoint(self):
-        pass
+        last_action_index, last_file_index = self._get_mark()
+        if last_action_index == -1 and last_file_index == -1:
+            self.start_pre_train()
+        else:
+            self.memory_serializer.try_load(last_action_index, last_file_index)
+            train_settings = [(action_index, file_index) for action_index, file_index in self._train_range()]
+            start_index = train_settings.index((last_action_index, last_file_index))
+
+            for action_index, file_index in train_settings[start_index + 1:]:
+                self.train_once(action_index, file_index)
+                self.memory_serializer.save(action_index, file_index)
+                self._mark(action_index, file_index)
+
+            self.memory_serializer.save()
 
     def train_once(self, action_index: int, file_index: int):
         train_env = PreTrainEnv(self.args)
@@ -70,6 +82,6 @@ class PreTrainer(object):
 
     @staticmethod
     def _train_range():
-        for action_index in [2]:
-            for hour in range(5, 24):
+        for action_index in [4]:
+            for hour in range(24):
                 yield action_index, hour

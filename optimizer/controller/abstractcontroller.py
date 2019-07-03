@@ -8,10 +8,6 @@ from ..replaymemory import ReplayMemoryProxy
 
 
 class AbstractController(object):
-    """
-    TODO: Discuss the design of Reward function.
-    TODO: Test and get the result.
-    """
 
     def __init__(self, args: argparse.Namespace):
         self.args = args
