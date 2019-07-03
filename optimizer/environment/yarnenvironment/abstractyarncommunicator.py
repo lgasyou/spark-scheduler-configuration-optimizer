@@ -2,14 +2,14 @@ import abc
 import os
 import subprocess
 import time
-from typing import Dict, Tuple, Optional
+from typing import Tuple, Optional
 
 import math
 import requests
 import torch
 from requests.exceptions import ConnectionError
 
-from optimizer.hyperparameters import STATE_SHAPE, QUEUES
+from optimizer.hyperparameters import STATE_SHAPE
 from .actionparser import ActionParser
 from .iresetablecommunicator import ICommunicator
 from .schedulerstrategy import SchedulerStrategyFactory
@@ -89,7 +89,7 @@ class AbstractYarnCommunicator(ICommunicator):
 
         # Line 0-74: waiting jobs and their tasks
         for i, wj in enumerate(raw.waiting_jobs[:75]):
-            line = [wj.elapsed_time, wj.priority, queue_name_to_index(wj.location)]
+            line = [wj.elapsed_time, wj.priority, wj.converted_location]
             for rr in wj.request_resources[:64]:
                 line.extend([rr.priority, rr.memory, rr.cpu])
             line.extend([0.0] * (width - len(line)))
@@ -98,7 +98,7 @@ class AbstractYarnCommunicator(ICommunicator):
         # Line 75-149: running jobs and their tasks
         for i, rj in enumerate(raw.running_jobs[:75]):
             row = i + 75
-            line = [rj.elapsed_time, rj.priority, queue_name_to_index(rj.location),
+            line = [rj.elapsed_time, rj.priority, rj.converted_location,
                     rj.progress, rj.queue_usage_percentage,
                     rj.memory_seconds, rj.vcore_seconds]
             for rr in rj.request_resources[:65]:
@@ -120,7 +120,7 @@ class AbstractYarnCommunicator(ICommunicator):
         # Line 199: queue constraints
         row, queue_constraints = 199, []
         for c in raw.constraints[:50]:
-            queue_constraints.extend([queue_name_to_index(c.name), c.capacity, c.max_capacity, c.used_capacity])
+            queue_constraints.extend([c.converted_name, c.capacity, c.max_capacity, c.used_capacity])
         queue_constraints.extend([0.0] * (width - len(queue_constraints)))
         tensor[row] = torch.Tensor(queue_constraints)
 
@@ -234,7 +234,3 @@ def build_request_resources_from_json(j: dict) -> List[JobRequestResource]:
         ret.append(JobRequestResource(priority, memory, cpu))
 
     return ret
-
-
-def queue_name_to_index(queue_name: str) -> int:
-    return QUEUES['names'].index(queue_name)

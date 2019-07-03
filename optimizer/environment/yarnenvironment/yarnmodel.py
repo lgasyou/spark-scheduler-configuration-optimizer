@@ -1,5 +1,7 @@
 from typing import List
 
+from optimizer.hyperparameters import QUEUES
+
 
 class JobRequestResource(object):
     def __init__(self, priority: int, memory: int, cpu: int):
@@ -16,6 +18,10 @@ class WaitingJob(object):
         self.location = location
         self.request_resources = request_resources
 
+    @property
+    def converted_location(self):
+        return queue_name_to_index(self.location)
+
 
 class RunningJob(object):
     def __init__(self, elapsed_time: int, priority: int, location: str, progress: float, queue_usage_percentage: float,
@@ -28,6 +34,10 @@ class RunningJob(object):
         self.memory_seconds = memory_seconds
         self.vcore_seconds = vcore_seconds
         self.request_resources = request_resources
+
+    @property
+    def converted_location(self):
+        return queue_name_to_index(self.location)
 
 
 class Resource(object):
@@ -43,6 +53,10 @@ class QueueConstraint(object):
         self.capacity = capacity
         self.max_capacity = max_capacity
 
+    @property
+    def converted_name(self):
+        return queue_name_to_index(self.name)
+
 
 class State(object):
     def __init__(self, waiting_jobs: List[WaitingJob], running_jobs: List[RunningJob],
@@ -51,3 +65,7 @@ class State(object):
         self.running_jobs = running_jobs
         self.resources = resources
         self.constraints = constraints
+
+
+def queue_name_to_index(queue_name: str) -> int:
+    return QUEUES['names'].index(queue_name)
