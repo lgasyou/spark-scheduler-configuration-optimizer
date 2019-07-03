@@ -18,7 +18,7 @@ class ISchedulerStrategy(object):
     def copy_conf_file(self):
         pass
 
-    def get_queue_constraints(self, constraint: Constraint):
+    def get_queue_constraints(self) -> List[QueueConstraint]:
         pass
 
 
@@ -43,9 +43,10 @@ class FairSchedulerStrategy(ISchedulerStrategy):
     def copy_conf_file(self):
         fileutil.file_copy('./data/fair-scheduler.xml', self.hadoop_etc + '/fair-scheduler.xml')
 
-    def get_queue_constraints(self, constraint: Constraint):
-        for queue_name, weight in self.current_action.items():
-            constraint.add_queue_c(QueueConstraint(queue_name, weight))
+    # TODO: Unfinished.
+    @DeprecationWarning
+    def get_queue_constraints(self):
+        return [QueueConstraint('', queue_name, weight, weight) for queue_name, weight in self.current_action.items()]
 
 
 class CapacitySchedulerStrategy(ISchedulerStrategy):
@@ -69,17 +70,20 @@ class CapacitySchedulerStrategy(ISchedulerStrategy):
     def copy_conf_file(self):
         fileutil.file_copy('./data/capacity-scheduler.xml', self.hadoop_etc + '/capacity-scheduler.xml')
 
-    def get_queue_constraints(self, constraint: Constraint):
+    def get_queue_constraints(self):
         url = self.rm_host + 'ws/v1/cluster/scheduler'
         conf = jsonutil.get_json(url)
 
+        ret = []
         queues = conf['scheduler']['schedulerInfo']['queues']['queue']
         for q in queues:
-            capacity = q['capacity']
-            max_capacity = q['maxCapacity']
             name = q['queueName']
-            queue_c = QueueConstraint(name, capacity, max_capacity)
-            constraint.add_queue_c(queue_c)
+            capacity = q['capacity']
+            used_capacity = q['usedCapacity']
+            max_capacity = q['maxCapacity']
+            ret.append(QueueConstraint(name, used_capacity, capacity, max_capacity))
+
+        return ret
 
     @staticmethod
     def _convert_weight_to_capacity(old_action_set: dict):

@@ -18,6 +18,7 @@ class PreTrainEnv(AbstractEnv):
 
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
+        self.t = 0
 
     def start_sls(self, file_index: int, action_index: int):
         filename = "{}/sls-jobs{}.json".format(self.TRAIN_SET, file_index)
@@ -34,6 +35,11 @@ class PreTrainEnv(AbstractEnv):
         done = self.communicator.is_done()
         self.state_buffer.append(state)
         return torch.stack(list(self.state_buffer), 0), reward, done
+
+    def save_tensor(self, t: torch.Tensor):
+        import numpy as np
+        np.savetxt('./results/state%d.csv' % self.t, t.numpy(), delimiter=',', fmt='%.2f')
+        self.t += 1
 
     def _communicator(self, args: argparse.Namespace):
         return YarnSlsCommunicator(args.rm_host, args.hadoop_home)

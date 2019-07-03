@@ -2,14 +2,14 @@ import abc
 import os
 import subprocess
 import time
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 import math
 import requests
 import torch
 from requests.exceptions import ConnectionError
 
-from optimizer.hyperparameters import STATE_SHAPE
+from optimizer.hyperparameters import STATE_SHAPE, QUEUES
 from .actionparser import ActionParser
 from .iresetablecommunicator import ICommunicator
 from .schedulerstrategy import SchedulerStrategyFactory
@@ -30,7 +30,7 @@ class AbstractYarnCommunicator(ICommunicator):
 
         self.start_time = timestamp()
         self.action_set = ActionParser.parse()
-        self.awaiting_jobs: List[Job] = []
+        self.state: Optional[State] = None
 
         scheduler_type = self.get_scheduler_type()
         self.scheduler_strategy = SchedulerStrategyFactory.create(scheduler_type, api_url,
@@ -46,16 +46,16 @@ class AbstractYarnCommunicator(ICommunicator):
         return self.get_reward()
 
     def get_reward(self) -> float:
-        job_count = len(self.awaiting_jobs)
+        waiting_jobs = self.state.waiting_jobs
+        running_jobs = self.state.running_jobs
+        job_count = len(waiting_jobs) + len(running_jobs)
         if job_count == 0:
             return 0
 
-        total_wait_time = 0.0
-        for j in self.awaiting_jobs:
-            total_wait_time += j.wait_time
-
-        average_wait_time = total_wait_time / job_count
-        cost = math.tanh(0.00001 * average_wait_time)
+        waiting_jobs_elapsed_time = sum([job.elapsed_time for job in waiting_jobs])
+        running_jobs_elapsed_time = sum([job.elapsed_time for job in running_jobs])
+        middle = (0.8 * waiting_jobs_elapsed_time + 0.2 * running_jobs_elapsed_time) / job_count
+        cost = math.tanh(0.00001 * middle)
         return -cost
 
     def get_state(self) -> State:
@@ -66,8 +66,8 @@ class AbstractYarnCommunicator(ICommunicator):
             wj, rj = self._get_jobs()
             resources = self._get_resources()
             constraints = self._get_constraints()
-            self.awaiting_jobs = wj
-            return State(wj, rj, resources, constraints)
+            self.state = State(wj, rj, resources, constraints)
+            return self.state
         except (ConnectionError, TypeError, requests.exceptions.HTTPError):
             raise StateInvalidException
 
@@ -77,68 +77,52 @@ class AbstractYarnCommunicator(ICommunicator):
         Which is defined as the ϕ(s) function defined in document.
 
         state: {
-            awaiting_jobs: [Job, Job, ...],
-            running_jobs: [Job, Job, ...],
+            waiting_jobs: [WaitingJob, WaitingJob, ...],
+            running_jobs: [RunningJob, RunningJob, ...],
             resources: [Resource, Resource, ...],
-            constraint: {
-                queue: [QueueConstraint, QueueConstraint, ...],
-                job: [JobConstraint, JobConstraint, ...],
-            }
+            queue_constraints: [QueueConstraint, QueueConstraint, ...]
         }
         """
         raw = self.get_state()
         height, width = STATE_SHAPE
         tensor = torch.zeros(height, width)
 
-        # Line 0-74: awaiting jobs and their tasks
-        for i, wj in enumerate(raw.awaiting_jobs[:75]):
-            idx = 0
-            tensor[i][idx] = wj.submit_time
-            idx += 1
-            tensor[i][idx] = wj.priority
-            idx += 1
-            for t in wj.tasks[:199]:
-                tensor[i][idx] = t.memory
-                idx += 1
-                tensor[i][idx] = t.cpu
-                idx += 1
+        # Line 0-74: waiting jobs and their tasks
+        for i, wj in enumerate(raw.waiting_jobs[:75]):
+            line = [wj.elapsed_time, wj.priority, queue_name_to_index(wj.location)]
+            for rr in wj.request_resources[:64]:
+                line.extend([rr.priority, rr.memory, rr.cpu])
+            line.extend([0.0] * (width - len(line)))
+            tensor[i] = torch.Tensor(line)
 
         # Line 75-149: running jobs and their tasks
         for i, rj in enumerate(raw.running_jobs[:75]):
-            idx = 0
             row = i + 75
-            tensor[row][idx] = rj.submit_time
-            idx += 1
-            tensor[row][idx] = rj.priority
-            idx += 1
-            for t in rj.tasks[:199]:
-                tensor[row][idx] = t.memory
-                idx += 1
-                tensor[row][idx] = t.cpu
-                idx += 1
+            line = [rj.elapsed_time, rj.priority, queue_name_to_index(rj.location),
+                    rj.progress, rj.queue_usage_percentage,
+                    rj.memory_seconds, rj.vcore_seconds]
+            for rr in rj.request_resources[:65]:
+                line.extend([rr.priority, rr.memory, rr.cpu])
+            line.extend([0.0] * (width - len(line)))
+            tensor[row] = torch.Tensor(line)
 
-        # Line 150-197: resources of cluster
+        # Line 150-198: resources of cluster
         row, idx = 150, 0
-        for r in raw.resources[:4800]:
+        for r in raw.resources[:4900]:
             tensor[row][idx] = r.mem
             idx += 1
-            tensor[row][idx] = r.cpu
+            tensor[row][idx] = r.vcore_num
             idx += 1
-            if idx == 200:
+            if idx == width:
                 row += 1
                 idx = 0
 
-        # Line 198: queue constraints
-        row, idx = 198, 0
-        for c in raw.constraint.queue[:100]:
-            tensor[row][idx] = c.max_capacity
-            idx += 1
-            tensor[row][idx] = c.capacity
-            idx += 1
-
-        # Line 199: job constraints(leave empty for now)
-        for _ in raw.constraint.job:
-            pass
+        # Line 199: queue constraints
+        row, queue_constraints = 199, []
+        for c in raw.constraints[:50]:
+            queue_constraints.extend([queue_name_to_index(c.name), c.capacity, c.max_capacity, c.used_capacity])
+        queue_constraints.extend([0.0] * (width - len(queue_constraints)))
+        tensor[row] = torch.Tensor(queue_constraints)
 
         return tensor
 
@@ -161,47 +145,20 @@ class AbstractYarnCommunicator(ICommunicator):
     def override_config(self, action_index: int):
         self.scheduler_strategy.override_config(action_index)
 
-    def _get_jobs(self) -> Tuple[List[Job], List[Job]]:
+    def _get_jobs(self) -> Tuple[List[WaitingJob], List[RunningJob]]:
+        waiting_jobs = self._get_waiting_jobs()
         running_jobs = self._get_running_jobs()
-        awaiting_jobs = self._get_waiting_jobs()
-        return awaiting_jobs, running_jobs
+        return waiting_jobs, running_jobs
 
-    def _get_jobs_by_states(self, states: str) -> List[Job]:
-        url = self.api_url + 'ws/v1/cluster/apps?states=' + states
+    def _get_waiting_jobs(self) -> List[WaitingJob]:
+        url = self.api_url + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED'
         job_json = jsonutil.get_json(url)
-        return self._build_jobs_from_json(job_json)
+        return build_waiting_jobs_from_json(job_json)
 
-    def _build_jobs_from_json(self, j: Dict[str, object]) -> List[Job]:
-        if j['apps'] is None:
-            return []
-
-        apps = j['apps']['app']
-        jobs = []
-        for j in apps:
-            application_id = j['id']
-            start_time_ms = j['startedTime'] - self.start_time
-            start_time = int(start_time_ms / 1000)
-            wait_time = j['elapsedTime']
-            priority = j['priority']
-            tasks = []
-
-            if 'resourceRequests' in j:
-                resource_requests = j['resourceRequests']
-                for req in resource_requests:
-                    capability = req['capability']
-                    memory = capability['memory']
-                    cpu = capability['vCores']
-                    tasks.append(Task('', memory, cpu))
-
-            jobs.append(Job(application_id, start_time, wait_time, priority, tasks))
-
-        return jobs
-
-    def _get_waiting_jobs(self) -> List[Job]:
-        return self._get_jobs_by_states('NEW,NEW_SAVING,SUBMITTED,ACCEPTED')
-
-    def _get_running_jobs(self) -> List[Job]:
-        return self._get_jobs_by_states('RUNNING')
+    def _get_running_jobs(self) -> List[RunningJob]:
+        url = self.api_url + 'ws/v1/cluster/apps?states=RUNNING'
+        job_json = jsonutil.get_json(url)
+        return build_running_jobs_from_json(job_json)
 
     def _get_resources(self) -> List[Resource]:
         url = self.api_url + 'ws/v1/cluster/nodes'
@@ -209,30 +166,13 @@ class AbstractYarnCommunicator(ICommunicator):
         nodes = conf['nodes']['node']
         resources = []
         for n in nodes:
-            node_name = n['nodeHostName']
             memory = (int(n['usedMemoryMB']) + int(n['availMemoryMB'])) / 1024
             vcores = int(n['usedVirtualCores']) + int(n['availableVirtualCores'])
-            resources.append(Resource(node_name, vcores, int(memory)))
+            resources.append(Resource(vcores, int(memory)))
         return resources
 
-    def _get_constraints(self) -> Constraint:
-        constraint = Constraint()
-        self.scheduler_strategy.get_queue_constraints(constraint)
-        self._get_job_constraints(constraint)
-        return constraint
-
-    def _get_job_constraints(self, constraint: Constraint):
-        for job in self.awaiting_jobs:
-            try:
-                url = "{}ws/v1/cluster/apps/{}/appattempts".format(self.api_url, job.application_id)
-                attempt_json = jsonutil.get_json(url)
-                attempts = attempt_json['appAttempts']['appAttempt']
-                for a in attempts:
-                    http_address = a['nodeHttpAddress']
-                    if len(http_address):
-                        constraint.add_job_c(JobConstraint(job.application_id, http_address))
-            except requests.exceptions.HTTPError:
-                pass
+    def _get_constraints(self) -> List[QueueConstraint]:
+        return self.scheduler_strategy.get_queue_constraints()
 
 
 def timestamp() -> int:
@@ -241,3 +181,60 @@ def timestamp() -> int:
 
 def refresh_queues(hadoop_home: str):
     subprocess.Popen([os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), hadoop_home])
+
+
+def build_running_jobs_from_json(j: dict) -> List[RunningJob]:
+    if j['apps'] is None:
+        return []
+
+    apps, jobs = j['apps']['app'], []
+    for j in apps:
+        elapsed_time = j['elapsedTime']
+        priority = j['priority']
+        progress = j['progress']
+        queue_usage_percentage = j['queueUsagePercentage']
+        memory_seconds = j['memorySeconds']
+        vcore_seconds = j['vcoreSeconds']
+        location = j['queue']
+        request_resources = build_request_resources_from_json(j)
+        jobs.append(RunningJob(elapsed_time, priority, location, progress, queue_usage_percentage, memory_seconds,
+                               vcore_seconds, request_resources))
+
+    return jobs
+
+
+def build_waiting_jobs_from_json(j: dict) -> List[WaitingJob]:
+    if j['apps'] is None:
+        return []
+
+    apps = j['apps']['app']
+    jobs = []
+    for j in apps:
+        elapsed_time = j['elapsedTime']
+        priority = j['priority']
+        location = j['queue']
+        request_resources = build_request_resources_from_json(j)
+        jobs.append(WaitingJob(elapsed_time, priority, location, request_resources))
+
+    return jobs
+
+
+def build_request_resources_from_json(j: dict) -> List[JobRequestResource]:
+    ret = []
+
+    if 'resourceRequests' not in j:
+        return ret
+
+    resource_requests = j['resourceRequests']
+    for req in resource_requests:
+        priority = req['priority']
+        capability = req['capability']
+        memory = capability['memory']
+        cpu = capability['vCores']
+        ret.append(JobRequestResource(priority, memory, cpu))
+
+    return ret
+
+
+def queue_name_to_index(queue_name: str) -> int:
+    return QUEUES['names'].index(queue_name)

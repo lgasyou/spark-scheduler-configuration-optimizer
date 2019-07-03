@@ -71,5 +71,5 @@ class PreTrainer(object):
     @staticmethod
     def _train_range():
         for action_index in [2]:
-            for hour in range(24):
+            for hour in range(5, 24):
                 yield action_index, hour
