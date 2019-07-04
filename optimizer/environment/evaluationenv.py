@@ -4,7 +4,7 @@ from typing import Tuple
 import torch
 
 from . import AbstractEnv
-from .yarnenvironment import YarnSlsCommunicator
+from .yarnenvironment import SparkCommunicator
 from optimizer.hyperparameters import STATE_SHAPE
 
 
@@ -48,8 +48,7 @@ class EvaluationEnv(AbstractEnv):
         self.communicator.close()
 
     def _communicator(self, args: argparse.Namespace):
-        sls_jobs_json = self.TEST_SET + '/sls-jobs.json'
-        return YarnSlsCommunicator(args.rm_host, args.hadoop_home, sls_jobs_json)
+        return SparkCommunicator(args.rm_host, args.hadoop_home, args.spark_home, args.java_home)
 
     def _reset_buffer(self):
         for _ in range(self.buffer_history_length):

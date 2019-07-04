@@ -135,6 +135,7 @@ class Validator(object):
             self.logger.info('Validation memory setting up finished.')
             return val_mem
 
+        # TODO: Remove commit.
         # T, done, state = 0, True, None
         # while T < self.args.evaluation_size:
         #     self.logger.info('Validation Loop %d' % T)

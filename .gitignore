@@ -2,8 +2,7 @@
 .idea/
 !.idea/dictionaries/
 
-# Input & output directories
-data/
+# Output directories
 results/
 
 # Byte-compiled / optimized / DLL files

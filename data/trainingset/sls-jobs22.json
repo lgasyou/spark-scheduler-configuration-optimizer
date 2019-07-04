@@ -1,0 +1,2848 @@
+
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 17,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueD",
+  "job.id" : "6442912071",
+  "job.user" : "MY3I/mTE4wAd7i/QeNQsEh131fQmNntg84KVWchCuFU=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 49701,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 42801,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 38001,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 41201,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 40401,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 40301,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 40401,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 38701,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 41201,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 38701,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 39401,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 49701,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 38601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 58401,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1,
+        "container.end.ms" : 38601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 40501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 46601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 38601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 38801,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 40401,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 38801,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 42001,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 42801,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39401,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 38601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 40501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39401,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 40501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 48801,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 38601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 38701,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 38601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 38801,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39501,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 41901,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 96601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 96101,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :101,
+        "container.end.ms" : 39401,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :201,
+        "container.end.ms" : 96201,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :201,
+        "container.end.ms" : 42001,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :201,
+        "container.end.ms" : 39601,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :201,
+        "container.end.ms" : 39601,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 24,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueC",
+  "job.id" : "6358026133",
+  "job.user" : "qteyl9BFLtHh8OdD206snZEvh+5KaGB6iRG6JS0i9rE=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 1437702,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 1437702,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 1437702,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 1437702,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1453102,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1465002,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1454002,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1507402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1457202,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1463902,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1453202,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1444602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1437602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1441202,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1442602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1440602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1440402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1441302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1436902,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1437602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1437502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1437602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1437602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1436902,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1441302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1436802,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 1442602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1459802,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1455402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1459802,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1454602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1453502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1454202,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1507502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1453202,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1459602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1470102,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1472702,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1466902,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1437102,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1437602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1437002,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1438302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1445402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1437602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1440102,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1437702,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1440102,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1437002,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :202,
+        "container.end.ms" : 1437002,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 24,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueB",
+  "job.id" : "6424987372",
+  "job.user" : "qteyl9BFLtHh8OdD206snZEvh+5KaGB6iRG6JS0i9rE=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 11102,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 10502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 10602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 14402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11802,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11202,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11202,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11202,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11102,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 18902,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11802,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12402,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10702,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 12602,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 14502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 11302,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10502,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :102,
+        "container.end.ms" : 10502,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 0,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueA",
+  "job.id" : "6451470233",
+  "job.user" : "g4V7IpMmA+knFspvmlihm7Mt0BjQ8Gfdh6702SVklas=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :0,
+        "container.end.ms" : 555800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 555800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 556000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :200,
+        "container.end.ms" : 556400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :500,
+        "container.end.ms" : 556000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 560000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :900,
+        "container.end.ms" : 556200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :900,
+        "container.end.ms" : 570400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1000,
+        "container.end.ms" : 555700,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1400,
+        "container.end.ms" : 557800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1400,
+        "container.end.ms" : 557800,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 2,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueC",
+  "job.id" : "6280257188",
+  "job.user" : "QhKaMUnHYqtG1RJkmo+zqhY1dChfuOZ6oy8jYGDlsic=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 44200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 49200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 43300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 43300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 44100,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :200,
+        "container.end.ms" : 44900,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :200,
+        "container.end.ms" : 43400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :200,
+        "container.end.ms" : 43300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :200,
+        "container.end.ms" : 45000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :300,
+        "container.end.ms" : 43400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :300,
+        "container.end.ms" : 48400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :300,
+        "container.end.ms" : 48600,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :300,
+        "container.end.ms" : 43500,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 44400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 44400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 42800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 43600,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 50000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 44400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 44400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 44400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 43600,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :500,
+        "container.end.ms" : 44400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :500,
+        "container.end.ms" : 45200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :500,
+        "container.end.ms" : 43000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :500,
+        "container.end.ms" : 45200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :500,
+        "container.end.ms" : 43000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :500,
+        "container.end.ms" : 45100,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :500,
+        "container.end.ms" : 43100,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 43000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 43800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 42900,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 44900,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 43200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 48300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 45300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 43000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 43200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 43100,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 48200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 48100,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 43200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 44500,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 48000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 45400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 43900,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 43000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 50400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 43200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 43200,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 40,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueA",
+  "job.id" : "6401086486",
+  "job.user" : "lSyhuDfwWwc5CxOPClHLAFc5fRFVIyPYjc8qE8Hb0ZU=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :4,
+        "container.end.ms" : 462904,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :4,
+        "container.end.ms" : 463704,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :4,
+        "container.end.ms" : 462204,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 462304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 463004,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 465304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 468504,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 466004,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 463004,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 462904,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 465904,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 464604,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 466804,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 466004,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 462304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 462304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 462304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :104,
+        "container.end.ms" : 475504,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 466004,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 463704,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 460704,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 466804,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 468404,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 466004,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 461804,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 471804,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 467804,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 462304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 463304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :204,
+        "container.end.ms" : 460604,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 467904,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 463904,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 462504,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 464804,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 465604,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 461804,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 462504,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 461804,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 467904,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 462504,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 472604,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 468004,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 470104,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :304,
+        "container.end.ms" : 462604,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :404,
+        "container.end.ms" : 461004,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :404,
+        "container.end.ms" : 463304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :404,
+        "container.end.ms" : 463304,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :404,
+        "container.end.ms" : 460904,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :404,
+        "container.end.ms" : 469404,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :404,
+        "container.end.ms" : 469404,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 0,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueD",
+  "job.id" : "6448628382",
+  "job.user" : "oPxcKd7feXmw+sZKrkp8/MvvNP/5kRG+Yy2fc/lz3Ks=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :0,
+        "container.end.ms" : 102700,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 102800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :100,
+        "container.end.ms" : 102100,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :300,
+        "container.end.ms" : 102300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 102700,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 66100,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :800,
+        "container.end.ms" : 102200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :800,
+        "container.end.ms" : 102800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :800,
+        "container.end.ms" : 102800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :900,
+        "container.end.ms" : 102800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :900,
+        "container.end.ms" : 102400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1000,
+        "container.end.ms" : 102400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1000,
+        "container.end.ms" : 72300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1100,
+        "container.end.ms" : 67900,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1100,
+        "container.end.ms" : 71600,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1100,
+        "container.end.ms" : 71600,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 55,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueB",
+  "job.id" : "6296046413",
+  "job.user" : "d2VTjfYNax8Fa/WdwdbO7zTYZ1UWfJEyx/DBfhaR/PA=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :5,
+        "container.end.ms" : 96205,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :5,
+        "container.end.ms" : 88505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :5,
+        "container.end.ms" : 91405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :105,
+        "container.end.ms" : 91405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :105,
+        "container.end.ms" : 96405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :105,
+        "container.end.ms" : 102705,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :205,
+        "container.end.ms" : 102405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :205,
+        "container.end.ms" : 89505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :205,
+        "container.end.ms" : 91405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :205,
+        "container.end.ms" : 95505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :205,
+        "container.end.ms" : 95405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :205,
+        "container.end.ms" : 96305,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :305,
+        "container.end.ms" : 102605,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :305,
+        "container.end.ms" : 96405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :305,
+        "container.end.ms" : 93405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :305,
+        "container.end.ms" : 91005,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :305,
+        "container.end.ms" : 89505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :305,
+        "container.end.ms" : 90905,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :405,
+        "container.end.ms" : 95805,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :405,
+        "container.end.ms" : 94505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :405,
+        "container.end.ms" : 91705,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :405,
+        "container.end.ms" : 96405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :505,
+        "container.end.ms" : 104405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :505,
+        "container.end.ms" : 96705,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :505,
+        "container.end.ms" : 88205,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :505,
+        "container.end.ms" : 87505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :505,
+        "container.end.ms" : 93805,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :505,
+        "container.end.ms" : 92405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :505,
+        "container.end.ms" : 91805,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :505,
+        "container.end.ms" : 102405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 90605,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 92305,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 90505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 91805,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 94905,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 95105,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 103005,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 96005,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 96105,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :605,
+        "container.end.ms" : 98405,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :705,
+        "container.end.ms" : 96005,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :705,
+        "container.end.ms" : 92505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :705,
+        "container.end.ms" : 96105,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :705,
+        "container.end.ms" : 90505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :705,
+        "container.end.ms" : 96905,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :905,
+        "container.end.ms" : 93205,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :905,
+        "container.end.ms" : 88505,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :905,
+        "container.end.ms" : 92605,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :905,
+        "container.end.ms" : 95205,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :905,
+        "container.end.ms" : 95205,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 6,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueB",
+  "job.id" : "6309870980",
+  "job.user" : "bPmfGUVHrdiUa3FNhN4Kkg76XAUHyurC3WbIJtula5U=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :0,
+        "container.end.ms" : 2800,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 28,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueC",
+  "job.id" : "6448505031",
+  "job.user" : "nSLhnjtRmqiT0ytrLIvs8cq2AoFad5WEfGcyNsY+ir0=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 2202,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 0,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueD",
+  "job.id" : "6351507079",
+  "job.user" : "RadM8g4+5sOfOLNjDbDRirrfEOAeY4TieW+qKkrGDQQ=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 117300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :400,
+        "container.end.ms" : 121300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 117400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :600,
+        "container.end.ms" : 117500,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 118700,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :700,
+        "container.end.ms" : 117600,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :800,
+        "container.end.ms" : 116400,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :900,
+        "container.end.ms" : 116600,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :900,
+        "container.end.ms" : 116800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :900,
+        "container.end.ms" : 117900,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :900,
+        "container.end.ms" : 116700,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1000,
+        "container.end.ms" : 116900,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1000,
+        "container.end.ms" : 116900,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1000,
+        "container.end.ms" : 120800,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1100,
+        "container.end.ms" : 117000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1100,
+        "container.end.ms" : 117000,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1200,
+        "container.end.ms" : 117300,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1200,
+        "container.end.ms" : 117100,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1300,
+        "container.end.ms" : 117200,
+        "container.priority" : 4,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1300,
+        "container.end.ms" : 117200,
+        "container.priority" : 4,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 50,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueB",
+  "job.id" : "6445514936",
+  "job.user" : "p41hbiB4aCxP+sZS+i5/qdx3AK5DdcIFyFW0Cfzg98g=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :5,
+        "container.end.ms" : 891605,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 24,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueB",
+  "job.id" : "6424975776",
+  "job.user" : "qteyl9BFLtHh8OdD206snZEvh+5KaGB6iRG6JS0i9rE=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2,
+        "container.end.ms" : 25502,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 2,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueA",
+  "job.id" : "6417413212",
+  "job.user" : "P/b25hVu6/7A0BJOLJFXi0VLXUOprxPTVtOKXlp/w/Y=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :0,
+        "container.end.ms" : 19700,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 45,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueC",
+  "job.id" : "6332349825",
+  "job.user" : "6ypz4vdMc6GlUOo/MIZtJKcW37mmdAWWUSv052k3RGs=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :4,
+        "container.end.ms" : 97776004,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 43,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueA",
+  "job.id" : "6401210073",
+  "job.user" : "CyS0bJ1mSJjSSGuoHDUH9h1P9aCRWvC13/GWBPTKDWw=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :4,
+        "container.end.ms" : 12604,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 0,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueB",
+  "job.id" : "6477928291",
+  "job.user" : "BeK/Qtm8ZGVzElYpUAGNBmuUFEc9ps4OhPyQAh/ImB0=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :0,
+        "container.end.ms" : 59200,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 0,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueD",
+  "job.id" : "6468517650",
+  "job.user" : "E2Ck2gvizHUwShxSuvjNcORB29GVR6KjVlz8RkY+F80=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :0,
+        "container.end.ms" : 1800,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 32,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueA",
+  "job.id" : "6454126339",
+  "job.user" : "O4NRuy2mh40vBNcpOihSjmoF/VD7FoV+r9NjFTm1trs=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :303,
+        "container.end.ms" : 48703,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1403,
+        "container.end.ms" : 6303,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1603,
+        "container.end.ms" : 10903,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1703,
+        "container.end.ms" : 48403,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1903,
+        "container.end.ms" : 5003,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2003,
+        "container.end.ms" : 3703,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2003,
+        "container.end.ms" : 56403,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2003,
+        "container.end.ms" : 47203,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2103,
+        "container.end.ms" : 49603,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2103,
+        "container.end.ms" : 48803,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2203,
+        "container.end.ms" : 3903,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2203,
+        "container.end.ms" : 46603,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2203,
+        "container.end.ms" : 48903,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2303,
+        "container.end.ms" : 48203,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2303,
+        "container.end.ms" : 12503,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2403,
+        "container.end.ms" : 5803,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2403,
+        "container.end.ms" : 52103,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2403,
+        "container.end.ms" : 6703,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2403,
+        "container.end.ms" : 11903,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2503,
+        "container.end.ms" : 11903,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2503,
+        "container.end.ms" : 59303,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2603,
+        "container.end.ms" : 43903,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2603,
+        "container.end.ms" : 49203,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2703,
+        "container.end.ms" : 49903,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2703,
+        "container.end.ms" : 8303,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2703,
+        "container.end.ms" : 48503,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2703,
+        "container.end.ms" : 10103,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2803,
+        "container.end.ms" : 44703,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2803,
+        "container.end.ms" : 12803,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2903,
+        "container.end.ms" : 48003,
+        "container.priority" : 6,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2903,
+        "container.end.ms" : 48003,
+        "container.priority" : 6,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 42,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueC",
+  "job.id" : "6442023734",
+  "job.user" : "JBEMyDFTIiNn1p7tUZhesIz1tAMtFYIahY6oWJP5leQ=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :4,
+        "container.end.ms" : 85704,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 50,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueC",
+  "job.id" : "6384304095",
+  "job.user" : "d2VTjfYNax8Fa/WdwdbO7zTYZ1UWfJEyx/DBfhaR/PA=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :5,
+        "container.end.ms" : 122705,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 0,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueB",
+  "job.id" : "6312547287",
+  "job.user" : "y9NKAC+Ud/LMV2fx5OqoEDjcCZYAfzpt8i0V/c/y9ik=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1200,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1300,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1400,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1500,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1600,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1600,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1600,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1600,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1700,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1800,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1800,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1800,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :1900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2000,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2000,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2000,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2000,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2000,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2100,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2100,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2100,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2200,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2200,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2200,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2300,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2300,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2300,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2300,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2400,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2400,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2500,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2500,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2600,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2600,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2600,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2700,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :2900,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :3000,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :3200,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :3300,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :3400,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map"
+    },{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :3400,
+        "container.end.ms" : 181664,
+        "container.priority" : 7,
+        "container.type" : "map" 
+    }]
+}
+{
+  "am.type" : "mapreduce",
+  "job.start.ms" : 5,
+  "job.end.ms" : 0,
+  "job.queue.name" : "queueA",
+  "job.id" : "6286600666",
+  "job.user" : "V+np11mG8kRGX5veywms3CfFed6YltsF7kvDAKgFbCo=",
+  "job.tasks" : [{
+        "container.host" : "/default-rack/1.smile.com",
+        "container.start.ms" :0,
+        "container.end.ms" : 80000,
+        "container.priority" : 8,
+        "container.type" : "map" 
+    }]
+}

@@ -43,7 +43,6 @@ class FairSchedulerStrategy(ISchedulerStrategy):
     def copy_conf_file(self):
         fileutil.file_copy('./data/fair-scheduler.xml', self.hadoop_etc + '/fair-scheduler.xml')
 
-    # TODO: Unfinished.
     @DeprecationWarning
     def get_queue_constraints(self):
         return [QueueConstraint('', queue_name, weight, weight) for queue_name, weight in self.current_action.items()]
