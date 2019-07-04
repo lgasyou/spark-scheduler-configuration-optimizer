@@ -22,7 +22,7 @@ class AbstractController(object):
     # Pre-train DQN model with offline data
     def pre_train_model(self):
         pre_trainer = PreTrainer(self.args, self.mem, self.agent)
-        pre_trainer.start_pre_train()
+        pre_trainer.start_from_breakpoint()
 
     @abc.abstractmethod
     def _env(self, args: argparse.Namespace):

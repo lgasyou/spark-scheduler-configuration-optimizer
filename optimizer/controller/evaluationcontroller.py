@@ -23,7 +23,8 @@ class EvaluationController(AbstractController):
         self.run_with_optimization()
 
         self.logger.info('Running without optimization.')
-        self.run_without_optimization()
+        for action_index in [2, 3, 4, 5, 6]:
+            self.run_without_optimization(action_index)
 
     def run_with_optimization(self):
         args = self.args
@@ -117,7 +118,7 @@ class EvaluationController(AbstractController):
 
         print('Total Time Cost :', total_time_cost_ms, 'ms')
         print(arr)
-        excelutil.list2excel(arr, './results/no_optimization.xlsx')
+        excelutil.list2excel(arr, './results/no-optimization-%d.xlsx' % action_index)
         env.close()
 
     def _env(self, args: argparse.Namespace):

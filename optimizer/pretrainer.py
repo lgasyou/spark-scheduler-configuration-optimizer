@@ -39,20 +39,27 @@ class PreTrainer(object):
         self.logger.info('Pre-training DQN model finished.')
 
     def start_from_breakpoint(self):
-        last_action_index, last_file_index = self._get_mark()
-        if last_action_index == -1 and last_file_index == -1:
-            self.start_pre_train()
-        else:
-            self.memory_serializer.try_load(last_action_index, last_file_index)
-            train_settings = [(action_index, file_index) for action_index, file_index in self._train_range()]
-            start_index = train_settings.index((last_action_index, last_file_index))
+        self.logger.info('Pre-training DQN model...')
 
-            for action_index, file_index in train_settings[start_index + 1:]:
-                self.train_once(action_index, file_index)
-                self.memory_serializer.save(action_index, file_index)
-                self._mark(action_index, file_index)
+        if not self.memory_serializer.try_load():
+            last_action_index, last_file_index = self._get_mark()
+            if last_action_index == -1 and last_file_index == -1:
+                self.start_pre_train()
+            else:
+                self.memory_serializer.try_load(last_action_index, last_file_index)
+                train_settings = [(action_index, file_index) for action_index, file_index in self._train_range()]
+                start_index = train_settings.index((last_action_index, last_file_index))
 
-            self.memory_serializer.save()
+                for action_index, file_index in train_settings[start_index + 1:]:
+                    self.train_once(action_index, file_index)
+                    self.memory_serializer.save(action_index, file_index)
+                    self._mark(action_index, file_index)
+
+                self.memory_serializer.save()
+
+        # Pre-train DQN model by using training set
+        self.dqn.learn(self.mem)
+        self.logger.info('Pre-training DQN model finished.')
 
     def train_once(self, action_index: int, file_index: int):
         train_env = PreTrainEnv(self.args)
@@ -67,6 +74,7 @@ class PreTrainer(object):
                 time.sleep(PRE_TRAIN_LOOP_INTERNAL)
                 T += 1
             except StateInvalidException:
+                self.mem.terminate()
                 done = True
 
     def _mark(self, action_index: int, file_index: int):
@@ -77,7 +85,7 @@ class PreTrainer(object):
         if fileutil.file_exists(self.MARK_FILENAME):
             with open(self.MARK_FILENAME) as f:
                 data = f.readline().split(',')
-                return data[0], data[1]
+                return int(data[0]), int(data[1])
         return -1, -1
 
     @staticmethod

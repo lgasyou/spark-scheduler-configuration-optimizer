@@ -131,28 +131,29 @@ class Validator(object):
         val_mem = ReplayMemoryProxy(self.args, self.args.evaluation_size)
         memory_serializer = MemorySerializer(val_mem)
 
-        if memory_serializer.try_load('./results/validation-replay-memory.pk'):
+        if memory_serializer.try_load_by_filename('./results/validation-replay-memory.pk'):
             self.logger.info('Validation memory setting up finished.')
             return val_mem
 
-        T, done, state = 0, True, None
-        while T < self.args.evaluation_size:
-            self.logger.info('Validation Loop %d' % T)
-            if done:
-                state, done = self.env.reset(), False
-
-            try:
-                next_state, reward, done = self.env.step(random.randint(0, self.action_space - 1))
-                print('Reward: %f' % reward)
-                time.sleep(EVALUATION_LOOP_INTERNAL)
-            except StateInvalidException:
-                done = True
-                continue
-
-            val_mem.append(state, None, None, done)
-            state = next_state
-            T += 1
-        memory_serializer.save('./results/validation-replay-memory.pk')
+        # T, done, state = 0, True, None
+        # while T < self.args.evaluation_size:
+        #     self.logger.info('Validation Loop %d' % T)
+        #     if done:
+        #         state, done = self.env.reset(), False
+        #
+        #     try:
+        #         next_state, reward, done = self.env.step(random.randint(0, self.action_space - 1))
+        #         print('Reward: %f' % reward)
+        #         time.sleep(EVALUATION_LOOP_INTERNAL)
+        #     except StateInvalidException:
+        #         val_mem.terminate()
+        #         done = True
+        #         continue
+        #
+        #     val_mem.append(state, None, None, done)
+        #     state = next_state
+        #     T += 1
+        # memory_serializer.save('./results/validation-replay-memory.pk')
 
         self.logger.info('Validation memory setting up finished.')
         return val_mem

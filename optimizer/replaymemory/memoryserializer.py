@@ -22,6 +22,9 @@ class MemorySerializer(object):
         else:
             filename = self._get_serialized_memory_filename(action_index, file_index)
 
+        return self.try_load_by_filename(filename)
+
+    def try_load_by_filename(self, filename):
         mem = self.mem
 
         if not fileutil.file_exists(filename):
