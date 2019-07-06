@@ -1,6 +1,8 @@
 from typing import List
+import time
 
 from optimizer.hyperparameters import QUEUES
+from .jobfinishtimepredictor import JobFinishTimePredictor
 
 
 class JobRequestResource(object):
@@ -25,19 +27,23 @@ class WaitingJob(object):
 
 class RunningJob(object):
     def __init__(self, elapsed_time: int, priority: int, location: str, progress: float, queue_usage_percentage: float,
-                 memory_seconds: int, vcore_seconds: int, request_resources: List[JobRequestResource]):
+                 request_resources: List[JobRequestResource]):
         self.elapsed_time = elapsed_time
         self.priority = priority
         self.location = location
         self.progress = progress
         self.queue_usage_percentage = queue_usage_percentage
-        self.memory_seconds = memory_seconds
-        self.vcore_seconds = vcore_seconds
         self.request_resources = request_resources
+        self.finish_time_predictor = JobFinishTimePredictor()
 
     @property
     def converted_location(self):
         return queue_name_to_index(self.location)
+
+    # TODO: Implement this function
+    @property
+    def predicted_time_delay(self):
+        return self.finish_time_predictor.predict(time.time() * 1000, )
 
 
 class FinishedJob(object):
