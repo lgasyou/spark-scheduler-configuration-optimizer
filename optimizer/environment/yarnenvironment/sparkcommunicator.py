@@ -5,7 +5,8 @@ from typing import List
 
 from .abstractyarncommunicator import AbstractYarnCommunicator
 from .iresetablecommunicator import IResetableCommunicator
-from optimizer.util import processutil
+from .yarnmodel import FinishedJob
+from optimizer.util import processutil, jsonutil
 
 
 class SparkCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
@@ -21,12 +22,20 @@ class SparkCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
 
     def close(self):
         self.workload_runner.stop_workloads()
-        time.sleep(5)
+        restart_process = restart_yarn(os.getcwd())
+        restart_process.wait()
 
     def reset(self):
         self.close()
         self.start_workload()
         time.sleep(5)
+
+    def get_total_time_cost(self):
+        url = self.api_url + 'ws/v1/cluster/apps?states=FINISHED'
+        job_json = jsonutil.get_json(url)
+        finished_jobs = build_finished_jobs_from_json(job_json)
+        time_costs = [j.elapsed_time for j in finished_jobs]
+        return time_costs, sum(time_costs)
 
     def start_workload(self):
         self.workload_runner.start_workloads(os.getcwd(), self.spark_home, self.hadoop_home, self.java_home)
@@ -37,7 +46,7 @@ class SparkCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
 
 class SparkWorkloadController(object):
 
-    WORKLOADS = ['bayes', 'fpgrowth', 'kmeans', 'lda', 'linear', 'SVM']
+    WORKLOADS = ['bayes', 'fpgrowth', 'kmeans', 'lda', 'linear', 'SVM', 'als']
 
     def __init__(self):
         self.processes: List[subprocess.Popen] = []
@@ -59,3 +68,20 @@ class SparkWorkloadController(object):
 def start_workload_process(workload_type, wd, spark_home, hadoop_home, java_home):
     cmd = "%s/bin/start-spark-workload.sh %s %s %s %s %s" % (wd, workload_type, spark_home, hadoop_home, java_home, wd)
     return subprocess.Popen(cmd, shell=True)
+
+
+def restart_yarn(wd):
+    cmd = "%s/bin/restart-yarn.sh" % wd
+    return subprocess.Popen(cmd, shell=True)
+
+
+def build_finished_jobs_from_json(j: dict) -> List[FinishedJob]:
+    if j['apps'] is None:
+        return []
+
+    apps, jobs = j['apps']['app'], []
+    for j in apps:
+        elapsed_time = j['elapsedTime']
+        jobs.append(FinishedJob(elapsed_time))
+
+    return jobs

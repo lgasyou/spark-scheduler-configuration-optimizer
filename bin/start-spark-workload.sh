@@ -9,58 +9,48 @@ export JAVA_HOME=${java_home}
 export HADOOP_CONF_DIR=${hadoop_conf_dir}
 
 
+function submit() {
+    class=$1
+    queue=$2
+    workload=$3
+
+    ${spark_home}/bin/spark-submit \
+    --class ${class} \
+    --master yarn \
+    --deploy-mode cluster \
+    --queue ${queue} \
+    --executor-memory 6g \
+    --driver-memory 1g \
+    ${work_dir}/data/testset/${workload}.jar
+}
+
 case $1 in
     SVM)
-        ${spark_home}/bin/spark-submit \
-            --class scalapackage.runtest \
-            --master yarn \
-            --deploy-mode cluster \
-            --queue queueA \
-            ${work_dir}/data/testset/workload_SVM.jar
+        submit scalapackage.runtest queueA workload_SVM
         ;;
 
     fpgrowth)
-        ${spark_home}/bin/spark-submit \
-        --class scalapackage.FPGrowth \
-        --master yarn \
-        --deploy-mode cluster \
-        --queue queueB \
-        ${work_dir}/data/testset/workload_fpgrowth.jar
+        submit scalapackage.FPGrowth queueB workload_fpgrowth
         ;;
 
     kmeans)
-        ${spark_home}/bin/spark-submit \
-            --class scalapackage.kmeans \
-            --master yarn \
-            --deploy-mode cluster \
-            --queue queueC \
-            ${work_dir}/data/testset/workload_kmeans.jar
+        submit scalapackage.kmeans queueC workload_kmeans
         ;;
 
     linear)
-        ${spark_home}/bin/spark-submit \
-            --class scalapackage.linear \
-            --master yarn \
-            --deploy-mode cluster \
-            --queue queueD \
-            ${work_dir}/data/testset/workload_linear.jar
+        submit scalapackage.linear queueD workload_linear
         ;;
 
     lda)
-        ${spark_home}/bin/spark-submit \
-            --class scalapackage.lda \
-            --master yarn \
-            --deploy-mode cluster \
-            --queue queueA \
-            ${work_dir}/data/testset/workload_lda.jar
+        submit scalapackage.lda queueA workload_lda
         ;;
 
     bayes)
-        ${spark_home}/bin/spark-submit \
-            --class scalapackage.bayes \
-            --master yarn \
-            --deploy-mode cluster \
-            --queue queueB \
-            ${work_dir}/data/testset/workload_bayes.jar
+        submit scalapackage.bayes queueB workload_bayes
         ;;
+
+    als)
+        submit scalapackage.als queueC workload_als
+        ;;
+
 esac

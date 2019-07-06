@@ -44,8 +44,10 @@ class MemorySerializer(object):
         else:
             filename = self._get_serialized_memory_filename(action_index, file_index)
 
-        mem = self.mem
+        self.save_as(filename)
 
+    def save_as(self, filename: str):
+        mem = self.mem
         with open(filename, 'wb') as f:
             pickle.dump([mem.t, mem.transitions], f)
 

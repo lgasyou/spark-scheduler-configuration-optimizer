@@ -40,6 +40,11 @@ class RunningJob(object):
         return queue_name_to_index(self.location)
 
 
+class FinishedJob(object):
+    def __init__(self, elapsed_time: int):
+        self.elapsed_time = elapsed_time
+
+
 class Resource(object):
     def __init__(self, vcore_num: int, mem: int):
         self.vcore_num: int = vcore_num         # vCore

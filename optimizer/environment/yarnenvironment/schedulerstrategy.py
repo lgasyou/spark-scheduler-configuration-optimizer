@@ -62,7 +62,8 @@ class CapacitySchedulerStrategy(ISchedulerStrategy):
         action: dict = self.action_set[action_index]
         for queue_name, capacity in action.items():
             xml_modifier.modify_kv_type('yarn.scheduler.capacity.root.%s.capacity' % queue_name, capacity)
-            xml_modifier.modify_kv_type('yarn.scheduler.capacity.root.%s.maximum-capacity' % queue_name, capacity)
+            # TODO: edit this
+            xml_modifier.modify_kv_type('yarn.scheduler.capacity.root.%s.maximum-capacity' % queue_name, 80)
 
         xml_modifier.save()
 

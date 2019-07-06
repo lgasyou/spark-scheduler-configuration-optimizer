@@ -135,26 +135,26 @@ class Validator(object):
             self.logger.info('Validation memory setting up finished.')
             return val_mem
 
-        # TODO: Remove commit.
-        # T, done, state = 0, True, None
-        # while T < self.args.evaluation_size:
-        #     self.logger.info('Validation Loop %d' % T)
-        #     if done:
-        #         state, done = self.env.reset(), False
-        #
-        #     try:
-        #         next_state, reward, done = self.env.step(random.randint(0, self.action_space - 1))
-        #         print('Reward: %f' % reward)
-        #         time.sleep(EVALUATION_LOOP_INTERNAL)
-        #     except StateInvalidException:
-        #         val_mem.terminate()
-        #         done = True
-        #         continue
-        #
-        #     val_mem.append(state, None, None, done)
-        #     state = next_state
-        #     T += 1
-        # memory_serializer.save('./results/validation-replay-memory.pk')
+        T, done, state = 0, True, None
+        while T < self.args.evaluation_size:
+            self.logger.info('Validation Loop %d' % T)
+            if done:
+                state, done = self.env.reset(), False
+
+            try:
+                next_state, reward, done = self.env.step(random.randint(0, self.action_space - 1))
+                print('Reward: %f' % reward)
+                time.sleep(EVALUATION_LOOP_INTERNAL)
+            except StateInvalidException:
+                val_mem.terminate()
+                done = True
+                continue
+
+            val_mem.append(state, None, None, done)
+            state = next_state
+            T += 1
+
+        memory_serializer.save_as('./results/validation-replay-memory.pk')
 
         self.logger.info('Validation memory setting up finished.')
         return val_mem
