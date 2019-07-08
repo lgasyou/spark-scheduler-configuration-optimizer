@@ -11,18 +11,19 @@ from optimizer.util import processutil, jsonutil
 
 class SparkCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
 
-    def __init__(self, api_url: str, hadoop_home: str, spark_home: str, java_home: str):
-        super().__init__(api_url, hadoop_home)
+    def __init__(self, rm_api_url: str, timeline_api_url: str, hadoop_home: str, spark_home: str, java_home: str):
+        super().__init__(rm_api_url, timeline_api_url, hadoop_home)
         self.spark_home = spark_home
         self.java_home = java_home
         self.workload_runner = SparkWorkloadController()
 
     def is_done(self) -> bool:
+        return False
         return self.workload_runner.is_done()
 
     def close(self):
         self.workload_runner.stop_workloads()
-        restart_process = restart_yarn(os.getcwd())
+        restart_process = restart_yarn(os.getcwd(), self.hadoop_home)
         restart_process.wait()
 
     def reset(self):
@@ -31,7 +32,7 @@ class SparkCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
         time.sleep(5)
 
     def get_total_time_cost(self):
-        url = self.api_url + 'ws/v1/cluster/apps?states=FINISHED'
+        url = self.rm_api_url + 'ws/v1/cluster/apps?states=FINISHED'
         job_json = jsonutil.get_json(url)
         finished_jobs = build_finished_jobs_from_json(job_json)
         time_costs = [j.elapsed_time for j in finished_jobs]
@@ -70,8 +71,8 @@ def start_workload_process(workload_type, wd, spark_home, hadoop_home, java_home
     return subprocess.Popen(cmd, shell=True)
 
 
-def restart_yarn(wd):
-    cmd = "%s/bin/restart-yarn.sh" % wd
+def restart_yarn(wd, hadoop_home):
+    cmd = "%s/bin/restart-yarn.sh %s" % (wd, hadoop_home)
     return subprocess.Popen(cmd, shell=True)
 
 

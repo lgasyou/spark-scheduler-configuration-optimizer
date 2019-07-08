@@ -48,7 +48,8 @@ class EvaluationEnv(AbstractEnv):
         self.communicator.close()
 
     def _communicator(self, args: argparse.Namespace):
-        return SparkCommunicator(args.rm_host, args.hadoop_home, args.spark_home, args.java_home)
+        return SparkCommunicator(args.rm_host, args.timeline_server_host,
+                                 args.hadoop_home, args.spark_home, args.java_home)
 
     def _reset_buffer(self):
         for _ in range(self.buffer_history_length):

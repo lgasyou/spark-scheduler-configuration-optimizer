@@ -42,7 +42,7 @@ class PreTrainEnv(AbstractEnv):
         self.t += 1
 
     def _communicator(self, args: argparse.Namespace):
-        return YarnSlsCommunicator(args.rm_host, args.hadoop_home)
+        return YarnSlsCommunicator(args.rm_host, args.timeline_server_host, args.hadoop_home)
 
     def _reset_buffer(self):
         for _ in range(self.buffer_history_length):

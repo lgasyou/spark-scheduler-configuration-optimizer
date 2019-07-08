@@ -4,7 +4,6 @@ import subprocess
 import time
 from typing import Tuple, Optional
 
-import math
 import requests
 import torch
 from requests.exceptions import ConnectionError
@@ -23,17 +22,19 @@ class AbstractYarnCommunicator(ICommunicator):
     Uses RESTFul API to communicate with YARN cluster scheduler.
     """
 
-    def __init__(self, api_url: str, hadoop_home: str):
+    def __init__(self, rm_api_url: str, timeline_api_url: str, hadoop_home: str):
         self.hadoop_home = hadoop_home
         self.hadoop_etc = hadoop_home + '/etc/hadoop'
-        self.api_url = api_url
+        self.rm_api_url = rm_api_url
+        self.timeline_api_url = timeline_api_url
 
         self.start_time = timestamp()
         self.action_set = ActionParser.parse()
         self.state: Optional[State] = None
+        self.last_sum_time_delay: Optional[float] = None
 
         scheduler_type = self.get_scheduler_type()
-        self.scheduler_strategy = SchedulerStrategyFactory.create(scheduler_type, api_url,
+        self.scheduler_strategy = SchedulerStrategyFactory.create(scheduler_type, rm_api_url,
                                                                   self.hadoop_etc, self.action_set)
         self.scheduler_strategy.copy_conf_file()
 
@@ -45,18 +46,21 @@ class AbstractYarnCommunicator(ICommunicator):
         self.set_and_refresh_queue_config(action_index)
         return self.get_reward()
 
+    # TODO: Test if we should use function math.tanh to clap the value of reward.
     def get_reward(self) -> float:
         waiting_jobs = self.state.waiting_jobs
         running_jobs = self.state.running_jobs
-        job_count = len(waiting_jobs) + len(running_jobs)
-        if job_count == 0:
+
+        sum_time_delay = sum([j.predicted_time_delay for j in (waiting_jobs + running_jobs)])
+
+        # If we just start this program, set the reward as 0.
+        if self.last_sum_time_delay is None or not self.last_sum_time_delay:
+            self.last_sum_time_delay = sum_time_delay
             return 0
 
-        waiting_jobs_elapsed_time = sum([job.elapsed_time for job in waiting_jobs])
-        running_jobs_elapsed_time = sum([job.elapsed_time for job in running_jobs])
-        middle = (0.8 * waiting_jobs_elapsed_time + 0.2 * running_jobs_elapsed_time) / job_count
-        cost = math.tanh(0.00001 * middle)
-        return -cost
+        reward = (self.last_sum_time_delay - sum_time_delay) / self.last_sum_time_delay
+        self.last_sum_time_delay = sum_time_delay
+        return reward
 
     def get_state(self) -> State:
         """
@@ -99,8 +103,7 @@ class AbstractYarnCommunicator(ICommunicator):
         for i, rj in enumerate(raw.running_jobs[:75]):
             row = i + 75
             line = [rj.elapsed_time, rj.priority, rj.converted_location,
-                    rj.progress, rj.queue_usage_percentage,
-                    rj.memory_seconds, rj.vcore_seconds]
+                    rj.progress, rj.queue_usage_percentage, rj.predicted_time_delay]
             for rr in rj.request_resources[:65]:
                 line.extend([rr.priority, rr.memory, rr.cpu])
             line.extend([0.0] * (width - len(line)))
@@ -151,17 +154,17 @@ class AbstractYarnCommunicator(ICommunicator):
         return waiting_jobs, running_jobs
 
     def _get_waiting_jobs(self) -> List[WaitingJob]:
-        url = self.api_url + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED'
+        url = self.rm_api_url + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED'
         job_json = jsonutil.get_json(url)
         return build_waiting_jobs_from_json(job_json)
 
     def _get_running_jobs(self) -> List[RunningJob]:
-        url = self.api_url + 'ws/v1/cluster/apps?states=RUNNING'
+        url = self.rm_api_url + 'ws/v1/cluster/apps?states=RUNNING'
         job_json = jsonutil.get_json(url)
-        return build_running_jobs_from_json(job_json)
+        return build_running_jobs_from_json(job_json, self.timeline_api_url)
 
     def _get_resources(self) -> List[Resource]:
-        url = self.api_url + 'ws/v1/cluster/nodes'
+        url = self.rm_api_url + 'ws/v1/cluster/nodes'
         conf = jsonutil.get_json(url)
         nodes = conf['nodes']['node']
         resources = []
@@ -183,22 +186,40 @@ def refresh_queues(hadoop_home: str):
     subprocess.Popen([os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), hadoop_home])
 
 
-def build_running_jobs_from_json(j: dict) -> List[RunningJob]:
+def get_containers_by_application_id(application_id: str, timeline_api_url: str) -> List[Container]:
+    attempt_url = '%sws/v1/applicationhistory/apps/%s/appattempts' % (timeline_api_url, application_id)
+    attempts_json = jsonutil.get_json(attempt_url)
+    attempts = attempts_json.get('appAttempt', [])
+    ret = []
+    for attempt in attempts:
+        container_url = '%sws/v1/applicationhistory/apps/%s/appattempts/%s/containers' % (
+            timeline_api_url, application_id, attempt['appAttemptId'])
+        containers: list = jsonutil.get_json(container_url).get('container', [])
+        ret.extend([build_container_from_json(c) for c in containers])
+
+    return ret
+
+
+def build_container_from_json(j: dict) -> Container:
+    return Container(j['startedTime'], 'RUNNING' if int(j['finishedTime']) == 0 else 'FINISHED')
+
+
+def build_running_jobs_from_json(j: dict, timeline_api_url) -> List[RunningJob]:
     if j['apps'] is None:
         return []
 
     apps, jobs = j['apps']['app'], []
     for j in apps:
+        application_id = j['id']
         elapsed_time = j['elapsedTime']
         priority = j['priority']
         progress = j['progress']
         queue_usage_percentage = j['queueUsagePercentage']
-        memory_seconds = j['memorySeconds']
-        vcore_seconds = j['vcoreSeconds']
         location = j['queue']
         request_resources = build_request_resources_from_json(j)
-        jobs.append(RunningJob(elapsed_time, priority, location, progress, queue_usage_percentage, memory_seconds,
-                               vcore_seconds, request_resources))
+        containers = get_containers_by_application_id(application_id, timeline_api_url)
+        jobs.append(RunningJob(elapsed_time, priority, location, progress,
+                               queue_usage_percentage, request_resources, containers))
 
     return jobs
 

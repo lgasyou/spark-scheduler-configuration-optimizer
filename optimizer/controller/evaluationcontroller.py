@@ -19,9 +19,9 @@ class EvaluationController(AbstractController):
         self.validator = Validator(args, self.env, self.agent, self.action_space)
 
     def run(self):
-        self.logger.info('Running without optimization.')
-        for action_index in [2, 3, 4, 5, 6]:
-            self.run_without_optimization(action_index)
+        # self.logger.info('Running without optimization.')
+        # for action_index in [2, 3, 4, 5, 6]:
+        #     self.run_without_optimization(action_index)
 
         self.logger.info('Running with optimization.')
         self.run_with_optimization()

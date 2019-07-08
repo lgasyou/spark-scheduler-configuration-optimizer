@@ -12,8 +12,8 @@ from optimizer.util import processutil
 
 class YarnSlsCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
 
-    def __init__(self, api_url: str, hadoop_home: str, sls_jobs_dataset: str = None):
-        super().__init__(api_url, hadoop_home)
+    def __init__(self, rm_api_url: str, timeline_api_url: str, hadoop_home: str, sls_jobs_dataset: str = None):
+        super().__init__(rm_api_url, timeline_api_url, hadoop_home)
         self.current_dataset = sls_jobs_dataset
         self.sls_runner: Optional[subprocess.Popen] = None
 

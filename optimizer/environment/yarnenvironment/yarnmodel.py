@@ -1,8 +1,45 @@
 from typing import List
-import time
+
 
 from optimizer.hyperparameters import QUEUES
-from .jobfinishtimepredictor import JobFinishTimePredictor
+
+
+class Task(object):
+    def __init__(self, task_id, running_time, current_finish_time):
+        self.id = task_id
+        self.running_time = running_time
+        self.current_finish_time = current_finish_time
+
+
+class Container(object):
+    def __init__(self, start_time: int, state: str):
+        self.start_time = start_time
+        self.state = state
+        self.tasks: List[Task] = []
+
+    def pop_waiting_tasks(self, current_time: int):
+        waiting_tasks = []
+        length = len(self.tasks)
+        for i in range(length - 1, -1, -1):
+            task = self.tasks[i]
+            task_start_time = task.current_finish_time - task.running_time
+            if task_start_time > current_time:
+                waiting_tasks.append(task)
+                self.tasks.pop(i)
+
+        return waiting_tasks
+
+    def add_task(self, task: Task):
+        task.current_finish_time = self.finish_time + task.running_time
+        self.tasks.append(task)
+
+    def add_tasks(self, tasks: List[Task]):
+        for t in tasks:
+            self.add_task(t)
+
+    @property
+    def finish_time(self):
+        return self.tasks[-1].current_finish_time if len(self.tasks) else self.start_time
 
 
 class JobRequestResource(object):
@@ -12,6 +49,7 @@ class JobRequestResource(object):
         self.cpu: int = cpu
 
 
+# TODO: We may need more information to calculate its predicted time delay.
 class WaitingJob(object):
     def __init__(self, elapsed_time: int, priority: int,
                  location: str, request_resources: List[JobRequestResource]):
@@ -24,17 +62,23 @@ class WaitingJob(object):
     def converted_location(self):
         return queue_name_to_index(self.location)
 
+    # TODO: Implement this function
+    @property
+    def predicted_time_delay(self):
+        """If this job doesn't start in this episode, its predicted time delay will be 0."""
+        return 1
+
 
 class RunningJob(object):
     def __init__(self, elapsed_time: int, priority: int, location: str, progress: float, queue_usage_percentage: float,
-                 request_resources: List[JobRequestResource]):
+                 request_resources: List[JobRequestResource], containers: List[Container]):
         self.elapsed_time = elapsed_time
         self.priority = priority
         self.location = location
         self.progress = progress
         self.queue_usage_percentage = queue_usage_percentage
         self.request_resources = request_resources
-        self.finish_time_predictor = JobFinishTimePredictor()
+        self.containers = containers
 
     @property
     def converted_location(self):
@@ -43,7 +87,7 @@ class RunningJob(object):
     # TODO: Implement this function
     @property
     def predicted_time_delay(self):
-        return self.finish_time_predictor.predict(time.time() * 1000, )
+        return 1
 
 
 class FinishedJob(object):
@@ -76,6 +120,12 @@ class State(object):
         self.running_jobs = running_jobs
         self.resources = resources
         self.constraints = constraints
+
+
+class ContainerAddition(object):
+    def __init__(self, add_time: int, num_containers: int):
+        self.time = add_time
+        self.containers = [Container(add_time) for _ in range(num_containers)]
 
 
 def queue_name_to_index(queue_name: str) -> int:

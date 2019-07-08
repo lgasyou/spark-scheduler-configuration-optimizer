@@ -11,10 +11,11 @@ logger = logging.getLogger(__name__)
 
 def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
+    parser.add_argument('--java-home', type=str, default='/home/lzq/library/jdk1.8.0_211', help='java home path')
     parser.add_argument('--hadoop-home', type=str, default='/home/lzq/library/hadoop', help='Hadoop home path')
     parser.add_argument('--spark-home', type=str, default='/home/lzq/library/spark-2.4.1-bin-hadoop2.7', help='Spark home path')
-    parser.add_argument('--java-home', type=str, default='/home/lzq/library/jdk1.8.0_211', help='java home path')
-    parser.add_argument('--rm-host', type=str, default='http://localhost:18088/', help='Address:port of ResourceManager')
+    parser.add_argument('--rm-host', type=str, default='http://omnisky:8088/', help='Address:port of ResourceManager')
+    parser.add_argument('--timeline-server-host', type=str, default='http://omnisky:8188/', help='Address:port of Timeline Server')
 
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
