@@ -3,22 +3,21 @@ import os
 import time
 from typing import List
 
-from .abstractyarncommunicator import AbstractYarnCommunicator
-from .iresetablecommunicator import IResetableCommunicator
-from .yarnmodel import FinishedJob
+from optimizer.environment.abstractyarncommunicator import AbstractYarnCommunicator
+from optimizer.environment.iresetablecommunicator import IResetableCommunicator
+from optimizer.environment.yarn.yarnmodel import FinishedApplication
 from optimizer.util import processutil, jsonutil
 
 
 class SparkCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
 
-    def __init__(self, rm_api_url: str, timeline_api_url: str, hadoop_home: str, spark_home: str, java_home: str):
-        super().__init__(rm_api_url, timeline_api_url, hadoop_home)
+    def __init__(self, rm_api_url: str, spark_history_server_api_url: str, hadoop_home: str, spark_home: str, java_home: str):
+        super().__init__(rm_api_url, spark_history_server_api_url, hadoop_home)
         self.spark_home = spark_home
         self.java_home = java_home
         self.workload_runner = SparkWorkloadController()
 
     def is_done(self) -> bool:
-        return False
         return self.workload_runner.is_done()
 
     def close(self):
@@ -76,13 +75,13 @@ def restart_yarn(wd, hadoop_home):
     return subprocess.Popen(cmd, shell=True)
 
 
-def build_finished_jobs_from_json(j: dict) -> List[FinishedJob]:
+def build_finished_jobs_from_json(j: dict) -> List[FinishedApplication]:
     if j['apps'] is None:
         return []
 
     apps, jobs = j['apps']['app'], []
     for j in apps:
         elapsed_time = j['elapsedTime']
-        jobs.append(FinishedJob(elapsed_time))
+        jobs.append(FinishedApplication(elapsed_time))
 
     return jobs

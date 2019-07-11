@@ -1,5 +1,5 @@
-from optimizer.util import jsonutil
-from optimizer.environment.yarnenvironment.jobfinishtimepredictor import Container
+# from optimizer.util import jsonutil
+# from optimizer.environment.yarn.jobfinishtimepredictor import Container
 
 # finished_jobs = build_finished_jobs_from_json(job_json)
 # time_costs = [j.elapsed_time for j in finished_jobs]
@@ -19,3 +19,6 @@ from optimizer.environment.yarnenvironment.jobfinishtimepredictor import Contain
 
 state = 'RUNNING' if 1 != 0 else 'FINISHED'
 print(state)
+
+import requests
+print(requests.get('http://localhost:4040'))
