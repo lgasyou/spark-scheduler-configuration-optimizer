@@ -5,12 +5,12 @@ from typing import Optional
 
 import pandas as pd
 
-from optimizer.environment.abstractyarncommunicator import AbstractYarnCommunicator
+from optimizer.environment.abstractcommunicator import AbstractCommunicator
 from optimizer.environment.iresetablecommunicator import IResetableCommunicator
 from optimizer.util import processutil
 
 
-class YarnSlsCommunicator(AbstractYarnCommunicator, IResetableCommunicator):
+class YarnSlsCommunicator(AbstractCommunicator, IResetableCommunicator):
 
     def __init__(self, rm_api_url: str, spark_history_server_api_url: str, hadoop_home: str, sls_jobs_dataset: str = None):
         super().__init__(rm_api_url, spark_history_server_api_url, hadoop_home)

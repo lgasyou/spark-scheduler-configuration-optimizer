@@ -12,7 +12,7 @@ from optimizer.environment.yarn.yarnmodel import *
 from optimizer.environment.yarn.statebuilder import StateBuilder
 
 
-class AbstractYarnCommunicator(ICommunicator):
+class AbstractCommunicator(ICommunicator):
     """
     Uses RESTFul API to communicate with YARN cluster scheduler.
     """

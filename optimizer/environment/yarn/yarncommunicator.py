@@ -1,7 +1,7 @@
-from optimizer.environment.abstractyarncommunicator import AbstractYarnCommunicator
+from optimizer.environment.abstractcommunicator import AbstractCommunicator
 
 
-class YarnCommunicator(AbstractYarnCommunicator):
+class YarnCommunicator(AbstractCommunicator):
 
     def __init__(self, rm_api_url: str, spark_history_server_api_url: str, hadoop_home: str):
         super().__init__(rm_api_url, spark_history_server_api_url, hadoop_home)
