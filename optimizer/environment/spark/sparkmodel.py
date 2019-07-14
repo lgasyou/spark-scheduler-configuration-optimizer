@@ -23,6 +23,7 @@ class Job(object):
 class Stage(object):
     stage_id: int
     num_tasks: int
+    input_bytes: int
     name: str
     tasks: List[Task]
 
@@ -30,7 +31,7 @@ class Stage(object):
 @dataclasses.dataclass
 class Task(object):
     task_id: int
-    launch_time: str
+    launch_time: int
     duration: int
     host: str
 
@@ -43,6 +44,5 @@ class Executor(object):
     max_memory_gb: float
 
 
-@dataclasses.dataclass
 class SparkGlobalConf(object):
-    hdfs_block_size: int = 128
+    spark_block_size_bytes: int = 256 * 1024 * 1024

@@ -81,7 +81,7 @@ def main():
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     args = get_args()
 
-    args.evaluate = True
+    args.evaluate = False
     if args.evaluate:
         controller = EvaluationController(args)
     else:

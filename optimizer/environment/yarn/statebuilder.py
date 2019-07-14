@@ -112,7 +112,7 @@ class StateBuilder(object):
             progress = j['progress']
             queue_usage_percentage = j['queueUsagePercentage']
             location = j['queue']
-            predicted_time_delay = self.application_time_delay_predictor.predict(application_id)
+            predicted_time_delay, _ = self.application_time_delay_predictor.predict(application_id)
             request_resources = self.build_request_resources_from_json(j)
             apps.append(RunningApplication(application_id, elapsed_time, priority, location, progress,
                                            queue_usage_percentage, predicted_time_delay, request_resources))

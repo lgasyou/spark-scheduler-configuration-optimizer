@@ -45,19 +45,21 @@ class SparkApplicationBuilder(object):
         return sparkmodel.Job(job_id, name, stages)
 
     def parse_and_build_stage(self, j):
-        stage_id = j[0]['stageId']
-        num_tasks = j[0]['numTasks']
-        name = j[0]['name']
+        j = j[0]
+        stage_id = j['stageId']
+        num_tasks = j['numTasks']
+        input_bytes = j['inputBytes']
+        name = j['name']
         tasks_url = self.spark_history_server_api_url + 'applications/%s/1/stages/%s/0/taskList' % (
             self.application_id, stage_id)
         tasks_json = jsonutil.get_json(tasks_url)
         tasks = [self.parse_and_build_task(task_json) for task_json in tasks_json]
-        return sparkmodel.Stage(stage_id, num_tasks, name, tasks)
+        return sparkmodel.Stage(stage_id, num_tasks, input_bytes, name, tasks)
 
     @staticmethod
     def parse_and_build_task(j):
         task_id = j['taskId']
-        launch_time = j['launchTime']
+        launch_time = timeutil.convert_str_to_timestamp(j['launchTime'])
         duration = j['duration']
         host = j['host']
         return sparkmodel.Task(task_id, launch_time, duration, host)

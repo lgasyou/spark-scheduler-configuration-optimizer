@@ -22,9 +22,7 @@ class EvaluationEnv(AbstractEnv):
     def reset(self) -> torch.Tensor:
         self._reset_buffer()
         self.communicator.reset()
-        state = self.communicator.get_state_tensor().to(self.device)
-        self.state_buffer.append(state)
-        return torch.stack(list(self.state_buffer), 0)
+        return self.get_state()
 
     # Return state, reward, done
     def step(self, action: int) -> Tuple[torch.Tensor, float, bool]:

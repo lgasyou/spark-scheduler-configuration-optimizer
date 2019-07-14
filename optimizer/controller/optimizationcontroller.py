@@ -17,8 +17,9 @@ class OptimizationController(AbstractController):
         priority_weight_increase = self.priority_weight_increase
         reward_clip = args.reward_clip
 
-        T = 0
+        T, done, next_state = 0, False, None
         state = env.get_state()
+
         while True:
             action = dqn.act(state)
 
@@ -29,9 +30,8 @@ class OptimizationController(AbstractController):
                 mem.append(state, action, reward, done)  # Append transition to memory
                 time.sleep(TRAIN_LOOP_INTERNAL)
                 T += 1
-            except StateInvalidException:
-                mem.terminate()
-                break
+            except StateInvalidException as e:
+                print(e)
 
             if done:
                 break
@@ -50,6 +50,7 @@ class OptimizationController(AbstractController):
                 # Update target network
                 if T % args.target_update == 0:
                     dqn.update_target_net()
+
             state = next_state
 
     def _env(self, args: argparse.Namespace):
