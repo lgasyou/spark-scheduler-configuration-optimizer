@@ -3,8 +3,8 @@ from typing import Tuple
 
 import torch
 
-from . import AbstractEnv
-from .spark.sparkcommunicator import SparkCommunicator
+from optimizer.environment import AbstractEnv
+from optimizer.environment.spark.sparkcommunicator import SparkCommunicator
 from optimizer.hyperparameters import STATE_SHAPE
 
 
@@ -20,7 +20,7 @@ class EvaluationEnv(AbstractEnv):
         self.training = True  # Consistent with model training mode
 
     def reset(self) -> torch.Tensor:
-        self._reset_buffer()
+        self.reset_buffer()
         self.communicator.reset()
         return self.get_state()
 
@@ -48,7 +48,3 @@ class EvaluationEnv(AbstractEnv):
     def _communicator(self, args: argparse.Namespace):
         return SparkCommunicator(args.rm_host, args.spark_history_server_host,
                                  args.hadoop_home, args.spark_home, args.java_home)
-
-    def _reset_buffer(self):
-        for _ in range(self.buffer_history_length):
-            self.state_buffer.append(torch.zeros(*STATE_SHAPE, device=self.device))

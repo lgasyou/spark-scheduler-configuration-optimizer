@@ -1,7 +1,7 @@
 import pickle
 
-from . import ReplayMemoryProxy
-from ..util import fileutil
+from optimizer.replaymemory import ReplayMemoryProxy
+from optimizer.util import fileutil
 
 
 class MemorySerializer(object):

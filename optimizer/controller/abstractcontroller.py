@@ -2,9 +2,9 @@ import abc
 import argparse
 import logging
 
-from ..agent import Agent
-from ..pretrainer import PreTrainer
-from ..replaymemory import ReplayMemoryProxy
+from optimizer.agent import Agent
+from optimizer.pretrainer import PreTrainer
+from optimizer.replaymemory import ReplayMemoryProxy
 
 
 class AbstractController(object):

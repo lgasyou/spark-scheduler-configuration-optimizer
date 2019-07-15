@@ -5,8 +5,10 @@ import torch
 from requests.exceptions import ConnectionError
 
 from optimizer.hyperparameters import STATE_SHAPE
-from .yarnmodel import *
+from optimizer.environment.yarn.yarnmodel import *
 from optimizer.environment.spark.sparkapplicationtimedelaypredictor import SparkApplicationTimeDelayPredictor
+from optimizer.environment.spark.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.environment.spark.completedsparkapplicationanalyzer import CompletedSparkApplicationAnalyzer
 from optimizer.environment.stateinvalidexception import StateInvalidException
 from optimizer.util import jsonutil
 
@@ -18,6 +20,47 @@ class StateBuilder(object):
         self.spark_history_server_api_url = spark_history_server_api_url
         self.scheduler_strategy = scheduler_strategy
         self.application_time_delay_predictor = SparkApplicationTimeDelayPredictor(spark_history_server_api_url)
+        self._tmp_add_models()
+
+    # TODO: Replace this with train set.
+    def _tmp_add_models(self):
+        builder = SparkApplicationBuilder(self.spark_history_server_api_url)
+        analyzer = CompletedSparkApplicationAnalyzer()
+        predictor = self.application_time_delay_predictor
+
+        app = builder.build('application_1562834622700_0051')
+        svm_model = analyzer.analyze(app)
+        predictor.add_algorithm('linear', svm_model)
+
+        # ALS
+        app = builder.build('application_1562834622700_0039')
+        als_model = analyzer.analyze(app)
+        predictor.add_algorithm('als', als_model)
+
+        # KMeans
+        app = builder.build('application_1562834622700_0018')
+        svm_model = analyzer.analyze(app)
+        predictor.add_algorithm('kmeans', svm_model)
+
+        # SVM
+        app = builder.build('application_1562834622700_0014')
+        svm_model = analyzer.analyze(app)
+        predictor.add_algorithm('svm', svm_model)
+
+        # Bayes
+        app = builder.build('application_1562834622700_0043')
+        svm_model = analyzer.analyze(app)
+        predictor.add_algorithm('bayes', svm_model)
+
+        # FPGrowth
+        app = builder.build('application_1562834622700_0054')
+        svm_model = analyzer.analyze(app)
+        predictor.add_algorithm('fpgrowth', svm_model)
+
+        # LDA
+        app = builder.build('application_1562834622700_0058')
+        svm_model = analyzer.analyze(app)
+        predictor.add_algorithm('lda', svm_model)
 
     def build(self):
         try:
@@ -107,12 +150,13 @@ class StateBuilder(object):
         apps_json, apps = j['apps']['app'], []
         for j in apps_json:
             application_id = j['id']
+            name = j['name']
             elapsed_time = j['elapsedTime']
             priority = j['priority']
             progress = j['progress']
             queue_usage_percentage = j['queueUsagePercentage']
             location = j['queue']
-            predicted_time_delay, _ = self.application_time_delay_predictor.predict(application_id)
+            predicted_time_delay = self.application_time_delay_predictor.predict(application_id, name)
             request_resources = self.build_request_resources_from_json(j)
             apps.append(RunningApplication(application_id, elapsed_time, priority, location, progress,
                                            queue_usage_percentage, predicted_time_delay, request_resources))

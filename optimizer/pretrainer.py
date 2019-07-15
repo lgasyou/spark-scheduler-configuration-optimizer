@@ -1,12 +1,12 @@
 import logging
 import time
 
-from .agent import Agent
-from .environment import PreTrainEnv, StateInvalidException
-from .hyperparameters import PRE_TRAIN_LOOP_INTERNAL
-from .replaymemory import ReplayMemoryProxy
-from .replaymemory.memoryserializer import MemorySerializer
-from .util import fileutil
+from optimizer.agent import Agent
+from optimizer.environment import PreTrainEnv, StateInvalidException
+from optimizer.hyperparameters import PRE_TRAIN_LOOP_INTERNAL
+from optimizer.replaymemory import ReplayMemoryProxy
+from optimizer.replaymemory.memoryserializer import MemorySerializer
+from optimizer.util import fileutil
 
 
 class PreTrainer(object):

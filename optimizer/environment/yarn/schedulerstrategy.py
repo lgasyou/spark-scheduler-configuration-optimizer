@@ -1,7 +1,7 @@
 import copy
 import os
 
-from .yarnmodel import *
+from optimizer.environment.yarn.yarnmodel import *
 from optimizer.util import fileutil, jsonutil
 from optimizer.util.xmlmodifier import XmlModifier
 

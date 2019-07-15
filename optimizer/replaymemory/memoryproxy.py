@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .memory import ReplayMemory
+from optimizer.replaymemory.memory import ReplayMemory
 
 
 class ReplayMemoryProxy(object):

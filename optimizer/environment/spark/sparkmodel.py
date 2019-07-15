@@ -10,6 +10,7 @@ class Application(object):
     start_time: int
     jobs: List[Job]
     executors: List[Executor]
+    input_bytes: int
 
 
 @dataclasses.dataclass
@@ -34,6 +35,7 @@ class Task(object):
     launch_time: int
     duration: int
     host: str
+    input_bytes: int
 
 
 @dataclasses.dataclass

@@ -1,7 +1,7 @@
-from typing import List
+from typing import Dict, List
 
-from optimizer.environment.spark.jobfinishtimepredictor import JobFinishTimePredictor
-from optimizer.environment.spark import sparkmodel, calculationmodel
+from optimizer.environment.spark import predictionsparkmodel, simulationmodel, sparkmodel
+from optimizer.environment.spark.applicationexecutionsimulator import ApplicationExecutionSimulator
 from optimizer.environment.spark.sparkapplicationbuilder import SparkApplicationBuilder
 
 
@@ -10,28 +10,46 @@ class SparkApplicationTimeDelayPredictor(object):
     def __init__(self, spark_history_server_api_url: str):
         self.spark_history_server_api_url = spark_history_server_api_url
         self.spark_application_builder = SparkApplicationBuilder(self.spark_history_server_api_url)
+        self.simulator = ApplicationExecutionSimulator()
 
-    def predict(self, application_id: str):
-        application = self.spark_application_builder.build(application_id)
-        return self._predict(application)
+        self.models: Dict[str, predictionsparkmodel.Application] = {}
+        self.task_id = 0
 
-    # TODO: 从application中获取输入的数据大小，通过其他途径获得输入的算法类型
-    # TODO: 从输入的以往数据中获取当前的Task数目
-    def _predict(self, application: sparkmodel.Application):
-        time_delay_predictor = JobFinishTimePredictor()
-        containers = [calculationmodel.Container(e.start_time, e.is_active) for e in application.executors]
-        tasks = self._build_tasks(application)
-        finish_time = time_delay_predictor.simulate(containers, tasks)
-        time_delay = finish_time - application.start_time
-        return time_delay, finish_time
+    def add_algorithm(self, algorithm_type: str, model: predictionsparkmodel.Application):
+        self.models[algorithm_type] = model
 
-    @staticmethod
-    def _build_tasks(application: sparkmodel.Application) -> List[calculationmodel.Task]:
+    def predict(self, application_id: str, algorithm_type: str) -> int:
+        app = self.spark_application_builder.build(application_id)
+        return self._predict(algorithm_type, app.input_bytes, app.executors)
+
+    def _predict(self, algorithm_type: str, input_bytes: int, executors: List[sparkmodel.Executor]) -> int:
+        self.task_id = 0
+        model = self.models[algorithm_type]
+
+        tasks = self._build_tasks(input_bytes, model)
+        containers = self._build_containers(executors)
+        return self.simulator.simulate(containers, tasks)
+
+    def _build_tasks(self, input_bytes: int, model: predictionsparkmodel.Application):
         tasks = []
-        for job in application.jobs:
-            for stage in job.stages:
-                for task in stage.tasks:
-                    # TODO: Differences of task execution time
-                    tasks.append(calculationmodel.Task(task.task_id, 26642))
+        for stage in model.stages:
+            stage_name = stage.name
+            block_size = stage.block_size
+            stage_input_bytes = input_bytes * stage.input_ratio
+            num_tasks = int(stage_input_bytes / block_size)
+            process_rate = model.average_action_process_rates[stage_name]
+
+            for _ in range(num_tasks):
+                tasks.append(simulationmodel.Task(self.task_id, block_size / process_rate))
+                self.task_id += 1
+
+            last_task_input_bytes = stage_input_bytes % block_size
+            if last_task_input_bytes:
+                tasks.append(simulationmodel.Task(self.task_id, last_task_input_bytes / process_rate))
+                self.task_id += 1
 
         return tasks
+
+    @staticmethod
+    def _build_containers(executors: List[sparkmodel.Executor]):
+        return [simulationmodel.Container(e.start_time, e.is_active) for e in executors]

@@ -1,2 +1,2 @@
-from .evaluationcontroller import EvaluationController
-from .optimizationcontroller import OptimizationController
+from optimizer.controller.evaluationcontroller import EvaluationController
+from optimizer.controller.optimizationcontroller import OptimizationController

@@ -1,7 +1,6 @@
 from typing import List
 import dataclasses
 
-
 from optimizer.hyperparameters import QUEUES
 
 

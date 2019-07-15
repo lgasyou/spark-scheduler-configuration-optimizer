@@ -5,8 +5,8 @@ from typing import Optional
 
 import torch
 
-from .actionparser import ActionParser
-from .iresetablecommunicator import ICommunicator
+from optimizer.environment.actionparser import ActionParser
+from optimizer.environment.iresetablecommunicator import ICommunicator
 from optimizer.environment.yarn.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.yarn.yarnmodel import *
 from optimizer.environment.yarn.statebuilder import StateBuilder
@@ -49,7 +49,7 @@ class AbstractCommunicator(ICommunicator):
         running_jobs = self.state.running_apps
 
         # noinspection PyTypeChecker
-        sum_time_delay = sum([j.predicted_time_delay for j in (waiting_jobs + running_jobs)])
+        sum_time_delay = sum([j.predicted_time_delay for j in running_jobs])
 
         # If we just start this program, set the reward as 0.
         if self.last_sum_time_delay is None or not self.last_sum_time_delay:

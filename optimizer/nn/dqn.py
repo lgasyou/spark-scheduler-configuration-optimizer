@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from .noisylinear import NoisyLinear
+from optimizer.nn.noisylinear import NoisyLinear
 
 
 class DQN(nn.Module):

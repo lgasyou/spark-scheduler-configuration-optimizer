@@ -1,1 +1,1 @@
-from .dqn import DQN
+from optimizer.nn.dqn import DQN

@@ -4,6 +4,8 @@ from collections import deque
 
 import torch
 
+from optimizer.hyperparameters import STATE_SHAPE
+
 
 class AbstractEnv(object):
 
@@ -21,6 +23,10 @@ class AbstractEnv(object):
 
     def action_space(self) -> int:
         return len(self.actions)
+
+    def reset_buffer(self):
+        for _ in range(self.buffer_history_length):
+            self.state_buffer.append(torch.zeros(*STATE_SHAPE, device=self.device))
 
     @abc.abstractmethod
     def _communicator(self, args: argparse.Namespace):

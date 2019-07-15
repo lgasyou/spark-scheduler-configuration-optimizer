@@ -2,8 +2,8 @@ import random
 
 import torch
 
-from .segmenttree import SegmentTree
-from .transition import Transition, blank_trans
+from optimizer.replaymemory.segmenttree import SegmentTree
+from optimizer.replaymemory.transition import Transition, blank_trans
 
 
 class ReplayMemory(object):

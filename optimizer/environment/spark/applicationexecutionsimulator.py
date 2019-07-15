@@ -1,14 +1,14 @@
 from typing import List
 
-from optimizer.environment.spark import calculationmodel
+from optimizer.environment.spark import simulationmodel
 
 
-class JobFinishTimePredictor(object):
+class ApplicationExecutionSimulator(object):
 
     def __init__(self):
-        self.containers: List[calculationmodel.Container] = []
+        self.containers: List[simulationmodel.Container] = []
 
-    def simulate(self, container_additions: List[calculationmodel.Container], tasks: List[calculationmodel.Task]):
+    def simulate(self, container_additions: List[simulationmodel.Container], tasks: List[simulationmodel.Task]):
         self.containers.clear()
         container_additions.sort(key=lambda item: item.start_time)
         container_additions = [c for c in container_additions if c.is_active]

@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pandas as pd
 
-from .icommunicator import ICommunicator
+from optimizer.environment.icommunicator import ICommunicator
 
 
 class IResetableCommunicator(ICommunicator):

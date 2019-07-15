@@ -1,9 +1,9 @@
 import argparse
 import time
 
-from .abstractcontroller import AbstractController
-from ..environment import Env, StateInvalidException
-from ..hyperparameters import TRAIN_LOOP_INTERNAL
+from optimizer.controller.abstractcontroller import AbstractController
+from optimizer.environment import Env, StateInvalidException
+from optimizer.hyperparameters import TRAIN_LOOP_INTERNAL
 
 
 class OptimizationController(AbstractController):
@@ -18,6 +18,7 @@ class OptimizationController(AbstractController):
         reward_clip = args.reward_clip
 
         T, done, next_state = 0, False, None
+        env.reset_buffer()
         state = env.get_state()
 
         while True:
@@ -27,6 +28,7 @@ class OptimizationController(AbstractController):
                 next_state, reward, done = env.step(action)  # Step
                 if reward_clip > 0:
                     reward = max(min(reward, reward_clip), -reward_clip)  # Clip rewards
+                print(reward, action)
                 mem.append(state, action, reward, done)  # Append transition to memory
                 time.sleep(TRAIN_LOOP_INTERNAL)
                 T += 1

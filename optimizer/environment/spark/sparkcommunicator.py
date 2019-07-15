@@ -18,14 +18,17 @@ class SparkCommunicator(AbstractCommunicator, IResetableCommunicator):
         self.workload_runner = SparkWorkloadController()
 
     def is_done(self) -> bool:
+        return False
         return self.workload_runner.is_done()
 
     def close(self):
+        return
         self.workload_runner.stop_workloads()
         restart_process = restart_yarn(os.getcwd(), self.hadoop_home)
         restart_process.wait()
 
     def reset(self):
+        return
         self.close()
         self.start_workload()
         time.sleep(5)

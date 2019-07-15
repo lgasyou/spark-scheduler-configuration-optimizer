@@ -9,9 +9,9 @@ import torch
 from plotly.graph_objs import Scatter
 from plotly.graph_objs.scatter import Line
 
-from ..environment import EvaluationEnv, StateInvalidException
-from ..hyperparameters import TEST_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
-from ..replaymemory import MemorySerializer, ReplayMemoryProxy
+from optimizer.environment import EvaluationEnv, StateInvalidException
+from optimizer.hyperparameters import TEST_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
+from optimizer.replaymemory import MemorySerializer, ReplayMemoryProxy
 from optimizer.util import excelutil
 
 # Globals

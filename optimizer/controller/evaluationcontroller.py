@@ -4,8 +4,8 @@ import time
 
 from tqdm import tqdm
 
-from .abstractcontroller import AbstractController
-from .validator import Validator
+from optimizer.controller.abstractcontroller import AbstractController
+from optimizer.controller.validator import Validator
 from optimizer.environment import EvaluationEnv, StateInvalidException
 from optimizer.hyperparameters import TRAIN_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
 from optimizer.util import excelutil

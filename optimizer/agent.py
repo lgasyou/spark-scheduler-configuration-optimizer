@@ -4,9 +4,10 @@ import random
 import torch
 from torch import optim
 
-from .environment import AbstractEnv
-from .nn import DQN
-from .replaymemory import ReplayMemoryProxy
+from optimizer.environment import AbstractEnv
+from optimizer.nn import DQN
+from optimizer.replaymemory import ReplayMemoryProxy
+from optimizer.hyperparameters import CUDA_DEVICES
 
 
 class Agent(object):
@@ -26,12 +27,14 @@ class Agent(object):
         self.discount = args.discount
 
         self.online_net = DQN(args, self.action_space).to(device=args.device)
+        self.online_net = torch.nn.DataParallel(self.online_net, CUDA_DEVICES)
         if args.model and os.path.isfile(args.model):
             # Always load tensors onto CPU by default, will shift to GPU if necessary
             self.online_net.load_state_dict(torch.load(args.model, map_location='cpu'))
         self.online_net.train()
 
         self.target_net = DQN(args, self.action_space).to(device=args.device)
+        self.target_net = torch.nn.DataParallel(self.target_net, CUDA_DEVICES)
         self.update_target_net()
         self.target_net.train()
         for param in self.target_net.parameters():
@@ -41,7 +44,7 @@ class Agent(object):
 
     # Resets noisy weights in all linear layers (of online net only)
     def reset_noise(self):
-        self.online_net.reset_noise()
+        self.online_net.module.reset_noise()
 
     # Acts based on single state (no batch)
     def act(self, state):
@@ -67,7 +70,7 @@ class Agent(object):
             dns = self.support.expand_as(pns) * pns  # Distribution d_t+n = (z, p(s_t+n, ·; θonline))
             # Perform argmax action selection using online network: argmax_a[(z, p(s_t+n, a; θonline))]
             argmax_indices_ns = dns.sum(2).argmax(1)
-            self.target_net.reset_noise()  # Sample new target net noise
+            self.target_net.module.reset_noise()  # Sample new target net noise
             pns = self.target_net(next_states)  # Probabilities p(s_t+n, ·; θtarget)
             # Double-Q probabilities p(s_t+n, argmax_a[(z, p(s_t+n, a; θonline))]; θtarget)
             pns_a = pns[range(self.batch_size), argmax_indices_ns]
