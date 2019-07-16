@@ -32,8 +32,8 @@ class OptimizationController(AbstractController):
                 mem.append(state, action, reward, done)  # Append transition to memory
                 time.sleep(TRAIN_LOOP_INTERNAL)
                 T += 1
-            except StateInvalidException as e:
-                print(e)
+            except StateInvalidException:
+                pass
 
             if done:
                 break

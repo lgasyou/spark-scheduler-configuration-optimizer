@@ -4,6 +4,8 @@ spark_home=$2
 hadoop_conf_dir=$3/etc/hadoop
 java_home=$4
 work_dir=$5
+queue=$6
+size=$7
 
 export JAVA_HOME=${java_home}
 export HADOOP_CONF_DIR=${hadoop_conf_dir}
@@ -13,44 +15,46 @@ function submit() {
     class=$1
     queue=$2
     workload=$3
+    size=$4
 
     ${spark_home}/bin/spark-submit \
     --class ${class} \
     --master yarn \
     --deploy-mode cluster \
     --queue ${queue} \
+    --num-executors 5 \
+    --executor-cores 4 \
     --executor-memory 6g \
     --driver-memory 1g \
-    ${work_dir}/data/testset/${workload}.jar
+    ${work_dir}/data/testset/${workload}.jar ${size}
 }
 
 case $1 in
     SVM)
-        submit scalapackage.runtest queueA workload_SVM
+        submit svm ${queue} workload_SVM ${size}
         ;;
 
     fpgrowth)
-        submit scalapackage.FPGrowth queueB workload_fpgrowth
+        submit FPGrowth ${queue} workload_FPGrowth ${size}
         ;;
 
     kmeans)
-        submit scalapackage.kmeans queueC workload_kmeans
+        submit kmeans ${queue} workload_kmeans ${size}
         ;;
 
     linear)
-        submit scalapackage.linear queueD workload_linear
+        submit linear ${queue} workload_linear ${size}
         ;;
 
     lda)
-        submit scalapackage.lda queueA workload_lda
+        submit lda ${queue} workload_lda ${size}
         ;;
 
     bayes)
-        submit scalapackage.bayes queueB workload_bayes
+        submit bayes ${queue} workload_bayes ${size}
         ;;
 
     als)
-        submit scalapackage.als queueC workload_als
+        submit als ${queue} workload_als ${size}
         ;;
-
 esac

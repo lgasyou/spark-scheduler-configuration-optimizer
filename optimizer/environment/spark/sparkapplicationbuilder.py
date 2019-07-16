@@ -59,7 +59,7 @@ class SparkApplicationBuilder(object):
         name = j['name']
         tasks_url = self.spark_history_server_api_url + 'applications/%s/1/stages/%s/0/taskList' % (
             self.application_id, stage_id)
-        tasks_json = jsonutil.get_json(tasks_url)
+        tasks_json: dict = jsonutil.get_json(tasks_url)
         tasks = [self.parse_and_build_task(task_json) for task_json in tasks_json]
 
         return sparkmodel.Stage(stage_id, num_tasks, input_bytes, name, tasks)
@@ -68,7 +68,7 @@ class SparkApplicationBuilder(object):
     def parse_and_build_task(j):
         task_id = j['taskId']
         launch_time = timeutil.convert_str_to_timestamp(j['launchTime'])
-        duration = j['duration']
+        duration = j.get('duration', 0)
         host = j['host']
         if 'taskMetrics' in j and 'inputMetrics' in j['taskMetrics'] and 'bytesRead' in j['taskMetrics']['inputMetrics']:
             input_bytes = j['taskMetrics']['inputMetrics']['bytesRead']

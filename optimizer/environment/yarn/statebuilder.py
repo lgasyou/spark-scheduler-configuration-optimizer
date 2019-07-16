@@ -55,7 +55,7 @@ class StateBuilder(object):
         # FPGrowth
         app = builder.build('application_1562834622700_0054')
         svm_model = analyzer.analyze(app)
-        predictor.add_algorithm('fpgrowth', svm_model)
+        predictor.add_algorithm('FPGrowth', svm_model)
 
         # LDA
         app = builder.build('application_1562834622700_0058')
