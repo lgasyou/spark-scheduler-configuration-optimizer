@@ -5,7 +5,6 @@ import torch
 
 from optimizer.environment.abstractenv import AbstractEnv
 from optimizer.environment.yarn.yarnslscommunicator import YarnSlsCommunicator
-from optimizer.hyperparameters import STATE_SHAPE
 
 
 class PreTrainEnv(AbstractEnv):
@@ -42,11 +41,7 @@ class PreTrainEnv(AbstractEnv):
         self.t += 1
 
     def _communicator(self, args: argparse.Namespace):
-        return YarnSlsCommunicator(args.rm_host, args.spark_history_server_host, args.hadoop_home)
-
-    def reset_buffer(self):
-        for _ in range(self.buffer_history_length):
-            self.state_buffer.append(torch.zeros(*STATE_SHAPE, device=self.device))
+        return YarnSlsCommunicator(args.resource_manager_host, args.spark_history_server_host, args.hadoop_home)
 
     def _reset(self):
         self.reset_buffer()

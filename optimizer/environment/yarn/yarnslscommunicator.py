@@ -6,14 +6,15 @@ from typing import Optional
 import pandas as pd
 
 from optimizer.environment.abstractcommunicator import AbstractCommunicator
-from optimizer.environment.iresetablecommunicator import IResetableCommunicator
+from optimizer.environment.resetablecommunicator import ResetableCommunicator
 from optimizer.util import processutil
 
 
-class YarnSlsCommunicator(AbstractCommunicator, IResetableCommunicator):
+class YarnSlsCommunicator(AbstractCommunicator, ResetableCommunicator):
 
-    def __init__(self, rm_api_url: str, spark_history_server_api_url: str, hadoop_home: str, sls_jobs_dataset: str = None):
-        super().__init__(rm_api_url, spark_history_server_api_url, hadoop_home)
+    def __init__(self, rm_host: str, spark_history_server_host: str,
+                 hadoop_home: str, sls_jobs_dataset: str = ''):
+        super().__init__(rm_host, spark_history_server_host, hadoop_home)
         self.current_dataset = sls_jobs_dataset
         self.sls_runner: Optional[subprocess.Popen] = None
 
@@ -28,7 +29,7 @@ class YarnSlsCommunicator(AbstractCommunicator, IResetableCommunicator):
 
         wd = os.getcwd()
         sls_jobs_json = './' + self.current_dataset
-        self.sls_runner = start_sls_process(wd, self.hadoop_home, sls_jobs_json)
+        self.sls_runner = start_sls_process(wd, self.HADOOP_HOME, sls_jobs_json)
 
         # Wait until web server starts.
         time.sleep(10)

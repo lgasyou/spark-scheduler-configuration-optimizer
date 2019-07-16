@@ -25,13 +25,13 @@ class ISchedulerStrategy(object):
 class FairSchedulerStrategy(ISchedulerStrategy):
 
     def __init__(self, rm_host, hadoop_etc, action_set):
-        self.rm_host = rm_host
-        self.hadoop_etc = hadoop_etc
+        self.RM_HOST = rm_host
+        self.HADOOP_ETC = hadoop_etc
         self.action_set = action_set
         self.current_action = None
 
     def override_config(self, action_index: int):
-        dest = os.path.join(self.hadoop_etc, 'fair-scheduler.xml')
+        dest = os.path.join(self.HADOOP_ETC, 'fair-scheduler.xml')
         xml_modifier = XmlModifier('./data/fair-scheduler-template.xml', dest)
 
         print("overriding configuration...")
@@ -41,7 +41,7 @@ class FairSchedulerStrategy(ISchedulerStrategy):
         xml_modifier.save()
 
     def copy_conf_file(self):
-        fileutil.file_copy('./data/fair-scheduler.xml', self.hadoop_etc + '/fair-scheduler.xml')
+        fileutil.file_copy('./data/fair-scheduler.xml', self.HADOOP_ETC + '/fair-scheduler.xml')
 
     @DeprecationWarning
     def get_queue_constraints(self):
@@ -51,12 +51,12 @@ class FairSchedulerStrategy(ISchedulerStrategy):
 class CapacitySchedulerStrategy(ISchedulerStrategy):
 
     def __init__(self, rm_host, hadoop_etc, action_set):
-        self.rm_host = rm_host
-        self.hadoop_etc = hadoop_etc
+        self.RM_HOST = rm_host
+        self.HADOOP_ETC = hadoop_etc
         self.action_set = self._convert_weight_to_capacity(action_set)
 
     def override_config(self, action_index: int):
-        dest = os.path.join(self.hadoop_etc, 'capacity-scheduler.xml')
+        dest = os.path.join(self.HADOOP_ETC, 'capacity-scheduler.xml')
         xml_modifier = XmlModifier('./data/capacity-scheduler-template.xml', dest)
 
         action: dict = self.action_set[action_index]
@@ -68,10 +68,10 @@ class CapacitySchedulerStrategy(ISchedulerStrategy):
         xml_modifier.save()
 
     def copy_conf_file(self):
-        fileutil.file_copy('./data/capacity-scheduler.xml', self.hadoop_etc + '/capacity-scheduler.xml')
+        fileutil.file_copy('./data/capacity-scheduler.xml', self.HADOOP_ETC + '/capacity-scheduler.xml')
 
     def get_queue_constraints(self):
-        url = self.rm_host + 'ws/v1/cluster/scheduler'
+        url = self.RM_HOST + 'ws/v1/cluster/scheduler'
         conf = jsonutil.get_json(url)
 
         ret = []

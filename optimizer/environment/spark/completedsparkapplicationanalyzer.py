@@ -6,9 +6,9 @@ from optimizer.environment.spark import sparkmodel, predictionsparkmodel
 class CompletedSparkApplicationAnalyzer(object):
 
     def __init__(self):
-        self.PRECISION = 0.2
+        self.ERROR_RATE = 0.2
         self.BLOCK_SIZES = [2 ** (20 + i) for i in range(6, 12)]  # From 64MB to 4GB
-        self.SIZE_PRECISIONS = [self.PRECISION * size for size in self.BLOCK_SIZES]
+        self.SIZE_ERRORS = [self.ERROR_RATE * size for size in self.BLOCK_SIZES]
         self.cur_app: Optional[predictionsparkmodel.Application] = None
 
     def analyze(self, application: sparkmodel.Application) -> predictionsparkmodel.Application:
@@ -43,7 +43,7 @@ class CompletedSparkApplicationAnalyzer(object):
     def _get_average_process_rate(tasks: List[sparkmodel.Task], block_size: int):
         precision = 0.02 * block_size   # Only calculate tasks with full block-size input.
         process_rates = [t.input_bytes / t.duration for t in tasks if abs(t.input_bytes - block_size) < precision]
-        if not process_rates:   # If we don't have any task with block-size input, use them all.
+        if not process_rates:   # If we don't have any task with block-size input, use all of them.
             process_rates = [t.input_bytes / t.duration for t in tasks]
         average_process_rate = sum(process_rates) / len(process_rates)
         return average_process_rate
@@ -56,7 +56,7 @@ class CompletedSparkApplicationAnalyzer(object):
         return input_bytes if num_tasks == 1 else self._block_size(input_bytes / num_tasks)
 
     def _block_size(self, bytes_each_task):
-        for size, precision in zip(self.BLOCK_SIZES, self.SIZE_PRECISIONS):
+        for size, precision in zip(self.BLOCK_SIZES, self.SIZE_ERRORS):
             if abs(bytes_each_task - size) < precision:
                 return size
 

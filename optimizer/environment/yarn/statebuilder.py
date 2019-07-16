@@ -16,15 +16,15 @@ from optimizer.util import jsonutil
 class StateBuilder(object):
 
     def __init__(self, rm_api_url: str, spark_history_server_api_url: str, scheduler_strategy):
-        self.rm_api_url = rm_api_url
-        self.spark_history_server_api_url = spark_history_server_api_url
+        self.RM_API_URL = rm_api_url
+        self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_api_url
         self.scheduler_strategy = scheduler_strategy
         self.application_time_delay_predictor = SparkApplicationTimeDelayPredictor(spark_history_server_api_url)
         self._tmp_add_models()
 
     # TODO: Replace this with train set.
     def _tmp_add_models(self):
-        builder = SparkApplicationBuilder(self.spark_history_server_api_url)
+        builder = SparkApplicationBuilder(self.SPARK_HISTORY_SERVER_API_URL)
         analyzer = CompletedSparkApplicationAnalyzer()
         predictor = self.application_time_delay_predictor
 
@@ -120,17 +120,17 @@ class StateBuilder(object):
         return waiting_apps, running_apps
 
     def parse_and_build_waiting_apps(self) -> List[WaitingApplication]:
-        url = self.rm_api_url + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED'
+        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED'
         app_json = jsonutil.get_json(url)
         return self.build_waiting_apps_from_json(app_json)
 
     def parse_and_build_running_apps(self) -> List[RunningApplication]:
-        url = self.rm_api_url + 'ws/v1/cluster/apps?states=RUNNING'
+        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=RUNNING'
         app_json = jsonutil.get_json(url)
         return self.build_running_apps_from_json(app_json)
 
     def parse_and_build_resources(self) -> List[Resource]:
-        url = self.rm_api_url + 'ws/v1/cluster/nodes'
+        url = self.RM_API_URL + 'ws/v1/cluster/nodes'
         conf = jsonutil.get_json(url)
         nodes = conf['nodes']['node']
         resources = []

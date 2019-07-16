@@ -7,6 +7,7 @@ from optimizer.environment.spark.sparkapplicationbuilder import SparkApplication
 
 @DeprecationWarning
 class DynamicSparkApplicationTimeDelayPredictor(object):
+    """Use SparkApplicationTimeDelayPredictor instead."""
 
     def __init__(self, spark_history_server_api_url: str):
         self.spark_history_server_api_url = spark_history_server_api_url
@@ -30,7 +31,6 @@ class DynamicSparkApplicationTimeDelayPredictor(object):
         for job in application.jobs:
             for stage in job.stages:
                 for task in stage.tasks:
-                    # TODO: Differences of task execution time
                     tasks.append(simulationmodel.Task(task.task_id, 26642))
 
         return tasks

@@ -6,31 +6,31 @@ from typing import Optional
 import torch
 
 from optimizer.environment.actionparser import ActionParser
-from optimizer.environment.iresetablecommunicator import ICommunicator
+from optimizer.environment.resetablecommunicator import Communicator
 from optimizer.environment.yarn.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.yarn.yarnmodel import *
 from optimizer.environment.yarn.statebuilder import StateBuilder
 
 
-class AbstractCommunicator(ICommunicator):
+class AbstractCommunicator(Communicator):
     """
     Uses RESTFul API to communicate with YARN cluster scheduler.
     """
 
-    def __init__(self, rm_api_url: str, spark_history_server_api_url: str, hadoop_home: str):
-        self.hadoop_home = hadoop_home
-        self.hadoop_etc = hadoop_home + '/etc/hadoop'
-        self.rm_api_url = rm_api_url
-        self.spark_history_server_api_url = spark_history_server_api_url + 'api/v1/'
+    def __init__(self, rm_host: str, spark_history_server_host: str, hadoop_home: str):
+        self.HADOOP_HOME = hadoop_home
+        self.HADOOP_ETC = hadoop_home + '/etc/hadoop'
+        self.RM_API_URL = rm_host
+        self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_host + 'api/v1/'
 
         self.action_set = ActionParser.parse()
 
         scheduler_type = self.get_scheduler_type()
         self.scheduler_strategy = SchedulerStrategyFactory.create(
-            scheduler_type, rm_api_url, self.hadoop_etc, self.action_set)
+            scheduler_type, rm_host, self.HADOOP_ETC, self.action_set)
         self.scheduler_strategy.copy_conf_file()
 
-        self.state_builder = StateBuilder(self.rm_api_url, self.spark_history_server_api_url, self.scheduler_strategy)
+        self.state_builder = StateBuilder(self.RM_API_URL, self.SPARK_HISTORY_SERVER_API_URL, self.scheduler_strategy)
 
         self.state: Optional[State] = None
         self.last_sum_time_delay: Optional[float] = None
@@ -84,7 +84,7 @@ class AbstractCommunicator(ICommunicator):
         Use script "refresh-queues.sh" to refresh the configurations of queues.
         """
         self.scheduler_strategy.override_config(action_index)
-        refresh_queues(self.hadoop_home)
+        refresh_queues(self.HADOOP_HOME)
 
     @abc.abstractmethod
     def is_done(self) -> bool:

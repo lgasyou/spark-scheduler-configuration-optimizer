@@ -5,7 +5,6 @@ import torch
 
 from optimizer.environment import AbstractEnv
 from optimizer.environment.spark.sparkcommunicator import SparkCommunicator
-from optimizer.hyperparameters import STATE_SHAPE
 
 
 class EvaluationEnv(AbstractEnv):
@@ -46,5 +45,5 @@ class EvaluationEnv(AbstractEnv):
         self.communicator.close()
 
     def _communicator(self, args: argparse.Namespace):
-        return SparkCommunicator(args.rm_host, args.spark_history_server_host,
+        return SparkCommunicator(args.resource_manager_host, args.spark_history_server_host,
                                  args.hadoop_home, args.spark_home, args.java_home)

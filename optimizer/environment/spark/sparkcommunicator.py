@@ -4,17 +4,18 @@ import time
 from typing import List
 
 from optimizer.environment.abstractcommunicator import AbstractCommunicator
-from optimizer.environment.iresetablecommunicator import IResetableCommunicator
+from optimizer.environment.resetablecommunicator import ResetableCommunicator
 from optimizer.environment.yarn.yarnmodel import FinishedApplication
 from optimizer.util import processutil, jsonutil
 
 
-class SparkCommunicator(AbstractCommunicator, IResetableCommunicator):
+class SparkCommunicator(AbstractCommunicator, ResetableCommunicator):
 
-    def __init__(self, rm_api_url: str, spark_history_server_api_url: str, hadoop_home: str, spark_home: str, java_home: str):
-        super().__init__(rm_api_url, spark_history_server_api_url, hadoop_home)
-        self.spark_home = spark_home
-        self.java_home = java_home
+    def __init__(self, rm_host: str, spark_history_server_host: str,
+                 hadoop_home: str, spark_home: str, java_home: str):
+        super().__init__(rm_host, spark_history_server_host, hadoop_home)
+        self.SPARK_HOME = spark_home
+        self.JAVA_HOME = java_home
         self.workload_runner = SparkWorkloadController()
 
     def is_done(self) -> bool:
@@ -34,14 +35,14 @@ class SparkCommunicator(AbstractCommunicator, IResetableCommunicator):
         time.sleep(5)
 
     def get_total_time_cost(self):
-        url = self.rm_api_url + 'ws/v1/cluster/apps?states=FINISHED'
+        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=FINISHED'
         job_json = jsonutil.get_json(url)
         finished_jobs = build_finished_jobs_from_json(job_json)
         time_costs = [j.elapsed_time for j in finished_jobs]
         return time_costs, sum(time_costs)
 
     def start_workload(self):
-        self.workload_runner.start_workloads(os.getcwd(), self.spark_home, self.hadoop_home, self.java_home)
+        self.workload_runner.start_workloads(os.getcwd(), self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
 
     def get_scheduler_type(self) -> str:
         return "CapacityScheduler"
