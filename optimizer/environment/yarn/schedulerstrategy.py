@@ -1,4 +1,3 @@
-import copy
 import os
 
 from optimizer.environment.yarn.yarnmodel import *
@@ -28,16 +27,18 @@ class FairSchedulerStrategy(ISchedulerStrategy):
         self.RM_HOST = rm_host
         self.HADOOP_ETC = hadoop_etc
         self.action_set = action_set
-        self.current_action = None
+        self.weights = None
 
     def override_config(self, action_index: int):
         dest = os.path.join(self.HADOOP_ETC, 'fair-scheduler.xml')
         xml_modifier = XmlModifier('./data/fair-scheduler-template.xml', dest)
 
-        print("overriding configuration...")
-        self.current_action: dict = self.action_set[action_index]
-        for queue_name, weight in self.current_action.items():
+        current_action = self.action_set[action_index]
+        self.weights: dict = current_action['weights']
+        for queue_name, weight in self.weights.items():
             xml_modifier.modify_property(queue_name, weight)
+        xml_modifier.modify_all_values('schedulingPolicy', current_action['schedulingPolicy'])
+
         xml_modifier.save()
 
     def copy_conf_file(self):
@@ -45,7 +46,7 @@ class FairSchedulerStrategy(ISchedulerStrategy):
 
     @DeprecationWarning
     def get_queue_constraints(self):
-        return [QueueConstraint('', queue_name, weight, weight) for queue_name, weight in self.current_action.items()]
+        return [QueueConstraint('', queue_name, weight, weight) for queue_name, weight in self.weights.items()]
 
 
 class CapacitySchedulerStrategy(ISchedulerStrategy):
@@ -53,17 +54,17 @@ class CapacitySchedulerStrategy(ISchedulerStrategy):
     def __init__(self, rm_host, hadoop_etc, action_set):
         self.RM_HOST = rm_host
         self.HADOOP_ETC = hadoop_etc
-        self.action_set = self._convert_weight_to_capacity(action_set)
+        self.action_set = action_set
 
     def override_config(self, action_index: int):
         dest = os.path.join(self.HADOOP_ETC, 'capacity-scheduler.xml')
         xml_modifier = XmlModifier('./data/capacity-scheduler-template.xml', dest)
 
         action: dict = self.action_set[action_index]
-        for queue_name, capacity in action.items():
+        for queue_name, conf in action.items():
+            capacity, max_capacity = conf
             xml_modifier.modify_kv_type('yarn.scheduler.capacity.root.%s.capacity' % queue_name, capacity)
-            # TODO: edit this
-            xml_modifier.modify_kv_type('yarn.scheduler.capacity.root.%s.maximum-capacity' % queue_name, 80)
+            xml_modifier.modify_kv_type('yarn.scheduler.capacity.root.%s.maximum-capacity' % queue_name, max_capacity)
 
         xml_modifier.save()
 
@@ -84,16 +85,6 @@ class CapacitySchedulerStrategy(ISchedulerStrategy):
             ret.append(QueueConstraint(name, used_capacity, capacity, max_capacity))
 
         return ret
-
-    @staticmethod
-    def _convert_weight_to_capacity(old_action_set: dict):
-        action_set = copy.deepcopy(old_action_set)
-        for index, action in action_set.items():
-            total_weight = sum(action.values())
-            for queue_name, weight in action.items():
-                capacity = 100 * weight / total_weight
-                action[queue_name] = round(capacity, 2)
-        return action_set
 
 
 class SchedulerStrategyFactory(object):

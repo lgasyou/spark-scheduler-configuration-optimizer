@@ -28,6 +28,11 @@ class XmlModifier(object):
                 n.weight.string = str(pro)
                 return
 
+    def modify_all_values(self, key, value):
+        names = self.data.find_all(key)
+        for n in names:
+            n.string = str(value)
+
     def save(self):
         with open(self.to_filename, 'w') as f:
             f.write(self.data.prettify())

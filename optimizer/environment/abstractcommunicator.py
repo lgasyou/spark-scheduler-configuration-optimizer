@@ -5,11 +5,11 @@ from typing import Optional
 
 import torch
 
-from optimizer.environment.actionparser import ActionParser
+from optimizer.environment import actionparsing
 from optimizer.environment.resetablecommunicator import Communicator
 from optimizer.environment.yarn.schedulerstrategy import SchedulerStrategyFactory
-from optimizer.environment.yarn.yarnmodel import *
 from optimizer.environment.yarn.statebuilder import StateBuilder
+from optimizer.environment.yarn.yarnmodel import *
 
 
 class AbstractCommunicator(Communicator):
@@ -23,11 +23,10 @@ class AbstractCommunicator(Communicator):
         self.RM_API_URL = rm_host
         self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_host + 'api/v1/'
 
-        self.action_set = ActionParser.parse()
-
         scheduler_type = self.get_scheduler_type()
+        self.action_set = actionparsing.parse(scheduler_type)
         self.scheduler_strategy = SchedulerStrategyFactory.create(
-            scheduler_type, rm_host, self.HADOOP_ETC, self.action_set)
+            scheduler_type, self.RM_API_URL, self.HADOOP_ETC, self.action_set)
         self.scheduler_strategy.copy_conf_file()
 
         self.state_builder = StateBuilder(self.RM_API_URL, self.SPARK_HISTORY_SERVER_API_URL, self.scheduler_strategy)

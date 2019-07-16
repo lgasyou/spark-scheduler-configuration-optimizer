@@ -4,15 +4,30 @@
 		<defaultQueueSchedulingPolicy>fair</defaultQueueSchedulingPolicy>
 
 		<queue name="queueA">
-			<weight>5</weight>
+			<weight>1</weight>
+			<schedulingPolicy>fair</schedulingPolicy>
 		</queue>
+
 		<queue name="queueB">
 			<weight>1</weight>
+			<schedulingPolicy>fair</schedulingPolicy>
 		</queue>
+
+		<queue name="queueC">
+			<weight>1</weight>
+			<schedulingPolicy>fair</schedulingPolicy>
+		</queue>
+
+		<queue name="queueD">
+			<weight>3</weight>
+			<schedulingPolicy>fair</schedulingPolicy>
+		</queue>
+
 		<queuePlacementPolicy>
 			<rule name="specified" create="false"/>
 			<rule name="primaryGroup" create="false"/>
 			<rule name="default" queue="queueA"/>
 		</queuePlacementPolicy>
+
 </allocations>
 
