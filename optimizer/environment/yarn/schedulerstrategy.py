@@ -44,9 +44,29 @@ class FairSchedulerStrategy(ISchedulerStrategy):
     def copy_conf_file(self):
         fileutil.file_copy('./data/fair-scheduler.xml', self.HADOOP_ETC + '/fair-scheduler.xml')
 
-    @DeprecationWarning
     def get_queue_constraints(self):
-        return [QueueConstraint('', queue_name, weight, weight) for queue_name, weight in self.weights.items()]
+        url = self.RM_HOST + 'ws/v1/cluster/scheduler'
+        conf = jsonutil.get_json(url)
+
+        ret = []
+        root_queue = conf['scheduler']['schedulerInfo']['rootQueue']
+        queues = root_queue['childQueues']['queue']
+        for q in queues:
+            name = q['queueName'].split('.')[-1]
+            if name == 'default':
+                continue
+
+            capacity = self.calculate_percentage(q['maxResources'], q['clusterResources'])
+            used_capacity = self.calculate_percentage(q['usedResources'], q['maxResources'])
+            max_capacity = capacity
+            ret.append(QueueConstraint(name, used_capacity, capacity, max_capacity))
+
+        return ret
+
+    @staticmethod
+    def calculate_percentage(lhs: dict, rhs: dict):
+        return (lhs['vCores'] / rhs['vCores'] +
+                lhs['memory'] / rhs['memory']) * 50
 
 
 class CapacitySchedulerStrategy(ISchedulerStrategy):

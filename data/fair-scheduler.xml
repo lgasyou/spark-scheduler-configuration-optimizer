@@ -1,32 +1,42 @@
 <?xml version="1.0"?>
 <allocations>
-		<defaultFairSharePreemptionTimeout>300</defaultFairSharePreemptionTimeout>
-		<defaultQueueSchedulingPolicy>fair</defaultQueueSchedulingPolicy>
+	<defaultQueueSchedulingPolicy>fair</defaultQueueSchedulingPolicy>
+
+	<queue name="root">
+
+		<schedulingPolicy>fair</schedulingPolicy>
+		<preemptable>false</preemptable>
 
 		<queue name="queueA">
 			<weight>1</weight>
 			<schedulingPolicy>fair</schedulingPolicy>
+			<preemptable>false</preemptable>
 		</queue>
 
 		<queue name="queueB">
 			<weight>1</weight>
 			<schedulingPolicy>fair</schedulingPolicy>
+			<preemptable>false</preemptable>
 		</queue>
 
 		<queue name="queueC">
 			<weight>1</weight>
 			<schedulingPolicy>fair</schedulingPolicy>
+			<preemptable>false</preemptable>
 		</queue>
 
 		<queue name="queueD">
 			<weight>3</weight>
 			<schedulingPolicy>fair</schedulingPolicy>
+			<preemptable>false</preemptable>
 		</queue>
 
-		<queuePlacementPolicy>
-			<rule name="specified" create="false"/>
-			<rule name="primaryGroup" create="false"/>
-			<rule name="default" queue="queueA"/>
-		</queuePlacementPolicy>
+	</queue>
+
+	<queuePlacementPolicy>
+		<rule name="specified" create="false"/>
+		<rule name="primaryGroup" create="false"/>
+		<rule name="default" queue="queueA"/>
+	</queuePlacementPolicy>
 
 </allocations>

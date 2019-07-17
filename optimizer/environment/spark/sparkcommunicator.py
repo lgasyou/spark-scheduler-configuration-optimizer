@@ -1,13 +1,13 @@
-import subprocess
 import os
+import subprocess
 import time
 from typing import List
 
+from optimizer import hyperparameters
 from optimizer.environment.abstractcommunicator import AbstractCommunicator
 from optimizer.environment.resetablecommunicator import ResetableCommunicator
 from optimizer.environment.yarn.yarnmodel import FinishedApplication
 from optimizer.util import processutil, jsonutil
-from optimizer import hyperparameters
 
 
 class SparkCommunicator(AbstractCommunicator, ResetableCommunicator):
@@ -54,7 +54,7 @@ class SparkCommunicator(AbstractCommunicator, ResetableCommunicator):
         self.workload_runner.start_workloads(os.getcwd(), self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
 
     def get_scheduler_type(self) -> str:
-        return "CapacityScheduler"
+        return "FairScheduler"
 
 
 class SparkWorkloadController(object):

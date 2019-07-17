@@ -4,12 +4,12 @@ import requests
 import torch
 from requests.exceptions import ConnectionError
 
-from optimizer.hyperparameters import STATE_SHAPE
-from optimizer.environment.yarn.yarnmodel import *
-from optimizer.environment.spark.sparkapplicationtimedelaypredictor import SparkApplicationTimeDelayPredictor
-from optimizer.environment.spark.sparkapplicationbuilder import SparkApplicationBuilder
 from optimizer.environment.spark.completedsparkapplicationanalyzer import CompletedSparkApplicationAnalyzer
+from optimizer.environment.spark.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.environment.spark.sparkapplicationtimedelaypredictor import SparkApplicationTimeDelayPredictor
 from optimizer.environment.stateinvalidexception import StateInvalidException
+from optimizer.environment.yarn.yarnmodel import *
+from optimizer.hyperparameters import STATE_SHAPE
 from optimizer.util import jsonutil
 
 
@@ -68,7 +68,8 @@ class StateBuilder(object):
             resources = self.parse_and_build_resources()
             constraints = self.parse_and_build_constraints()
             return State(waiting_apps, running_apps, resources, constraints)
-        except (ConnectionError, TypeError, requests.exceptions.HTTPError):
+        except (ConnectionError, TypeError, requests.exceptions.HTTPError) as e:
+            print(e)
             raise StateInvalidException
 
     @staticmethod
