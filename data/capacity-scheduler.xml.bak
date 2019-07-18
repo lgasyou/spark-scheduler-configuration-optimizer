@@ -45,7 +45,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.queues</name>
-    <value>queueA,queueB</value>
+    <value>queueA,queueB,queueC,queueD</value>
     <description>
       The queues at the this level (root is the root queue).
     </description>
@@ -58,17 +58,37 @@
   </property>
   <property>
 	<name>yarn.scheduler.capacity.root.queueA.maximum-capacity</name>
-  	<value>80</value>
+  	<value>25</value>
   </property>
 
   <property>
     <name>yarn.scheduler.capacity.root.queueB.capacity</name>
-    <value>75</value>
+    <value>25</value>
     <description>Default queue target capacity.</description>
   </property>
   <property>
   	<name>yarn.scheduler.capacity.root.queueB.maximum-capacity</name>
-	<value>80</value>
+	<value>25</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.capacity.root.queueC.capacity</name>
+    <value>25</value>
+    <description>Default queue target capacity.</description>
+  </property>
+  <property>
+	<name>yarn.scheduler.capacity.root.queueC.maximum-capacity</name>
+  	<value>25</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.capacity.root.queueD.capacity</name>
+    <value>25</value>
+    <description>Default queue target capacity.</description>
+  </property>
+  <property>
+	<name>yarn.scheduler.capacity.root.queueD.maximum-capacity</name>
+  	<value>25</value>
   </property>
 
   <property>

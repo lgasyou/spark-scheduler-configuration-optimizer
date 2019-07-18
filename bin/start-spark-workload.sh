@@ -31,7 +31,7 @@ function submit() {
 
 case $1 in
     SVM)
-        submit svm ${queue} workload_SVM ${size}
+        submit svm ${queue} workload_svm ${size}
         ;;
 
     fpgrowth)

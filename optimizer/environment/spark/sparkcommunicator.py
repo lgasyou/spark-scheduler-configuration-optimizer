@@ -6,12 +6,12 @@ from typing import List
 
 from optimizer import hyperparameters
 from optimizer.environment.abstractcommunicator import AbstractCommunicator
-from optimizer.environment.resetablecommunicator import ResetableCommunicator
+from optimizer.environment.evaluationcommunicator import EvaluationCommunicator
 from optimizer.environment.yarn.yarnmodel import FinishedApplication
 from optimizer.util import processutil, jsonutil
 
 
-class SparkCommunicator(AbstractCommunicator, ResetableCommunicator):
+class SparkCommunicator(AbstractCommunicator, EvaluationCommunicator):
 
     def __init__(self, rm_host: str, spark_history_server_host: str,
                  hadoop_home: str, spark_home: str, java_home: str):
@@ -21,7 +21,12 @@ class SparkCommunicator(AbstractCommunicator, ResetableCommunicator):
         self.workload_runner = SparkWorkloadController()
 
     def is_done(self) -> bool:
-        return self.workload_runner.is_done()
+        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED,RUNNING'
+        app_json = jsonutil.get_json(url)
+        all_app_finished = app_json['apps'] is None
+        done = all_app_finished and self.workload_runner.is_done()
+        self.logger.info('{}{}'.format(all_app_finished, self.workload_runner.is_done()))
+        return done
 
     def close(self):
         self.workload_runner.stop_workloads()
@@ -60,12 +65,12 @@ class SparkWorkloadController(object):
         self.processes: List[subprocess.Popen] = []
 
     def start_workloads(self, wd, spark_home, hadoop_home, java_home):
-        ITEMS = [['bayes', 'queueA', '1'], ['bayes', 'queueA', '2'], ['bayes', 'queueA', '3'], ['fpgrowth', 'queueA', '1'], ['fpgrowth', 'queueB', '2'], ['fpgrowth', 'queueC', '3'], ['kmeans', 'queueC', '1'], ['kmeans', 'queueD', '2'], ['kmeans', 'queueA', '3'], ['lda', 'queueA', '1'], ['lda', 'queueD', '2'], ['lda', 'queueB', '3'], ['linear', 'queueC', '1'], ['linear', 'queueD', '2'], ['linear', 'queueB', '3'], ['SVM', 'queueC', '1'], ['SVM', 'queueB', '2'], ['SVM', 'queueD', '3'], ['als', 'queueA', '1'], ['als', 'queueB', '2'], ['als', 'queueB', '3']]
+        ITEMS = [['bayes', 'queueA', '1'], ['bayes', 'queueB', '2'], ['bayes', 'queueA', '3'], ['fpgrowth', 'queueA', '1'], ['fpgrowth', 'queueB', '2'], ['fpgrowth', 'queueA', '3'], ['kmeans', 'queueB', '1'], ['kmeans', 'queueA', '2'], ['kmeans', 'queueA', '3'], ['lda', 'queueA', '1'], ['lda', 'queueB', '2'], ['lda', 'queueB', '3'], ['linear', 'queueA', '1'], ['linear', 'queueB', '2'], ['linear', 'queueB', '3'], ['SVM', 'queueA', '1'], ['SVM', 'queueB', '2'], ['SVM', 'queueB', '3']]
         for workload, queue, option in ITEMS:
             self.logger.info('Starting {} on {} with option {}...'.format(workload, queue, option))
-            time.sleep(1)
             p = start_workload_process(workload, queue, option, wd, spark_home, hadoop_home, java_home)
             self.processes.append(p)
+            time.sleep(1)
 
     def stop_workloads(self):
         for p in self.processes:
@@ -78,12 +83,12 @@ class SparkWorkloadController(object):
 
 def start_workload_process(workload_type, queue, option, wd, spark_home, hadoop_home, java_home):
     c = ['%s/bin/start-spark-workload.sh' % wd, workload_type, spark_home, hadoop_home,  java_home, wd, queue, option]
-    return processutil.start_quiet_process(c)
+    return processutil.start_process(c)
 
 
 def restart_yarn(wd, hadoop_home):
     cmd = ["%s/bin/restart-yarn.sh" % wd, hadoop_home]
-    return processutil.start_quiet_process(cmd)
+    return processutil.start_process(cmd)
 
 
 def build_finished_jobs_from_json(j: dict) -> List[FinishedApplication]:

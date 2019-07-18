@@ -79,7 +79,7 @@ def get_args() -> argparse.Namespace:
 def main():
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+        format='%(asctime)s - %(levelname)s: %(message)s',
         filename='./results/runtime.log',
         filemode='w'
     )

@@ -5,7 +5,7 @@ from typing import Optional
 
 import torch
 
-from optimizer.environment.resetablecommunicator import Communicator
+from optimizer.environment.communicator import Communicator
 from optimizer.environment.yarn.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.yarn.statebuilder import StateBuilder
 from optimizer.environment.yarn.yarnmodel import *
@@ -102,4 +102,4 @@ class AbstractCommunicator(Communicator):
 
 def refresh_queues(hadoop_home: str):
     cmd = [os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), hadoop_home]
-    return processutil.start_quiet_process(cmd)
+    return processutil.start_process(cmd)

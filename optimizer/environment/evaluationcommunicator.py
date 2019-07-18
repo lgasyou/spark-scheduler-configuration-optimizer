@@ -5,7 +5,7 @@ import pandas as pd
 from optimizer.environment.communicator import Communicator
 
 
-class ResetableCommunicator(Communicator):
+class EvaluationCommunicator(Communicator):
 
     def reset(self):
         pass

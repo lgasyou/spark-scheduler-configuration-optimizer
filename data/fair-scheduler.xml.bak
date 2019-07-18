@@ -19,6 +19,18 @@
 			<preemptable>false</preemptable>
 		</queue>
 
+		<queue name="queueC">
+			<weight>1</weight>
+			<schedulingPolicy>fair</schedulingPolicy>
+			<preemptable>false</preemptable>
+		</queue>
+
+		<queue name="queueD">
+			<weight>3</weight>
+			<schedulingPolicy>fair</schedulingPolicy>
+			<preemptable>false</preemptable>
+		</queue>
+
 	</queue>
 
 	<queuePlacementPolicy>

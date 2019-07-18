@@ -25,6 +25,6 @@ def kill_process_and_wait(process: subprocess.Popen):
         process.wait()
 
 
-def start_quiet_process(cmd: list) -> subprocess.Popen:
+def start_process(cmd: list) -> subprocess.Popen:
     cmd_str = ' '.join(cmd)
     return subprocess.Popen(cmd_str, shell=True)

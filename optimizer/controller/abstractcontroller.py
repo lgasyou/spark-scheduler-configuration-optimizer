@@ -3,7 +3,7 @@ import argparse
 import logging
 
 from optimizer.agent import Agent
-from optimizer.pretrainer import PreTrainer
+from optimizer.controller.pretrainer import PreTrainer
 from optimizer.replaymemory import ReplayMemoryProxy
 
 
@@ -21,7 +21,7 @@ class AbstractController(object):
 
     # Pre-train DQN model with offline data
     def pre_train_model(self):
-        pre_trainer = PreTrainer(self.args, self.mem, self.agent)
+        pre_trainer = PreTrainer(self.args, self.mem, self.agent, self.action_space)
         pre_trainer.start_from_breakpoint()
 
     @abc.abstractmethod

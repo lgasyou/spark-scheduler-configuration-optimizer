@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import time
 
 from tqdm import tqdm
@@ -8,7 +9,7 @@ from optimizer.controller.abstractcontroller import AbstractController
 from optimizer.controller.validator import Validator
 from optimizer.environment import EvaluationEnv, StateInvalidException
 from optimizer.hyperparameters import TRAIN_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
-from optimizer.util import excelutil
+from optimizer.util import excelutil, processutil
 
 
 class EvaluationController(AbstractController):
@@ -20,12 +21,13 @@ class EvaluationController(AbstractController):
 
     def run(self):
         self.logger.info('Running without optimization.')
-        for action_index in range(self.action_space):
+        for action_index in range(1, self.action_space):
             self.run_without_optimization(action_index)
 
         # self.logger.info('Running with optimization.')
         # self.run_with_optimization()
 
+    # TODO: Refactor this code.
     def run_with_optimization(self):
         args = self.args
         agent = self.agent
@@ -39,23 +41,24 @@ class EvaluationController(AbstractController):
         T, done, state = 0, True, None
         agent.train()
         for T in tqdm(range(num_training_steps)):
-            if done:
-                state, done = env.reset(), False
-                mem.terminate()
-
-            if T % args.replay_frequency == 0:
-                agent.reset_noise()  # Draw a new set of noisy weights
-
-            action = agent.act(state)  # Choose an action greedily (with noisy weights)
             try:
+                if done:
+                    state, done = env.reset(), False
+                    mem.terminate()
+
+                if T % args.replay_frequency == 0:
+                    agent.reset_noise()  # Draw a new set of noisy weights
+
+                action = agent.act(state)  # Choose an action greedily (with noisy weights)
                 next_state, reward, done = env.step(action)  # Step
                 if reward_clip > 0:
                     reward = max(min(reward, reward_clip), -reward_clip)  # Clip rewards
                 self.logger.info('Reward: %f', reward)
                 mem.append(state, action, reward, done)  # Append transition to memory
                 T += 1
-            except StateInvalidException as e:
-                self.logger.warning(e)
+            except StateInvalidException:
+                if done:
+                    done = False
             finally:
                 time.sleep(TRAIN_LOOP_INTERNAL)
 
@@ -97,14 +100,14 @@ class EvaluationController(AbstractController):
         for T in range(self.args.evaluation_episodes):
             while True:
                 self.logger.info('Evaluation Loop %d' % T)
-                if done:
-                    _, done = env.reset(), False
-
                 try:
+                    if done:
+                        _, done = env.reset(), False
+
                     _, reward, done = env.step(action_index)  # Step
                     self.logger.info('Reward: %f', reward)
                 except StateInvalidException:
-                    pass
+                    done = False if done is True else False
                 time.sleep(EVALUATION_LOOP_INTERNAL)
 
                 if done:
@@ -114,6 +117,7 @@ class EvaluationController(AbstractController):
                     total_time_cost_ms += time_cost_ms
                     self.logger.info('Iteration: {}, Time Cost: {}'.format(T, costs))
                     excelutil.list2excel(arr, './results/no-optimization-%d-%d.xlsx' % (action_index, T))
+                    clean_spark_log(os.getcwd(), self.args.hadoop_home)
                     break
 
         self.logger.info('Total Time Cost :%d ms', total_time_cost_ms)
@@ -123,3 +127,8 @@ class EvaluationController(AbstractController):
 
     def _env(self, args: argparse.Namespace):
         return EvaluationEnv(args)
+
+
+def clean_spark_log(wd, hadoop_home):
+    cmd = ['%s/bin/clean-spark-log.sh' % wd, hadoop_home]
+    return processutil.start_process(cmd)

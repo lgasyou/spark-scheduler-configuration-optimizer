@@ -1,7 +1,6 @@
 import logging
 import pickle
 from typing import Tuple
-import logging
 
 import requests
 import torch
@@ -74,7 +73,7 @@ class StateBuilder(object):
             constraints = self.parse_and_build_constraints()
             return State(waiting_apps, running_apps, resources, constraints)
         except (ConnectionError, TypeError, requests.exceptions.HTTPError) as e:
-            self.logger.info(e)
+            self.logger.warning(e)
             raise StateInvalidException
 
     @staticmethod

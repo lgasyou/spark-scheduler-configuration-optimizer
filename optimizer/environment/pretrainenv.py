@@ -1,32 +1,23 @@
 import argparse
-import pathlib
 
 import torch
 
 from optimizer.environment.abstractenv import AbstractEnv
-from optimizer.environment.yarn.yarnslscommunicator import YarnSlsCommunicator
+from optimizer.environment.spark.sparktrainingcommunicator import SparkTrainingCommunicator
 
 
 class PreTrainEnv(AbstractEnv):
-    """
-    Used while pre-training.
-    Uses Google traces as its input.
-    """
-
-    TRAIN_SET = 'data/trainingset'
 
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
-        self.t = 0
 
-    def start_sls(self, file_index: int, action_index: int):
-        filename = "{}/sls-jobs{}.json".format(self.TRAIN_SET, file_index)
-        if not pathlib.Path(filename).exists():
-            print("File:", filename, "doesn't exist.")
+    def generate_pre_train_set(self):
+        return self.communicator.generate_pre_train_set()
 
-        self.communicator.set_dataset(filename)
+    # TODO: Implement
+    def start(self, action_index: int, workloads):
         self.communicator.override_config(action_index)
-        self._reset()
+        self._reset(workloads)
 
     def step(self):
         state = self.communicator.get_state_tensor().to(self.device)
@@ -35,14 +26,10 @@ class PreTrainEnv(AbstractEnv):
         self.state_buffer.append(state)
         return torch.stack(list(self.state_buffer), 0), reward, done
 
-    def save_tensor(self, t: torch.Tensor):
-        import numpy as np
-        np.savetxt('./results/state%d.csv' % self.t, t.numpy(), delimiter=',', fmt='%.2f')
-        self.t += 1
-
     def _communicator(self, args: argparse.Namespace):
-        return YarnSlsCommunicator(args.resource_manager_host, args.spark_history_server_host, args.hadoop_home)
+        return SparkTrainingCommunicator(args.resource_manager_host, args.spark_history_server_host,
+                                         args.hadoop_home, args.spark_home, args.java_home)
 
-    def _reset(self):
+    def _reset(self, workloads):
         self.reset_buffer()
-        self.communicator.reset()
+        self.communicator.reset(workloads)
