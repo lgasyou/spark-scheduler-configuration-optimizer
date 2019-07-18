@@ -1,6 +1,7 @@
 import logging
 import pickle
 from typing import Tuple
+import logging
 
 import requests
 import torch
