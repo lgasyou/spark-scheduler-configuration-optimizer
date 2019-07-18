@@ -77,7 +77,12 @@ def get_args() -> argparse.Namespace:
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(message)s',
+        filename='./results/' + __name__ + '.log',
+        filemode='a'
+    )
     args = get_args()
 
     args.evaluate = True
