@@ -103,8 +103,8 @@ class EvaluationController(AbstractController):
                 try:
                     _, reward, done = env.step(action_index)  # Step
                     self.logger.info('Reward: %f', reward)
-                except StateInvalidException as e:
-                    self.logger.warning(e)
+                except StateInvalidException:
+                    pass
                 time.sleep(EVALUATION_LOOP_INTERNAL)
 
                 if done:

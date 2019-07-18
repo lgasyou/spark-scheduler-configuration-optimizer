@@ -1,4 +1,5 @@
 from typing import Tuple
+import logging
 
 import requests
 import torch
@@ -16,6 +17,7 @@ from optimizer.util import jsonutil
 class StateBuilder(object):
 
     def __init__(self, rm_api_url: str, spark_history_server_api_url: str, scheduler_strategy):
+        self.logger = logging.getLogger(__name__)
         self.RM_API_URL = rm_api_url
         self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_api_url
         self.scheduler_strategy = scheduler_strategy
@@ -69,7 +71,7 @@ class StateBuilder(object):
             constraints = self.parse_and_build_constraints()
             return State(waiting_apps, running_apps, resources, constraints)
         except (ConnectionError, TypeError, requests.exceptions.HTTPError) as e:
-            print(e)
+            self.logger.info(e)
             raise StateInvalidException
 
     @staticmethod
