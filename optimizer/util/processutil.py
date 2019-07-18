@@ -1,6 +1,7 @@
-import subprocess
-import psutil
 import signal
+import subprocess
+
+import psutil
 
 
 def has_process_finished(process: subprocess.Popen):
@@ -22,3 +23,8 @@ def kill_process_and_wait(process: subprocess.Popen):
     if process is not None:
         kill_process_family(process.pid)
         process.wait()
+
+
+def start_quiet_process(cmd: list) -> subprocess.Popen:
+    cmd_str = ' '.join(cmd)
+    return subprocess.Popen(cmd_str, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)

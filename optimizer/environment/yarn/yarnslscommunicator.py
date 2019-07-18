@@ -47,7 +47,7 @@ class YarnSlsCommunicator(AbstractCommunicator, ResetableCommunicator):
         return processutil.has_process_finished(self.sls_runner)
 
     def get_scheduler_type(self) -> str:
-        return "CapacityScheduler"
+        return "capacityScheduler"
 
     def get_total_time_cost(self):
         data = pd.read_csv('./results/logs/jobruntime.csv')
@@ -59,5 +59,5 @@ class YarnSlsCommunicator(AbstractCommunicator, ResetableCommunicator):
 
 
 def start_sls_process(wd: str, hadoop_home: str, sls_jobs_json: str):
-    cmd = "%s/bin/start-sls.sh %s %s %s" % (wd, hadoop_home, wd, sls_jobs_json)
-    return subprocess.Popen(cmd, shell=True)
+    cmd = ["%s/bin/start-sls.sh" % wd, hadoop_home, wd, sls_jobs_json]
+    return processutil.start_quiet_process(cmd)

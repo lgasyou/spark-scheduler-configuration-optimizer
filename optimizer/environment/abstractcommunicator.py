@@ -1,15 +1,15 @@
 import abc
+import logging
 import os
-import subprocess
 from typing import Optional
 
 import torch
 
-from optimizer.environment import actionparsing
 from optimizer.environment.resetablecommunicator import Communicator
 from optimizer.environment.yarn.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.yarn.statebuilder import StateBuilder
 from optimizer.environment.yarn.yarnmodel import *
+from optimizer.util import processutil
 
 
 class AbstractCommunicator(Communicator):
@@ -18,16 +18,18 @@ class AbstractCommunicator(Communicator):
     """
 
     def __init__(self, rm_host: str, spark_history_server_host: str, hadoop_home: str):
+        self.logger = logging.getLogger(__name__)
+
         self.HADOOP_HOME = hadoop_home
         self.HADOOP_ETC = hadoop_home + '/etc/hadoop'
         self.RM_API_URL = rm_host
         self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_host + 'api/v1/'
 
         scheduler_type = self.get_scheduler_type()
-        self.action_set = actionparsing.parse(scheduler_type)
         self.scheduler_strategy = SchedulerStrategyFactory.create(
-            scheduler_type, self.RM_API_URL, self.HADOOP_ETC, self.action_set)
+            scheduler_type, self.RM_API_URL, self.HADOOP_ETC)
         self.scheduler_strategy.copy_conf_file()
+        self.action_set = self.scheduler_strategy.action_set
 
         self.state_builder = StateBuilder(self.RM_API_URL, self.SPARK_HISTORY_SERVER_API_URL, self.scheduler_strategy)
 
@@ -99,4 +101,5 @@ class AbstractCommunicator(Communicator):
 
 
 def refresh_queues(hadoop_home: str):
-    subprocess.Popen([os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), hadoop_home])
+    cmd = [os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), hadoop_home]
+    return processutil.start_quiet_process(cmd)

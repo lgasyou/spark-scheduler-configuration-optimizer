@@ -10,4 +10,4 @@ class YarnCommunicator(AbstractCommunicator):
         return False
 
     def get_scheduler_type(self) -> str:
-        return "CapacityScheduler"
+        return "capacityScheduler"

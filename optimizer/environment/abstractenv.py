@@ -28,6 +28,9 @@ class AbstractEnv(object):
         for _ in range(self.buffer_history_length):
             self.state_buffer.append(torch.zeros(*STATE_SHAPE, device=self.device))
 
+    def close(self):
+        pass
+
     @abc.abstractmethod
     def _communicator(self, args: argparse.Namespace):
         """Get Communicator instance."""

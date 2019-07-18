@@ -19,12 +19,12 @@ class EvaluationController(AbstractController):
         self.validator = Validator(args, self.env, self.agent, self.action_space)
 
     def run(self):
-        # self.logger.info('Running without optimization.')
-        # for action_index in [2, 3, 4, 5, 6]:
-        #     self.run_without_optimization(action_index)
+        self.logger.info('Running without optimization.')
+        for action_index in range(self.action_space):
+            self.run_without_optimization(action_index)
 
-        self.logger.info('Running with optimization.')
-        self.run_with_optimization()
+        # self.logger.info('Running with optimization.')
+        # self.run_with_optimization()
 
     def run_with_optimization(self):
         args = self.args
@@ -41,6 +41,7 @@ class EvaluationController(AbstractController):
         for T in tqdm(range(num_training_steps)):
             if done:
                 state, done = env.reset(), False
+                mem.terminate()
 
             if T % args.replay_frequency == 0:
                 agent.reset_noise()  # Draw a new set of noisy weights
@@ -50,14 +51,13 @@ class EvaluationController(AbstractController):
                 next_state, reward, done = env.step(action)  # Step
                 if reward_clip > 0:
                     reward = max(min(reward, reward_clip), -reward_clip)  # Clip rewards
-                print('Reward:', reward)
+                self.logger.info('Reward: %f', reward)
                 mem.append(state, action, reward, done)  # Append transition to memory
-                time.sleep(TRAIN_LOOP_INTERNAL)
                 T += 1
-            except StateInvalidException:
-                done = True
-                mem.terminate()
-                continue
+            except StateInvalidException as e:
+                self.logger.warning(e)
+            finally:
+                time.sleep(TRAIN_LOOP_INTERNAL)
 
             # Train and test
             if T >= args.learn_start:
@@ -86,38 +86,38 @@ class EvaluationController(AbstractController):
 
         env.close()
 
-    def run_without_optimization(self, action_index=2):
+    def run_without_optimization(self, action_index):
         env = EvaluationEnv(self.args)
         env.eval()
         total_time_cost_ms = 0
 
         arr = []
         # Test performance over several episodes
-        done, reward_sum, state = True, 0, None
+        done = True
         for T in range(self.args.evaluation_episodes):
             while True:
                 self.logger.info('Evaluation Loop %d' % T)
                 if done:
-                    state, reward_sum, done = env.reset(), 0, False
+                    _, done = env.reset(), False
 
                 try:
-                    state, reward, done = env.step(action_index)  # Step
-                    print('Reward:', reward)
-                    reward_sum += reward
-                    time.sleep(EVALUATION_LOOP_INTERNAL)
-                except StateInvalidException:
-                    done = True
+                    _, reward, done = env.step(action_index)  # Step
+                    self.logger.info('Reward: %f', reward)
+                except StateInvalidException as e:
+                    self.logger.warning(e)
+                time.sleep(EVALUATION_LOOP_INTERNAL)
 
                 if done:
                     time.sleep(EVALUATION_LOOP_INTERNAL)
                     costs, time_cost_ms = env.get_total_time_cost()
-                    print('Iteration', T, 'Time Cost:', costs)
                     arr.append(costs)
                     total_time_cost_ms += time_cost_ms
+                    self.logger.info('Iteration: %d, Time Cost: %d', T, costs)
                     break
 
-        print('Total Time Cost :', total_time_cost_ms, 'ms')
-        print(arr)
+        self.logger.info('Total Time Cost :%d ms', total_time_cost_ms)
+        self.logger.info(arr)
+
         excelutil.list2excel(arr, './results/no-optimization-%d.xlsx' % action_index)
         env.close()
 

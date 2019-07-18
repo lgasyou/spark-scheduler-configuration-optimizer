@@ -1,12 +1,21 @@
+import abc
 import os
+from typing import Dict, Type
 
 from optimizer.environment.yarn.yarnmodel import *
 from optimizer.util import fileutil, jsonutil
 from optimizer.util.xmlmodifier import XmlModifier
 
 
-class ISchedulerStrategy(object):
+class AbstractSchedulerStrategy(object):
 
+    def __init__(self, scheduler_type, rm_host, hadoop_etc):
+        self.TYPE = scheduler_type
+        self.RM_HOST = rm_host
+        self.HADOOP_ETC = hadoop_etc
+        self.action_set = self._get_action_set()
+
+    @abc.abstractmethod
     def override_config(self, action_index: int):
         """
         Override capacity-scheduler.xml or fair-scheduler-template.xml
@@ -14,28 +23,42 @@ class ISchedulerStrategy(object):
         """
         pass
 
+    @abc.abstractmethod
     def copy_conf_file(self):
         pass
 
+    @abc.abstractmethod
     def get_queue_constraints(self) -> List[QueueConstraint]:
         pass
 
+    def _get_action_set(self):
+        queue_names = QUEUES.get("names")
+        raw_actions = QUEUES.get("actions")[self.TYPE]
+        return self._build_actions(queue_names, raw_actions)
 
-class FairSchedulerStrategy(ISchedulerStrategy):
+    def _build_actions(self, queue_names, raw_actions):
+        action_space = len(raw_actions)
+        actions = {}
+        for i in range(action_space):
+            action = self._build_action(i, queue_names, raw_actions)
+            actions[i] = action
 
-    def __init__(self, rm_host, hadoop_etc, action_set):
-        self.RM_HOST = rm_host
-        self.HADOOP_ETC = hadoop_etc
-        self.action_set = action_set
-        self.weights = None
+        return actions
+
+    @abc.abstractmethod
+    def _build_action(self, index: int, queue_names: list, actions: dict):
+        pass
+
+
+class FairSchedulerStrategy(AbstractSchedulerStrategy):
 
     def override_config(self, action_index: int):
         dest = os.path.join(self.HADOOP_ETC, 'fair-scheduler.xml')
         xml_modifier = XmlModifier('./data/fair-scheduler-template.xml', dest)
 
         current_action = self.action_set[action_index]
-        self.weights: dict = current_action['weights']
-        for queue_name, weight in self.weights.items():
+        weights: dict = current_action['weights']
+        for queue_name, weight in weights.items():
             xml_modifier.modify_property(queue_name, weight)
         xml_modifier.modify_all_values('schedulingPolicy', current_action['schedulingPolicy'])
 
@@ -68,13 +91,18 @@ class FairSchedulerStrategy(ISchedulerStrategy):
         return (lhs['vCores'] / rhs['vCores'] +
                 lhs['memory'] / rhs['memory']) * 50
 
+    def _build_action(self, index: int, queue_names: list, actions: dict):
+        weights, scheduling_policy = actions.get(index)
+        action = {}
+        for name, weight in zip(queue_names, weights):
+            action[name] = weight
+        return {
+            'weights': action,
+            'schedulingPolicy': scheduling_policy
+        }
 
-class CapacitySchedulerStrategy(ISchedulerStrategy):
 
-    def __init__(self, rm_host, hadoop_etc, action_set):
-        self.RM_HOST = rm_host
-        self.HADOOP_ETC = hadoop_etc
-        self.action_set = action_set
+class CapacitySchedulerStrategy(AbstractSchedulerStrategy):
 
     def override_config(self, action_index: int):
         dest = os.path.join(self.HADOOP_ETC, 'capacity-scheduler.xml')
@@ -106,18 +134,26 @@ class CapacitySchedulerStrategy(ISchedulerStrategy):
 
         return ret
 
+    def _build_action(self, index: int, queue_names: list, actions: dict):
+        capacities, max_capacities = actions.get(index)
+        action = {}
+        for name, c, mc in zip(queue_names, capacities, max_capacities):
+            action[name] = (c, mc)
+        return action
+
 
 class SchedulerStrategyFactory(object):
 
-    STR_STRATEGY_MAP = {
-        'FairScheduler': FairSchedulerStrategy,
-        'CapacityScheduler': CapacitySchedulerStrategy
+    STR_STRATEGY_MAP: Dict[str, Type[AbstractSchedulerStrategy]] = {
+        'fairScheduler': FairSchedulerStrategy,
+        'capacityScheduler': CapacitySchedulerStrategy
     }
 
     @staticmethod
-    def create(scheduler_type: str, rm_host: str, hadoop_etc: str, action_set: dict) -> ISchedulerStrategy:
-        cls = SchedulerStrategyFactory.STR_STRATEGY_MAP.get(scheduler_type)
-        if cls is None:
+    def create(scheduler_type: str, rm_host: str, hadoop_etc: str) -> AbstractSchedulerStrategy:
+        try:
+            cls = SchedulerStrategyFactory.STR_STRATEGY_MAP[scheduler_type]
+        except KeyError:
             raise RuntimeError
 
-        return cls(rm_host, hadoop_etc, action_set)
+        return cls(scheduler_type, rm_host, hadoop_etc)

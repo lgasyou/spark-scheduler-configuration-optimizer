@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 import time
@@ -20,17 +21,16 @@ class SparkCommunicator(AbstractCommunicator, ResetableCommunicator):
         self.workload_runner = SparkWorkloadController()
 
     def is_done(self) -> bool:
-        return False
-        # return self.workload_runner.is_done()
+        return self.workload_runner.is_done()
 
     def close(self):
-        return
         self.workload_runner.stop_workloads()
+        self.logger.info('Restarting YARN...')
         restart_process = restart_yarn(os.getcwd(), self.HADOOP_HOME)
         restart_process.wait()
+        self.logger.info('YARN restarted.')
 
     def reset(self):
-        return
         self.close()
         self.start_workload()
         time.sleep(5)
@@ -42,19 +42,11 @@ class SparkCommunicator(AbstractCommunicator, ResetableCommunicator):
         time_costs = [j.elapsed_time for j in finished_jobs]
         return time_costs, sum(time_costs)
 
-    @staticmethod
-    def get():
-        url = 'http://omnisky:8088/' + 'ws/v1/cluster/apps?states=FINISHED'
-        job_json = jsonutil.get_json(url)
-        finished_jobs = build_finished_jobs_from_json(job_json)
-        time_costs = [j.elapsed_time for j in finished_jobs]
-        return time_costs, sum(time_costs)
-
     def start_workload(self):
         self.workload_runner.start_workloads(os.getcwd(), self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
 
     def get_scheduler_type(self) -> str:
-        return "FairScheduler"
+        return "capacityScheduler"
 
 
 class SparkWorkloadController(object):
@@ -64,12 +56,14 @@ class SparkWorkloadController(object):
     OPTIONS = [*map(lambda item: str(item), [1, 2, 3])]
 
     def __init__(self):
+        self.logger = logging.getLogger(__name__)
         self.processes: List[subprocess.Popen] = []
 
     def start_workloads(self, wd, spark_home, hadoop_home, java_home):
         ITEMS = [['bayes', 'queueA', '1'], ['bayes', 'queueA', '2'], ['bayes', 'queueA', '3'], ['fpgrowth', 'queueA', '1'], ['fpgrowth', 'queueB', '2'], ['fpgrowth', 'queueC', '3'], ['kmeans', 'queueC', '1'], ['kmeans', 'queueD', '2'], ['kmeans', 'queueA', '3'], ['lda', 'queueA', '1'], ['lda', 'queueD', '2'], ['lda', 'queueB', '3'], ['linear', 'queueC', '1'], ['linear', 'queueD', '2'], ['linear', 'queueB', '3'], ['SVM', 'queueC', '1'], ['SVM', 'queueB', '2'], ['SVM', 'queueD', '3'], ['als', 'queueA', '1'], ['als', 'queueB', '2'], ['als', 'queueB', '3']]
         for workload, queue, option in ITEMS:
-            print('starting', workload, queue, option)
+            self.logger.info('Starting {} on {} with option {}...'.format(workload, queue, option))
+            time.sleep(1)
             p = start_workload_process(workload, queue, option, wd, spark_home, hadoop_home, java_home)
             self.processes.append(p)
 
@@ -84,12 +78,12 @@ class SparkWorkloadController(object):
 
 def start_workload_process(workload_type, queue, option, wd, spark_home, hadoop_home, java_home):
     c = ['%s/bin/start-spark-workload.sh' % wd, workload_type, spark_home, hadoop_home,  java_home, wd, queue, option]
-    return subprocess.Popen(' '.join(c), shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return processutil.start_quiet_process(c)
 
 
 def restart_yarn(wd, hadoop_home):
-    cmd = "%s/bin/restart-yarn.sh %s" % (wd, hadoop_home)
-    return subprocess.Popen(cmd, shell=True)
+    cmd = ["%s/bin/restart-yarn.sh" % wd, hadoop_home]
+    return processutil.start_quiet_process(cmd)
 
 
 def build_finished_jobs_from_json(j: dict) -> List[FinishedApplication]:
