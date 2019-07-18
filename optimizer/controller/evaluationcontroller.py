@@ -103,8 +103,8 @@ class EvaluationController(AbstractController):
                 try:
                     _, reward, done = env.step(action_index)  # Step
                     self.logger.info('Reward: %f', reward)
-                except StateInvalidException as e:
-                    self.logger.warning(e)
+                except StateInvalidException:
+                    pass
                 time.sleep(EVALUATION_LOOP_INTERNAL)
 
                 if done:
@@ -112,11 +112,11 @@ class EvaluationController(AbstractController):
                     costs, time_cost_ms = env.get_total_time_cost()
                     arr.append(costs)
                     total_time_cost_ms += time_cost_ms
-                    self.logger.info('Iteration: %d, Time Cost: %d', T, costs)
+                    self.logger.info('Iteration: {}, Time Cost: {}'.format(T, costs))
+                    excelutil.list2excel(arr, './results/no-optimization-%d-%d.xlsx' % (action_index, T))
                     break
 
         self.logger.info('Total Time Cost :%d ms', total_time_cost_ms)
-        self.logger.info(arr)
 
         excelutil.list2excel(arr, './results/no-optimization-%d.xlsx' % action_index)
         env.close()

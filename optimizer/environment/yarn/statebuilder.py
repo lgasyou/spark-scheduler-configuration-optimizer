@@ -1,11 +1,11 @@
+import logging
+import pickle
 from typing import Tuple
 
 import requests
 import torch
 from requests.exceptions import ConnectionError
 
-from optimizer.environment.spark.completedsparkapplicationanalyzer import CompletedSparkApplicationAnalyzer
-from optimizer.environment.spark.sparkapplicationbuilder import SparkApplicationBuilder
 from optimizer.environment.spark.sparkapplicationtimedelaypredictor import SparkApplicationTimeDelayPredictor
 from optimizer.environment.stateinvalidexception import StateInvalidException
 from optimizer.environment.yarn.yarnmodel import *
@@ -16,6 +16,7 @@ from optimizer.util import jsonutil
 class StateBuilder(object):
 
     def __init__(self, rm_api_url: str, spark_history_server_api_url: str, scheduler_strategy):
+        self.logger = logging.getLogger(__name__)
         self.RM_API_URL = rm_api_url
         self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_api_url
         self.scheduler_strategy = scheduler_strategy
@@ -24,43 +25,46 @@ class StateBuilder(object):
 
     # TODO: Replace this with train set.
     def _tmp_add_models(self):
-        builder = SparkApplicationBuilder(self.SPARK_HISTORY_SERVER_API_URL)
-        analyzer = CompletedSparkApplicationAnalyzer()
-        predictor = self.application_time_delay_predictor
+        with open('./results/algorithm-models.pk', 'rb') as f:
+            self.application_time_delay_predictor = pickle.load(f)
 
-        app = builder.build('application_1562834622700_0051')
-        svm_model = analyzer.analyze(app)
-        predictor.add_algorithm('linear', svm_model)
-
-        # ALS
-        app = builder.build('application_1562834622700_0039')
-        als_model = analyzer.analyze(app)
-        predictor.add_algorithm('als', als_model)
-
-        # KMeans
-        app = builder.build('application_1562834622700_0018')
-        svm_model = analyzer.analyze(app)
-        predictor.add_algorithm('kmeans', svm_model)
-
-        # SVM
-        app = builder.build('application_1562834622700_0014')
-        svm_model = analyzer.analyze(app)
-        predictor.add_algorithm('svm', svm_model)
-
-        # Bayes
-        app = builder.build('application_1562834622700_0043')
-        svm_model = analyzer.analyze(app)
-        predictor.add_algorithm('bayes', svm_model)
-
-        # FPGrowth
-        app = builder.build('application_1562834622700_0054')
-        svm_model = analyzer.analyze(app)
-        predictor.add_algorithm('FPGrowth', svm_model)
-
-        # LDA
-        app = builder.build('application_1562834622700_0058')
-        svm_model = analyzer.analyze(app)
-        predictor.add_algorithm('lda', svm_model)
+        # builder = SparkApplicationBuilder(self.SPARK_HISTORY_SERVER_API_URL)
+        # analyzer = CompletedSparkApplicationAnalyzer()
+        # predictor = self.application_time_delay_predictor
+        #
+        # app = builder.build('application_1562834622700_0051')
+        # svm_model = analyzer.analyze(app)
+        # predictor.add_algorithm('linear', svm_model)
+        #
+        # # ALS
+        # app = builder.build('application_1562834622700_0039')
+        # als_model = analyzer.analyze(app)
+        # predictor.add_algorithm('als', als_model)
+        #
+        # # KMeans
+        # app = builder.build('application_1562834622700_0018')
+        # svm_model = analyzer.analyze(app)
+        # predictor.add_algorithm('kmeans', svm_model)
+        #
+        # # SVM
+        # app = builder.build('application_1562834622700_0014')
+        # svm_model = analyzer.analyze(app)
+        # predictor.add_algorithm('svm', svm_model)
+        #
+        # # Bayes
+        # app = builder.build('application_1562834622700_0043')
+        # svm_model = analyzer.analyze(app)
+        # predictor.add_algorithm('bayes', svm_model)
+        #
+        # # FPGrowth
+        # app = builder.build('application_1562834622700_0054')
+        # svm_model = analyzer.analyze(app)
+        # predictor.add_algorithm('FPGrowth', svm_model)
+        #
+        # # LDA
+        # app = builder.build('application_1562834622700_0058')
+        # svm_model = analyzer.analyze(app)
+        # predictor.add_algorithm('lda', svm_model)
 
     def build(self):
         try:
@@ -69,7 +73,7 @@ class StateBuilder(object):
             constraints = self.parse_and_build_constraints()
             return State(waiting_apps, running_apps, resources, constraints)
         except (ConnectionError, TypeError, requests.exceptions.HTTPError) as e:
-            print(e)
+            self.logger.info(e)
             raise StateInvalidException
 
     @staticmethod

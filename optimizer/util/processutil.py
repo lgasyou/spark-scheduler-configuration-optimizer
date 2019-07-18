@@ -27,4 +27,4 @@ def kill_process_and_wait(process: subprocess.Popen):
 
 def start_quiet_process(cmd: list) -> subprocess.Popen:
     cmd_str = ' '.join(cmd)
-    return subprocess.Popen(cmd_str, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    return subprocess.Popen(cmd_str, shell=True)
