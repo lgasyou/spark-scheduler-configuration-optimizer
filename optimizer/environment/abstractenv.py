@@ -31,7 +31,7 @@ class AbstractEnv(object):
             try:
                 state = self.get_state()
             except StateInvalidException:
-                self.logger.warning("State was not obtained. Try again in %ds." % retry_interval)
+                self.logger.warning("State obtaining failed. Try again in %ds." % retry_interval)
                 time.sleep(retry_interval)
         return state
 

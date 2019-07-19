@@ -12,9 +12,6 @@ from optimizer.util import yarnutil
 
 
 class AbstractCommunicator(Communicator):
-    """
-    Uses RESTFul API to communicate with YARN cluster scheduler.
-    """
 
     def __init__(self, rm_host: str, spark_history_server_host: str, hadoop_home: str):
         self.logger = logging.getLogger(__name__)
@@ -50,7 +47,7 @@ class AbstractCommunicator(Communicator):
         running_jobs = self.state.running_apps
 
         # noinspection PyTypeChecker
-        sum_time_delay = sum([j.predicted_time_delay for j in running_jobs])
+        sum_time_delay = sum([j.predicted_time_delay for j in running_jobs if j.predicted_time_delay != -1])
 
         # If we just start this program, set the reward as 0.
         if self.last_sum_time_delay is None or not self.last_sum_time_delay:

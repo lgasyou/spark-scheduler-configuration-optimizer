@@ -3,7 +3,7 @@ import time
 
 from optimizer.controller.abstractcontroller import AbstractController
 from optimizer.environment import TrainingEnv
-from optimizer.hyperparameters import PRE_TRAIN_LOOP_INTERNAL
+from optimizer.hyperparameters import TRAINING_LOOP_INTERNAL
 from optimizer.replaymemory.memoryserializer import MemorySerializer
 from optimizer.util import sparkutil
 
@@ -25,7 +25,7 @@ class TrainingController(AbstractController):
         if not self.memory_serializer.try_load():
             self.memory_serializer.try_load_by_filename(self.TMP_MEMORY_FILENAME)
             self.t = self.mem.index
-            self.logger.info('Start from time %d' % self.t)
+            self.logger.info('Start from episode %d.' % self.t)
             while True:
                 self._train_step()
 
@@ -41,7 +41,7 @@ class TrainingController(AbstractController):
             sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
 
     def _train_episode(self, action_index: int):
-        done, interval = False, PRE_TRAIN_LOOP_INTERNAL
+        done, interval = False, TRAINING_LOOP_INTERNAL
         while not done:
             self._reset_noise()
 
@@ -63,7 +63,6 @@ class TrainingController(AbstractController):
 
     def _save_progress(self):
         self.memory_serializer.save_as(self.TMP_MEMORY_FILENAME)
-        self.agent.save()
 
     def _env(self, args):
         return TrainingEnv(self.args)

@@ -5,9 +5,9 @@ import torch
 from torch import optim
 
 from optimizer.environment import AbstractEnv
+from optimizer.hyperparameters import CUDA_DEVICES
 from optimizer.nn import DQN
 from optimizer.replaymemory import ReplayMemoryProxy
-from optimizer.hyperparameters import CUDA_DEVICES
 
 
 class Agent(object):
@@ -80,7 +80,7 @@ class Agent(object):
             Tz = returns.unsqueeze(1) + nonterminals * (self.discount ** self.n) * self.support.unsqueeze(0)
             Tz = Tz.clamp(min=self.V_min, max=self.V_max)  # Clamp between supported values
             # Compute L2 projection of Tz onto fixed support z
-            b = (Tz - self.V_min) / self.delta_z  # b = (Tz - V_min) / Δz
+            b = (Tz - self.V_min) / self.delta_z  # b = (Tz - Vmin) / Δz
             l, u = b.floor().to(torch.int64), b.ceil().to(torch.int64)
             # Fix disappearing probability mass when l = b = u (b is int)
             l[(u > 0) * (l == u)] -= 1
@@ -100,7 +100,7 @@ class Agent(object):
         (weights * loss).mean().backward()  # Backpropagate importance-weighted minibatch loss
         self.optimiser.step()
 
-        mem.update_priorities(idxs, loss.detach())  # Update priorities of sampled transitions
+        mem.update_priorities(idxs, loss.detach().cpu().numpy())  # Update priorities of sampled transitions
 
     def update_target_net(self) -> None:
         self.target_net.load_state_dict(self.online_net.state_dict())

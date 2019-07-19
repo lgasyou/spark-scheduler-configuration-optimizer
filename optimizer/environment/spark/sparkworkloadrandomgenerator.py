@@ -11,15 +11,15 @@ class SparkWorkloadRandomGenerator(object):
 
     def generate(self) -> dict:
         items = []
-        for workload in self.WORKLOAD_TYPES:
-            for _ in range(3):
-                item = {
-                    "name": workload,
-                    "interval": random.randrange(3, 10),
-                    "queue": random.choice(self.QUEUES),
-                    "dataSize": random.choice(self.DATA_SIZES)
-                }
-                items.append(item)
+        workloads_size = random.randint(5, 18)
+        for _ in range(workloads_size):
+            item = {
+                "name": random.choice(self.WORKLOAD_TYPES),
+                "interval": random.randrange(3, 10),
+                "queue": random.choice(self.QUEUES),
+                "dataSize": random.choice(self.DATA_SIZES)
+            }
+            items.append(item)
 
         random.shuffle(items)
         return {'workloads': items}

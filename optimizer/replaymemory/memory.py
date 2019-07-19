@@ -1,5 +1,4 @@
-import random
-
+import numpy as np
 import torch
 
 from optimizer.replaymemory.segmenttree import SegmentTree
@@ -22,17 +21,17 @@ class ReplayMemory(object):
         # Store transitions in a wrap-around cyclic buffer within a sum tree for querying priorities
         self.transitions = SegmentTree(capacity)
 
-    # Adds state and action at time test, reward and terminal at time test + 1
+    # Adds state and action at time t, reward and terminal at time t + 1
     def append(self, state, action, reward, terminal):
         # Only store last frame and discretise to save memory
-        state = state[-1].to(device=torch.device('cpu'))
+        state = state[-1].to(dtype=torch.float32, device=torch.device('cpu'))
         self.transitions.append(Transition(self.t, state, action, reward, not terminal),
                                 self.transitions.max)  # Store new transition with maximum priority
-        self.t = 0 if terminal else self.t + 1  # Start new episodes with test = 0
+        self.t = 0 if terminal else self.t + 1  # Start new episodes with t = 0
 
     # Returns a transition with blank states where appropriate
     def _get_transition(self, idx):
-        transition = [None] * (self.history + self.n)
+        transition = np.array([None] * (self.history + self.n))
         transition[self.history - 1] = self.transitions.get(idx)
         for t in range(self.history - 2, -1, -1):  # e.g. 2 1 0
             if transition[t + 1].timestep == 0:
@@ -50,22 +49,22 @@ class ReplayMemory(object):
     def _get_sample_from_segment(self, segment, i):
         valid = False
         while not valid:
-            sample = random.uniform(i * segment, (i + 1) * segment)  # Uniformly sample an element from within a segment
+            # Uniformly sample an element from within a segment
+            sample = np.random.uniform(i * segment, (i + 1) * segment)
             # Retrieve sample from tree with un-normalised probability
             prob, idx, tree_idx = self.transitions.find(sample)
             # Resample if transition straddled current index or probablity 0
-            if (self.transitions.index - idx) % self.capacity > self.n \
-               and (idx - self.transitions.index) % self.capacity >= self.history and prob != 0:
+            if (self.transitions.index - idx) % self.capacity > self.n and (
+                    idx - self.transitions.index) % self.capacity >= self.history and prob != 0:
                 valid = True  # Note that conditions are valid but extra conservative around buffer index 0
 
-        # Retrieve all required transition data (from test - h to test + n)
+        # Retrieve all required transition data (from t - h to t + n)
         transition = self._get_transition(idx)
         # Create un-discretised state and nth next state
         state = torch.stack([trans.state for trans in transition[:self.history]]).to(dtype=torch.float32,
                                                                                      device=self.device)
         next_state = torch.stack([trans.state for trans in transition[self.n:self.n + self.history]]).to(
             dtype=torch.float32, device=self.device)
-
         # Discrete action to be used as index
         action = torch.tensor([transition[self.history - 1].action], dtype=torch.int64, device=self.device)
         # Calculate truncated n-step discounted return R^n = Σ_k=0->n-1 (γ^k)R_t+k+1
@@ -86,15 +85,15 @@ class ReplayMemory(object):
         probs, idxs, tree_idxs, states, actions, returns, next_states, nonterminals = zip(*batch)
         states, next_states, = torch.stack(states), torch.stack(next_states)
         actions, returns, nonterminals = torch.cat(actions), torch.cat(returns), torch.stack(nonterminals)
-        probs = torch.tensor(probs, dtype=torch.float32,
-                             device=self.device) / p_total  # Calculate normalised probabilities
+        probs = np.array(probs, dtype=np.float32) / p_total  # Calculate normalised probabilities
         capacity = self.capacity if self.transitions.full else self.transitions.index
         weights = (capacity * probs) ** -self.priority_weight  # Compute importance-sampling weights w
-        weights = weights / weights.max()  # Normalise by max importance-sampling weight from batch
+        weights = torch.tensor(weights / weights.max(), dtype=torch.float32,
+                               device=self.device)  # Normalise by max importance-sampling weight from batch
         return tree_idxs, states, actions, returns, next_states, nonterminals, weights
 
     def update_priorities(self, idxs, priorities):
-        priorities.pow_(self.priority_exponent)
+        priorities = np.power(priorities, self.priority_exponent)
         [self.transitions.update(idx, priority) for idx, priority in zip(idxs, priorities)]
 
     # Set up internal state for iterator

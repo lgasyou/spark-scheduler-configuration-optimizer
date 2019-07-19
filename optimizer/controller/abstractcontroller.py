@@ -44,7 +44,7 @@ class AbstractController(object):
         if self.t >= self.args.learn_start:
             self._agent_learn()
 
-        return state, reward, done
+        return state, action, reward, done
 
     def _clip_reward(self, reward):
         reward_clip = self.args.reward_clip

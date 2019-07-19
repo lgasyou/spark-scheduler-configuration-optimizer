@@ -92,8 +92,10 @@ class StateBuilder(object):
         # Line 75-149: running apps and their resource requests
         for i, ra in enumerate(raw.running_apps[:75]):
             row = i + 75
+            # We assume the longest execution time is 10000s.
+            predicted_time_delay = ra.predicted_time_delay if ra.predicted_time_delay > 0 else 10000
             line = [ra.elapsed_time, ra.priority, ra.converted_location,
-                    ra.progress, ra.queue_usage_percentage, ra.predicted_time_delay]
+                    ra.progress, ra.queue_usage_percentage, predicted_time_delay]
             for rr in ra.request_resources[:65]:
                 line.extend([rr.priority, rr.memory, rr.cpu])
             line.extend([0.0] * (width - len(line)))
@@ -156,12 +158,14 @@ class StateBuilder(object):
         for j in apps_json:
             application_id = j['id']
             name = j['name']
+            started_time = j['startedTime']
             elapsed_time = j['elapsedTime']
             priority = j['priority']
             progress = j['progress']
             queue_usage_percentage = j['queueUsagePercentage']
             location = j['queue']
-            predicted_time_delay = self.application_time_delay_predictor.predict(application_id, name)
+            predicted_time_delay = self.application_time_delay_predictor.predict(application_id, name, started_time)
+            self.logger.info('%s, Predicted time delay: %f' % (application_id, predicted_time_delay))
             request_resources = self.build_request_resources_from_json(j)
             apps.append(RunningApplication(application_id, elapsed_time, priority, location, progress,
                                            queue_usage_percentage, predicted_time_delay, request_resources))

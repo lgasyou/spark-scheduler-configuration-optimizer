@@ -13,7 +13,7 @@ class ApplicationExecutionSimulator(object):
         container_additions.sort(key=lambda item: item.start_time)
         container_additions = [c for c in container_additions if c.is_active]
         if len(container_additions) == 0:
-            return 0
+            return -1
 
         tasks.sort(key=lambda item: item.id)
         container_additions[0].add_tasks(tasks)

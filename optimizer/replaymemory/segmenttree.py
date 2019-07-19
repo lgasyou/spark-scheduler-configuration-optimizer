@@ -9,7 +9,7 @@ class SegmentTree(object):
         self.size = size
         self.full = False  # Used to track actual capacity
         # Initialise fixed size tree with all (priority) zeros
-        self.sum_tree = np.zeros((2 * size - 1, ), dtype=np.float32)
+        self.sum_tree = np.zeros((2 * size - 1,), dtype=np.float32)
         self.data = np.array([None] * size)  # Wrap-around cyclic buffer
         self.max = 1  # Initial max value to return (1 = 1^ω)
 

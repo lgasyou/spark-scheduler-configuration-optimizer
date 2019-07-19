@@ -4,7 +4,7 @@ import random
 
 import torch
 
-from optimizer import EvaluationController
+from optimizer import TrainingController
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,6 @@ def setup_arg_parser() -> argparse.ArgumentParser:
 
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
-    parser.add_argument('--game', type=str, default='space_invaders', help='ATARI game')
     parser.add_argument('--T-max', type=int, default=int(6000), metavar='STEPS', help='Number of training steps (4x number of frames)')
     parser.add_argument('--max-episode-length', type=int, default=int(12), metavar='LENGTH', help='Max episode length (0 to disable)')
     parser.add_argument('--history-length', type=int, default=4, metavar='T', help='Number of consecutive states processed')
@@ -40,22 +39,21 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--lr', type=float, default=0.0000625, metavar='η', help='Learning rate')
     parser.add_argument('--adam-eps', type=float, default=1.5e-4, metavar='ε', help='Adam epsilon')
     parser.add_argument('--batch-size', type=int, default=32, metavar='SIZE', help='Batch size')
-    parser.add_argument('--learn-start', type=int, default=int(900), metavar='STEPS', help='Number of steps before starting training')
+    parser.add_argument('--learn-start', type=int, default=int(10000), metavar='STEPS', help='Number of steps before starting training')
     parser.add_argument('--evaluate', action='store_true', help='Evaluate only')
     parser.add_argument('--evaluation-interval', type=int, default=2000, metavar='STEPS', help='Number of training steps between evaluations')
     parser.add_argument('--evaluation-episodes', type=int, default=5, metavar='N', help='Number of evaluation episodes to average over')
     parser.add_argument('--evaluation-size', type=int, default=288, metavar='N', help='Number of transitions to use for validating Q')
     parser.add_argument('--log-interval', type=int, default=288, metavar='STEPS', help='Number of training steps between logging status')
-    parser.add_argument('--render', action='store_true', help='Display screen (testing only)')
 
     return parser
 
 
 # Setup PyTorch args
 def setup_torch_args(args: argparse.Namespace):
-    logger.info(' ' * 26 + 'Options')
+    logger.info('Options')
     for k, v in vars(args).items():
-        logger.info(' ' * 26 + k + ': ' + str(v))
+        logger.info(k + ': ' + str(v))
     random.seed(args.seed)
     torch.manual_seed(random.randint(1, 10000))
     if torch.cuda.is_available() and not args.disable_cuda:
@@ -79,7 +77,7 @@ def get_args() -> argparse.Namespace:
 def main():
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(levelname)s: %(message)s',
+        format='%(asctime)s %(levelname)s %(funcName)s: %(message)s',
         filename='./results/runtime.log',
         filemode='w'
     )
@@ -91,9 +89,9 @@ def main():
     # else:
     #     controller = OptimizationController(args)
 
-    controller = EvaluationController(args)
+    # controller = EvaluationController(args)
     # controller = OptimizationController(args)
-    # controller = TrainingController(args)
+    controller = TrainingController(args)
     try:
         controller.run()
     except KeyboardInterrupt:

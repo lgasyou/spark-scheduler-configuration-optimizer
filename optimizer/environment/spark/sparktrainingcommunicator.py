@@ -2,7 +2,7 @@ import os
 
 from optimizer.environment.abstractcommunicator import AbstractCommunicator
 from optimizer.environment.spark.sparkworkloadrandomgenerator import SparkWorkloadRandomGenerator
-from optimizer.util import yarnutil, jsonutil, sparkutil
+from optimizer.util import yarnutil, sparkutil
 
 
 class SparkTrainingCommunicator(AbstractCommunicator):
@@ -15,10 +15,7 @@ class SparkTrainingCommunicator(AbstractCommunicator):
         self.workload_generator = SparkWorkloadRandomGenerator()
 
     def is_done(self) -> bool:
-        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED,RUNNING'
-        app_json = jsonutil.get_json(url)
-        all_app_finished = app_json['apps'] is None
-        return all_app_finished
+        return yarnutil.has_all_application_done(self.RM_API_URL)
 
     def close(self):
         self.logger.info('Restarting YARN...')
@@ -34,7 +31,10 @@ class SparkTrainingCommunicator(AbstractCommunicator):
         return self.workload_generator.generate()
 
     def start_workloads(self, workloads):
+        self.logger.info('Starting workloads...')
+        self.logger.info(workloads)
         sparkutil.async_start_workloads(workloads, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
+        self.logger.info('Workloads started.')
 
     def get_scheduler_type(self) -> str:
         return "capacityScheduler"

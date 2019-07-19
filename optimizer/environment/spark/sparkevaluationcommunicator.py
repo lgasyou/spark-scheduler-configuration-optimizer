@@ -33,10 +33,7 @@ class SparkEvaluationCommunicator(AbstractCommunicator, EvaluationCommunicator):
         }
 
     def is_done(self) -> bool:
-        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED,RUNNING'
-        app_json = jsonutil.get_json(url)
-        all_app_finished = app_json['apps'] is None
-        return all_app_finished
+        return yarnutil.has_all_application_done(self.RM_API_URL)
 
     def close(self):
         self.logger.info('Restarting YARN...')
@@ -68,6 +65,7 @@ class SparkEvaluationCommunicator(AbstractCommunicator, EvaluationCommunicator):
         return jobs
 
     def start_workload(self):
+        self.logger.info(self.WORKLOADS)
         sparkutil.async_start_workloads(self.WORKLOADS, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
 
     def get_scheduler_type(self) -> str:

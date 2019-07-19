@@ -16,12 +16,12 @@ class EvaluationController(AbstractController):
         self.episode = 0
 
     def run(self):
-        self.logger.info('Running without optimization.')
-        for action_index in range(self.action_space):
-            self.run_without_optimization(action_index)
+        # self.logger.info('Running without optimization.')
+        # for action_index in range(7, self.action_space):
+        #     self.run_without_optimization(action_index)
 
-        # self.logger.info('Running with optimization.')
-        # self.run_with_optimization()
+        self.logger.info('Running with optimization.')
+        self.run_with_optimization()
 
     def run_with_optimization(self):
         self.agent.eval()
@@ -37,8 +37,9 @@ class EvaluationController(AbstractController):
         self.env.reset_buffer()
         done, state = False, self.env.try_get_state(interval)
         while not done:
-            state, reward, done = self.optimize_episode(state, self.agent.act_e_greedy, interval)
-            self.logger.info("Episode {}: Reward {}, Done {}".format(self.episode, reward, done))
+            state, action, reward, done = self.optimize_episode(state, self.agent.act_e_greedy, interval)
+            self.logger.info("Episode {}, Time {}: Reward {}, Action {}, Done {}"
+                             .format(self.episode, self.t, reward, action, done))
             time.sleep(interval)
 
         self.mem.terminate()
@@ -57,7 +58,8 @@ class EvaluationController(AbstractController):
         done, state = False, self.env.try_get_state(interval)
         while not done:
             _, reward, done = self.env.step(action_index, interval)
-            self.logger.info("Episode {}: Reward {}, Done {}".format(self.episode, reward, done))
+            self.logger.info("Episode {}: Reward {}, Action {}, Done {}"
+                             .format(self.episode, reward, action_index, done))
             time.sleep(interval)
 
     def cleanup(self, save_filename: str):
@@ -65,6 +67,7 @@ class EvaluationController(AbstractController):
         self.costs.append(costs)
         self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, costs))
         excelutil.list2excel(self.costs, save_filename)
+        self.logger.info('Summary {} saved.' % save_filename)
         sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
 
     # def run_with_optimization(self):
