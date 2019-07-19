@@ -92,7 +92,7 @@ def main():
         controller = OptimizationController(args)
 
     try:
-        # controller.pre_train_model()
+        controller.pre_train_model()
         controller.run()
     except KeyboardInterrupt:
         controller.env.close()

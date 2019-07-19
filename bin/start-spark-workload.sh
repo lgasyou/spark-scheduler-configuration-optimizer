@@ -17,6 +17,17 @@ function submit() {
     workload=$3
     size=$4
 
+    echo "${spark_home}/bin/spark-submit \
+    --class ${class} \
+    --master yarn \
+    --deploy-mode cluster \
+    --queue ${queue} \
+    --num-executors 5 \
+    --executor-cores 4 \
+    --executor-memory 6g \
+    --driver-memory 1g \
+    ${work_dir}/data/testset/${workload}.jar ${size}"
+
     ${spark_home}/bin/spark-submit \
     --class ${class} \
     --master yarn \
@@ -29,32 +40,4 @@ function submit() {
     ${work_dir}/data/testset/${workload}.jar ${size}
 }
 
-case $1 in
-    SVM)
-        submit svm ${queue} workload_svm ${size}
-        ;;
-
-    fpgrowth)
-        submit FPGrowth ${queue} workload_FPGrowth ${size}
-        ;;
-
-    kmeans)
-        submit kmeans ${queue} workload_kmeans ${size}
-        ;;
-
-    linear)
-        submit linear ${queue} workload_linear ${size}
-        ;;
-
-    lda)
-        submit lda ${queue} workload_lda ${size}
-        ;;
-
-    bayes)
-        submit bayes ${queue} workload_bayes ${size}
-        ;;
-
-    als)
-        submit als ${queue} workload_als ${size}
-        ;;
-esac
+submit $1 ${queue} workload_$1 ${size}

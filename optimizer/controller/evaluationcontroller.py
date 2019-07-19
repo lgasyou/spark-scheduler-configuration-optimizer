@@ -9,7 +9,7 @@ from optimizer.controller.abstractcontroller import AbstractController
 from optimizer.controller.validator import Validator
 from optimizer.environment import EvaluationEnv, StateInvalidException
 from optimizer.hyperparameters import TRAIN_LOOP_INTERNAL, EVALUATION_LOOP_INTERNAL
-from optimizer.util import excelutil, processutil
+from optimizer.util import excelutil, sparkutil
 
 
 class EvaluationController(AbstractController):
@@ -117,7 +117,7 @@ class EvaluationController(AbstractController):
                     total_time_cost_ms += time_cost_ms
                     self.logger.info('Iteration: {}, Time Cost: {}'.format(T, costs))
                     excelutil.list2excel(arr, './results/no-optimization-%d-%d.xlsx' % (action_index, T))
-                    clean_spark_log(os.getcwd(), self.args.hadoop_home)
+                    sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
                     break
 
         self.logger.info('Total Time Cost :%d ms', total_time_cost_ms)
@@ -127,8 +127,3 @@ class EvaluationController(AbstractController):
 
     def _env(self, args: argparse.Namespace):
         return EvaluationEnv(args)
-
-
-def clean_spark_log(wd, hadoop_home):
-    cmd = ['%s/bin/clean-spark-log.sh' % wd, hadoop_home]
-    return processutil.start_process(cmd)

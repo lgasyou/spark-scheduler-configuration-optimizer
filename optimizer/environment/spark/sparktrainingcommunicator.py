@@ -1,9 +1,9 @@
 import os
-import time
+import threading
 
 from optimizer.environment.abstractcommunicator import AbstractCommunicator
-from optimizer.environment.spark.sparkcommunicator import SparkWorkloadController
-from optimizer.util import processutil, jsonutil
+from optimizer.environment.spark.sparkworkloadrandomgenerator import SparkWorkloadRandomGenerator
+from optimizer.util import processutil, jsonutil, sparkutil
 
 
 class SparkTrainingCommunicator(AbstractCommunicator):
@@ -13,18 +13,15 @@ class SparkTrainingCommunicator(AbstractCommunicator):
         super().__init__(rm_host, spark_history_server_host, hadoop_home)
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
-        self.workload_runner = SparkWorkloadController()
+        self.workload_generator = SparkWorkloadRandomGenerator()
 
     def is_done(self) -> bool:
         url = self.RM_API_URL + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED,RUNNING'
         app_json = jsonutil.get_json(url)
         all_app_finished = app_json['apps'] is None
-        done = all_app_finished and self.workload_runner.is_done()
-        self.logger.info('{}{}'.format(all_app_finished, self.workload_runner.is_done()))
-        return done
+        return all_app_finished
 
     def close(self):
-        self.workload_runner.stop_workloads()
         self.logger.info('Restarting YARN...')
         restart_process = restart_yarn(os.getcwd(), self.HADOOP_HOME)
         restart_process.wait()
@@ -33,13 +30,15 @@ class SparkTrainingCommunicator(AbstractCommunicator):
     def reset(self, workloads):
         self.close()
         self.start_workloads(workloads)
-        time.sleep(5)
 
-    def generate_pre_train_set(self):
-        pass
+    def generate_pre_train_set(self) -> dict:
+        return self.workload_generator.generate()
 
     def start_workloads(self, workloads):
-        self.workload_runner.start_workloads(os.getcwd(), self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
+        args = (workloads, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
+        start_thread = threading.Thread(target=sparkutil.spark_submit, args=args)
+        start_thread.start()
+        start_thread.join(30)
 
     def get_scheduler_type(self) -> str:
         return "capacityScheduler"

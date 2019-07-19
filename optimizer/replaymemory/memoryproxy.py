@@ -39,6 +39,10 @@ class ReplayMemoryProxy(object):
     def priority_weight(self, value):
         self._mem.priority_weight = value
 
+    @property
+    def t(self):
+        return self.memory.t
+
     def _flush_cache(self):
         if self._cache is not None:
             state, action, reward, terminal = self._cache

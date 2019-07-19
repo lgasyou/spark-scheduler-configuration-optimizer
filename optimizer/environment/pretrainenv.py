@@ -11,10 +11,9 @@ class PreTrainEnv(AbstractEnv):
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
 
-    def generate_pre_train_set(self):
+    def generate_pre_train_set(self) -> dict:
         return self.communicator.generate_pre_train_set()
 
-    # TODO: Implement
     def start(self, action_index: int, workloads):
         self.communicator.override_config(action_index)
         self._reset(workloads)

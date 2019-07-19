@@ -25,7 +25,6 @@ class SparkCommunicator(AbstractCommunicator, EvaluationCommunicator):
         app_json = jsonutil.get_json(url)
         all_app_finished = app_json['apps'] is None
         done = all_app_finished and self.workload_runner.is_done()
-        self.logger.info('{}{}'.format(all_app_finished, self.workload_runner.is_done()))
         return done
 
     def close(self):
@@ -38,7 +37,6 @@ class SparkCommunicator(AbstractCommunicator, EvaluationCommunicator):
     def reset(self):
         self.close()
         self.start_workload()
-        time.sleep(5)
 
     def get_total_time_cost(self):
         url = self.RM_API_URL + 'ws/v1/cluster/apps?states=FINISHED'
@@ -56,7 +54,7 @@ class SparkCommunicator(AbstractCommunicator, EvaluationCommunicator):
 
 class SparkWorkloadController(object):
 
-    WORKLOADS = ['bayes', 'fpgrowth', 'kmeans', 'lda', 'linear', 'SVM', 'als']
+    WORKLOADS = ['bayes', 'fpgrowth', 'kmeans', 'lda', 'linear', 'SVM']
     QUEUES = hyperparameters.QUEUES['names']
     OPTIONS = [*map(lambda item: str(item), [1, 2, 3])]
 
@@ -82,7 +80,7 @@ class SparkWorkloadController(object):
 
 
 def start_workload_process(workload_type, queue, option, wd, spark_home, hadoop_home, java_home):
-    c = ['%s/bin/start-spark-workload.sh' % wd, workload_type, spark_home, hadoop_home,  java_home, wd, queue, option]
+    c = ['%s/bin/start-spark-workloadsubmission.sh' % wd, workload_type, spark_home, hadoop_home,  java_home, wd, queue, option]
     return processutil.start_process(c)
 
 
