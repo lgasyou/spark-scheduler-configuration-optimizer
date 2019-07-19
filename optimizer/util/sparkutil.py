@@ -1,10 +1,20 @@
+import logging
 import os
+import threading
 import time
 
 from optimizer.util import processutil
 
 
-def spark_submit(workloads, spark_home, hadoop_home, java_home):
+def async_start_workloads(workloads, spark_home, hadoop_home, java_home, wait: int = 30):
+    args = (workloads, spark_home, hadoop_home, java_home)
+    start_thread = threading.Thread(target=start_workloads, args=args)
+    start_thread.start()
+    start_thread.join(wait)
+    return start_thread
+
+
+def start_workloads(workloads, spark_home, hadoop_home, java_home):
     workloads = workloads['workloads']
     for w in workloads:
         start_workload_process(w['name'], w['queue'], w['dataSize'],
@@ -18,5 +28,6 @@ def start_workload_process(workload_type, queue, data_size, wd, spark_home, hado
 
 
 def clean_spark_log(wd, hadoop_home):
+    logging.info('Cleaning Spark logs...')
     cmd = ['%s/bin/clean-spark-log.sh' % wd, hadoop_home]
     return processutil.start_process(cmd)

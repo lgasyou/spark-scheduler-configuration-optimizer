@@ -1,12 +1,10 @@
 import argparse
 
-import torch
-
 from optimizer.environment.abstractenv import AbstractEnv
 from optimizer.environment.spark.sparktrainingcommunicator import SparkTrainingCommunicator
 
 
-class PreTrainEnv(AbstractEnv):
+class TrainingEnv(AbstractEnv):
 
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
@@ -18,12 +16,11 @@ class PreTrainEnv(AbstractEnv):
         self.communicator.override_config(action_index)
         self._reset(workloads)
 
-    def step(self):
-        state = self.communicator.get_state_tensor().to(self.device)
+    def step(self, retry_interval: int):
+        state = self.try_get_state(retry_interval)
         reward = self.communicator.get_reward()
         done = self.communicator.is_done()
-        self.state_buffer.append(state)
-        return torch.stack(list(self.state_buffer), 0), reward, done
+        return state, reward, done
 
     def _communicator(self, args: argparse.Namespace):
         return SparkTrainingCommunicator(args.resource_manager_host, args.spark_history_server_host,

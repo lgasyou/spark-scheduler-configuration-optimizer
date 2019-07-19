@@ -4,7 +4,7 @@ import random
 
 import torch
 
-from optimizer import EvaluationController, OptimizationController
+from optimizer import EvaluationController
 
 logger = logging.getLogger(__name__)
 
@@ -85,14 +85,16 @@ def main():
     )
     args = get_args()
 
-    args.evaluate = True
-    if args.evaluate:
-        controller = EvaluationController(args)
-    else:
-        controller = OptimizationController(args)
+    # args.evaluate = True
+    # if args.evaluate:
+    #     controller = EvaluationController(args)
+    # else:
+    #     controller = OptimizationController(args)
 
+    controller = EvaluationController(args)
+    # controller = OptimizationController(args)
+    # controller = TrainingController(args)
     try:
-        controller.pre_train_model()
         controller.run()
     except KeyboardInterrupt:
         controller.env.close()

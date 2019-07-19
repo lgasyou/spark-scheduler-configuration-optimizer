@@ -1,7 +1,8 @@
-from optimizer.environment.spark.sparkcommunicator import SparkWorkloadController, SparkCommunicator, restart_yarn
-
 import os
 import time
+
+from optimizer.environment.spark.sparkcommunicator import SparkWorkloadController, SparkEvaluationCommunicator, \
+    restart_yarn
 
 this = []
 for _ in range(1):
@@ -12,7 +13,7 @@ for _ in range(1):
         print('waiting')
         time.sleep(1)
 
-    _1, _2 = SparkCommunicator.get()
+    _1, _2 = SparkEvaluationCommunicator.get()
     this.append((_1, _2))
     print(_1, _2)
 

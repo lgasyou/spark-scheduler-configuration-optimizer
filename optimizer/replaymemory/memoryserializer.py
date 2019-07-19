@@ -15,7 +15,7 @@ class MemorySerializer(object):
 
     def try_load(self):
         """
-        Load from a file.
+        Load from file.
         :return: Whether load succeed.
         """
         return self.try_load_by_filename(self.FINAL_SAVE_FILENAME)
@@ -24,7 +24,7 @@ class MemorySerializer(object):
         mem = self.mem
 
         if not fileutil.file_exists(filename):
-            print('File: ', filename, "doesn't exist.")
+            self.logger.info("File: %s doesn't exist." % filename)
             return False
 
         with open(filename, 'rb') as f:
@@ -32,12 +32,10 @@ class MemorySerializer(object):
             return True
 
     def save(self):
-        """
-        Save into a file.
-        """
         self.save_as(self.FINAL_SAVE_FILENAME)
 
     def save_as(self, filename: str):
         mem = self.mem
         with open(filename, 'wb') as f:
             pickle.dump([mem.t, mem.transitions], f)
+            self.logger.info('File %s saved.' % filename)

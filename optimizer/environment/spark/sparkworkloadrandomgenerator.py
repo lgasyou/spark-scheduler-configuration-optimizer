@@ -5,7 +5,7 @@ from optimizer import hyperparameters
 
 class SparkWorkloadRandomGenerator(object):
 
-    WORKLOAD_TYPES = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'SVM']
+    WORKLOAD_TYPES = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm']
     QUEUES = hyperparameters.QUEUES['names']
     DATA_SIZES = [str(i) for i in range(1, 9)]
 

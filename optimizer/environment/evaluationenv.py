@@ -4,7 +4,7 @@ from typing import Tuple
 import torch
 
 from optimizer.environment import AbstractEnv
-from optimizer.environment.spark.sparkcommunicator import SparkCommunicator
+from optimizer.environment.spark.sparkevaluationcommunicator import SparkEvaluationCommunicator
 
 
 class EvaluationEnv(AbstractEnv):
@@ -18,14 +18,13 @@ class EvaluationEnv(AbstractEnv):
         super().__init__(args)
         self.training = True  # Consistent with model training mode
 
-    def reset(self) -> torch.Tensor:
+    def reset(self):
         self.reset_buffer()
         self.communicator.reset()
-        return self.get_state()
 
     # Return state, reward, done
-    def step(self, action: int) -> Tuple[torch.Tensor, float, bool]:
-        state = self.get_state()
+    def step(self, action: int, retry_interval: int) -> Tuple[torch.Tensor, float, bool]:
+        state = self.try_get_state(retry_interval)
         reward = self.communicator.act(action)
         done = self.communicator.is_done()
         return state, reward, done
@@ -45,5 +44,5 @@ class EvaluationEnv(AbstractEnv):
         self.communicator.close()
 
     def _communicator(self, args: argparse.Namespace):
-        return SparkCommunicator(args.resource_manager_host, args.spark_history_server_host,
-                                 args.hadoop_home, args.spark_home, args.java_home)
+        return SparkEvaluationCommunicator(args.resource_manager_host, args.spark_history_server_host,
+                                           args.hadoop_home, args.spark_home, args.java_home)

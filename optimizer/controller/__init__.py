@@ -1,2 +1,3 @@
 from optimizer.controller.evaluationcontroller import EvaluationController
 from optimizer.controller.optimizationcontroller import OptimizationController
+from optimizer.controller.trainingcontroller import TrainingController

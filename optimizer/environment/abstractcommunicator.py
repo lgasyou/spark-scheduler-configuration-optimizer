@@ -1,6 +1,5 @@
 import abc
 import logging
-import os
 from typing import Optional
 
 import torch
@@ -9,7 +8,7 @@ from optimizer.environment.communicator import Communicator
 from optimizer.environment.yarn.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.yarn.statebuilder import StateBuilder
 from optimizer.environment.yarn.yarnmodel import *
-from optimizer.util import processutil
+from optimizer.util import yarnutil
 
 
 class AbstractCommunicator(Communicator):
@@ -45,8 +44,9 @@ class AbstractCommunicator(Communicator):
         return self.get_reward()
 
     # TODO: Test if we should use function math.tanh to clap the value of reward.
+    # TODO: Add waiting jobs' finish time prediction.
     def get_reward(self) -> float:
-        waiting_jobs = self.state.waiting_apps
+        # waiting_jobs = self.state.waiting_apps
         running_jobs = self.state.running_apps
 
         # noinspection PyTypeChecker
@@ -85,7 +85,7 @@ class AbstractCommunicator(Communicator):
         Use script "refresh-queues.sh" to refresh the configurations of queues.
         """
         self.scheduler_strategy.override_config(action_index)
-        refresh_queues(self.HADOOP_HOME)
+        yarnutil.refresh_queues(self.HADOOP_HOME)
 
     @abc.abstractmethod
     def is_done(self) -> bool:
@@ -98,8 +98,3 @@ class AbstractCommunicator(Communicator):
 
     def override_config(self, action_index: int):
         self.scheduler_strategy.override_config(action_index)
-
-
-def refresh_queues(hadoop_home: str):
-    cmd = [os.path.join(os.getcwd(), 'bin', 'refresh-queues.sh'), hadoop_home]
-    return processutil.start_process(cmd)

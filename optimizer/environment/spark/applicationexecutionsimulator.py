@@ -19,11 +19,11 @@ class ApplicationExecutionSimulator(object):
         container_additions[0].add_tasks(tasks)
         for addition in container_additions:
             self.containers.append(addition)
-            self.simulate_step(addition.start_time)
+            self._simulate_step(addition.start_time)
 
         return self.current_time_delay
 
-    def simulate_step(self, current_time: int):
+    def _simulate_step(self, current_time: int):
         """Predicts the finish time of job"""
         waiting_tasks = []
         for c in self.containers:

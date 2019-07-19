@@ -10,12 +10,11 @@ from optimizer.environment.spark.sparkcommunicator import SparkCommunicator
 class Env(AbstractEnv):
 
     # Return state, reward, done
-    def step(self, action: int) -> Tuple[torch.Tensor, float, bool]:
-        state = self.get_state()
+    def step(self, action: int, retry_interval: int) -> Tuple[torch.Tensor, float, bool]:
+        state = self.try_get_state(retry_interval)
         reward = self.communicator.act(action)
         done = self.communicator.is_done()
         return state, reward, done
 
     def _communicator(self, args: argparse.Namespace):
-        return SparkCommunicator(args.resource_manager_host, args.spark_history_server_host,
-                                 args.hadoop_home, args.spark_home, args.java_home)
+        return SparkCommunicator(args.resource_manager_host, args.spark_history_server_host, args.hadoop_home)

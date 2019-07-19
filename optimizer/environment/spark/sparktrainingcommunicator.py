@@ -1,9 +1,8 @@
 import os
-import threading
 
 from optimizer.environment.abstractcommunicator import AbstractCommunicator
 from optimizer.environment.spark.sparkworkloadrandomgenerator import SparkWorkloadRandomGenerator
-from optimizer.util import processutil, jsonutil, sparkutil
+from optimizer.util import yarnutil, jsonutil, sparkutil
 
 
 class SparkTrainingCommunicator(AbstractCommunicator):
@@ -23,7 +22,7 @@ class SparkTrainingCommunicator(AbstractCommunicator):
 
     def close(self):
         self.logger.info('Restarting YARN...')
-        restart_process = restart_yarn(os.getcwd(), self.HADOOP_HOME)
+        restart_process = yarnutil.restart_yarn(os.getcwd(), self.HADOOP_HOME)
         restart_process.wait()
         self.logger.info('YARN restarted.')
 
@@ -35,15 +34,7 @@ class SparkTrainingCommunicator(AbstractCommunicator):
         return self.workload_generator.generate()
 
     def start_workloads(self, workloads):
-        args = (workloads, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
-        start_thread = threading.Thread(target=sparkutil.spark_submit, args=args)
-        start_thread.start()
-        start_thread.join(30)
+        sparkutil.async_start_workloads(workloads, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
 
     def get_scheduler_type(self) -> str:
         return "capacityScheduler"
-
-
-def restart_yarn(wd, hadoop_home):
-    cmd = ["%s/bin/restart-yarn.sh" % wd, hadoop_home]
-    return processutil.start_process(cmd)
