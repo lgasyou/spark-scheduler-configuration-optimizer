@@ -47,7 +47,7 @@ class AbstractCommunicator(Communicator):
         running_jobs = self.state.running_apps
 
         # noinspection PyTypeChecker
-        sum_time_delay = sum([j.predicted_time_delay for j in running_jobs if j.predicted_time_delay != -1])
+        sum_time_delay = sum([j.predicted_time_delay for j in running_jobs if j.predicted_time_delay > 0])
 
         # If we just start this program, set the reward as 0.
         if self.last_sum_time_delay is None or not self.last_sum_time_delay:

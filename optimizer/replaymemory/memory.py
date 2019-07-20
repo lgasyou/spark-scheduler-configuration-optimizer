@@ -53,10 +53,13 @@ class ReplayMemory(object):
             sample = np.random.uniform(i * segment, (i + 1) * segment)
             # Retrieve sample from tree with un-normalised probability
             prob, idx, tree_idx = self.transitions.find(sample)
-            # Resample if transition straddled current index or probablity 0
-            if (self.transitions.index - idx) % self.capacity > self.n and (
-                    idx - self.transitions.index) % self.capacity >= self.history and prob != 0:
+            if prob != 0:
                 valid = True  # Note that conditions are valid but extra conservative around buffer index 0
+
+            # # Resample if transition straddled current index or probablity 0
+            # if (self.transitions.index - idx) % self.capacity > self.n and (
+            #         idx - self.transitions.index) % self.capacity >= self.history and prob != 0:
+            #     valid = True
 
         # Retrieve all required transition data (from t - h to t + n)
         transition = self._get_transition(idx)

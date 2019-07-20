@@ -7,7 +7,7 @@ from optimizer.util import fileutil
 
 class MemorySerializer(object):
 
-    FINAL_SAVE_FILENAME = './results/pre-train-replay-memory.pk'
+    FINAL_SAVE_FILENAME = './results/pre-train-memory.pk'
 
     def __init__(self, proxy: ReplayMemoryProxy):
         self.logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ class MemorySerializer(object):
 
         with open(filename, 'rb') as f:
             mem.t, mem.transitions = pickle.load(f)
+            self.logger.info('Memory %s loaded with %d episodes.' % (filename, mem.transitions.index))
             return True
 
     def save(self):

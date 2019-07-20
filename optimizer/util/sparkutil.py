@@ -10,7 +10,7 @@ def async_start_workloads(workloads, spark_home, hadoop_home, java_home, wait: i
     args = (workloads, spark_home, hadoop_home, java_home)
     start_thread = threading.Thread(target=start_workloads, args=args)
     start_thread.start()
-    logging.info('Wait for start for %d seconds.' % wait)
+    logging.info("Wait for workloads' start for %d seconds." % wait)
     time.sleep(wait)
     return start_thread
 

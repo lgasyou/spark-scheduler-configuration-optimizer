@@ -9,6 +9,7 @@ from optimizer.hyperparameters import OPTIMIZATION_LOOP_INTERNAL
 class OptimizationController(AbstractController):
 
     def run(self):
+        self._load_memory()
         interval = OPTIMIZATION_LOOP_INTERNAL
         self.env.reset_buffer()
         state = self.env.try_get_state(interval)

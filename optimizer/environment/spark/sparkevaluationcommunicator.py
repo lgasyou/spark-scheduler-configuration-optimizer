@@ -15,17 +15,17 @@ class SparkEvaluationCommunicator(AbstractCommunicator, EvaluationCommunicator):
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
 
-        ITEMS = [['bayes', 'queueA', '2'], ['bayes', 'queueB', '5'], ['bayes', 'queueA', '8'],
-                 ['FPGrowth', 'queueA', '2'], ['FPGrowth', 'queueB', '5'], ['FPGrowth', 'queueA', '8'],
-                 ['kmeans', 'queueB', '2'], ['kmeans', 'queueA', '5'], ['kmeans', 'queueA', '8'],
-                 ['lda', 'queueA', '2'], ['lda', 'queueB', '5'], ['lda', 'queueB', '8'],
-                 ['linear', 'queueA', '2'], ['linear', 'queueB', '5'], ['linear', 'queueB', '8'],
-                 ['svm', 'queueA', '2'], ['svm', 'queueB', '5'], ['svm', 'queueB', '8']]
+        ITEMS = [['linear', 'queueB', '5'], ['bayes', 'queueA', '2'], ['linear', 'queueB', '8'],
+                 ['kmeans', 'queueA', '8'], ['lda', 'queueA', '2'], ['FPGrowth', 'queueB', '5'],
+                 ['lda', 'queueB', '5'], ['linear', 'queueA', '2'], ['lda', 'queueB', '8'],
+                 ['FPGrowth', 'queueA', '2'], ['kmeans', 'queueA', '5'], ['svm', 'queueA', '2'],
+                 ['FPGrowth', 'queueA', '8'], ['kmeans', 'queueB', '2'], ['svm', 'queueB', '5'],
+                 ['bayes', 'queueB', '5'], ['bayes', 'queueA', '8']]
         self.WORKLOADS = {
             'workloads': [
                 {
                     "name": name,
-                    "interval": 1,
+                    "interval": 5,
                     "queue": queue,
                     "dataSize": data_size
                 } for name, queue, data_size in ITEMS

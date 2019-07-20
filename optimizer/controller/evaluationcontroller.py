@@ -16,15 +16,20 @@ class EvaluationController(AbstractController):
         self.episode = 0
 
     def run(self):
-        # self.logger.info('Running without optimization.')
-        # for action_index in range(7, self.action_space):
-        #     self.run_without_optimization(action_index)
+        self.logger.info('Running without optimization.')
+        for action_index in range(self.action_space):
+            self.run_without_optimization(action_index)
 
-        self.logger.info('Running with optimization.')
-        self.run_with_optimization()
+        # self.logger.info('Running with optimization.')
+        # self.run_with_optimization()
 
     def run_with_optimization(self):
+        self._load_memory()
+        self.agent.train()
+        self.agent.learn(self.mem)
+        self.logger.info('Agent learnt.')
         self.agent.eval()
+
         self.costs.clear()
         for i in range(self.args.evaluation_episodes):
             self.episode = i

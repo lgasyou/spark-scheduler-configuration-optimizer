@@ -4,7 +4,7 @@ import random
 
 import torch
 
-from optimizer import TrainingController
+from optimizer import TrainingController, EvaluationController, OptimizationController
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--spark-home', type=str, default='/home/lzq/library/spark-2.4.1-bin-hadoop2.7', help='Spark home path')
     parser.add_argument('--resource-manager-host', type=str, default='http://omnisky:8088/', help='Address:port of ResourceManager')
     parser.add_argument('--spark-history-server-host', type=str, default='http://omnisky:18080/', help='Address:port of Spark history server')
+    parser.add_argument('--execution-type', type=int, default=int(0), help='Set program execution type.')
 
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
@@ -40,9 +41,8 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--adam-eps', type=float, default=1.5e-4, metavar='ε', help='Adam epsilon')
     parser.add_argument('--batch-size', type=int, default=32, metavar='SIZE', help='Batch size')
     parser.add_argument('--learn-start', type=int, default=int(10000), metavar='STEPS', help='Number of steps before starting training')
-    parser.add_argument('--evaluate', action='store_true', help='Evaluate only')
     parser.add_argument('--evaluation-interval', type=int, default=2000, metavar='STEPS', help='Number of training steps between evaluations')
-    parser.add_argument('--evaluation-episodes', type=int, default=5, metavar='N', help='Number of evaluation episodes to average over')
+    parser.add_argument('--evaluation-episodes', type=int, default=3, metavar='N', help='Number of evaluation episodes to average over')
     parser.add_argument('--evaluation-size', type=int, default=288, metavar='N', help='Number of transitions to use for validating Q')
     parser.add_argument('--log-interval', type=int, default=288, metavar='STEPS', help='Number of training steps between logging status')
 
@@ -83,15 +83,15 @@ def main():
     )
     args = get_args()
 
-    # args.evaluate = True
-    # if args.evaluate:
-    #     controller = EvaluationController(args)
-    # else:
-    #     controller = OptimizationController(args)
+    controllers = {
+        0: OptimizationController,
+        1: EvaluationController,
+        2: TrainingController,
+    }
 
-    # controller = EvaluationController(args)
-    # controller = OptimizationController(args)
-    controller = TrainingController(args)
+    execution_type: int = args.execution_type
+    execution_type: int = 1
+    controller = controllers[execution_type](args)
     try:
         controller.run()
     except KeyboardInterrupt:

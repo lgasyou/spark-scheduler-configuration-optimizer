@@ -3,7 +3,7 @@ import argparse
 import logging
 
 from optimizer.agent import Agent
-from optimizer.replaymemory import ReplayMemoryProxy
+from optimizer.replaymemory import ReplayMemoryProxy, MemorySerializer
 
 
 class AbstractController(object):
@@ -15,7 +15,9 @@ class AbstractController(object):
         self.env = self._env(args)
         self.action_space = self.env.action_space()
         self.mem = ReplayMemoryProxy(self.args, self.args.memory_capacity)
+        self.logger.info('Setup agent...')
         self.agent = Agent(self.args, self.env)
+        self.logger.info('Agent setup finished.')
         self.priority_weight_increase = (1 - self.args.priority_weight) / (self.args.T_max - self.args.learn_start)
         self.t = 0
 
@@ -45,6 +47,10 @@ class AbstractController(object):
             self._agent_learn()
 
         return state, action, reward, done
+
+    def _load_memory(self) -> bool:
+        mem_serializer = MemorySerializer(self.mem)
+        return mem_serializer.try_load()
 
     def _clip_reward(self, reward):
         reward_clip = self.args.reward_clip
