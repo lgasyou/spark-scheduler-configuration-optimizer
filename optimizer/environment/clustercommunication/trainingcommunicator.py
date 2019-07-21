@@ -1,18 +1,18 @@
 import os
 
-from optimizer.environment.abstractcommunicator import AbstractCommunicator
-from optimizer.environment.spark.sparkworkloadrandomgenerator import SparkWorkloadRandomGenerator
+from optimizer.environment.clustercommunication.abstractcommunicator import AbstractCommunicator
+from optimizer.environment.workloadgenerating.workloadrandomgenerator import WorkloadRandomGenerator
 from optimizer.util import yarnutil, sparkutil
 
 
-class SparkTrainingCommunicator(AbstractCommunicator):
+class TrainingCommunicator(AbstractCommunicator):
 
     def __init__(self, rm_host: str, spark_history_server_host: str,
                  hadoop_home: str, spark_home: str, java_home: str):
         super().__init__(rm_host, spark_history_server_host, hadoop_home)
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
-        self.workload_generator = SparkWorkloadRandomGenerator()
+        self.workload_generator = WorkloadRandomGenerator()
 
     def is_done(self) -> bool:
         return yarnutil.has_all_application_done(self.RM_API_URL)
@@ -32,7 +32,6 @@ class SparkTrainingCommunicator(AbstractCommunicator):
 
     def start_workloads(self, workloads):
         self.logger.info('Starting workloads...')
-        self.logger.info(workloads)
         sparkutil.async_start_workloads(workloads, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
         self.logger.info('Workloads started.')
 

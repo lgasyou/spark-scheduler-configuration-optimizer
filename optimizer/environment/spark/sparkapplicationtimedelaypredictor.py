@@ -29,7 +29,8 @@ class SparkApplicationTimeDelayPredictor(object):
         tasks = self._build_tasks(input_bytes, model)
         containers = self._build_containers(executors)
         predicted_finish_time = self.simulator.simulate(containers, tasks)
-        return (predicted_finish_time - start_time) / 1000 if predicted_finish_time > 0 else -1
+        # We assume the longest execution time is 10000s.
+        return (predicted_finish_time - start_time) / 1000 if predicted_finish_time > 0 else 10000
 
     def _build_tasks(self, input_bytes: int, model: predictionsparkmodel.Application):
         tasks = []

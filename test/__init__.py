@@ -1,7 +1,8 @@
 import os
 import time
 
-from optimizer.environment.spark.sparkcommunicator import SparkWorkloadController, SparkEvaluationCommunicator, \
+from optimizer.environment.clustercommunication.sparkcommunicator import SparkWorkloadController, \
+    SparkEvaluationCommunicator, \
     restart_yarn
 
 this = []

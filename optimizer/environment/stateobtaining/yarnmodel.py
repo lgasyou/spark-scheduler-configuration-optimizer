@@ -1,5 +1,5 @@
-from typing import List
 import dataclasses
+from typing import List
 
 from optimizer.hyperparameters import QUEUES
 
@@ -15,9 +15,11 @@ class ApplicationRequestResource(object):
 @dataclasses.dataclass
 class WaitingApplication(object):
 
+    application_id: str
     elapsed_time: int
     priority: int
     location: str
+    predicted_time_delay: int
     request_resources: List[ApplicationRequestResource] = dataclasses.field(default_factory=list)
 
     @property

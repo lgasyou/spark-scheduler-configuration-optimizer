@@ -27,7 +27,6 @@ class EvaluationController(AbstractController):
         self._load_memory()
         self.agent.train()
         self.agent.learn(self.mem)
-        self.logger.info('Agent learnt.')
         self.agent.eval()
 
         self.costs.clear()
@@ -72,7 +71,7 @@ class EvaluationController(AbstractController):
         self.costs.append(costs)
         self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, costs))
         excelutil.list2excel(self.costs, save_filename)
-        self.logger.info('Summary {} saved.' % save_filename)
+        self.logger.info('Summary %s saved.' % save_filename)
         sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
 
     # def run_with_optimization(self):

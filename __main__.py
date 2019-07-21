@@ -16,8 +16,8 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--spark-home', type=str, default='/home/lzq/library/spark-2.4.1-bin-hadoop2.7', help='Spark home path')
     parser.add_argument('--resource-manager-host', type=str, default='http://omnisky:8088/', help='Address:port of ResourceManager')
     parser.add_argument('--spark-history-server-host', type=str, default='http://omnisky:18080/', help='Address:port of Spark history server')
-    parser.add_argument('--execution-type', type=int, default=int(0), help='Set program execution type.')
-
+    parser.add_argument('--execution-mode', type=int, default=int(0), help='Set program execution mode.')
+    parser.add_argument('--log-filename', type=str, default='./results/runtime.log', help='Runtime log filename.')
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
     parser.add_argument('--T-max', type=int, default=int(6000), metavar='STEPS', help='Number of training steps (4x number of frames)')
@@ -28,7 +28,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--atoms', type=int, default=51, metavar='C', help='Discretised size of value distribution')
     parser.add_argument('--V-min', type=float, default=-10, metavar='V', help='Minimum of value distribution support')
     parser.add_argument('--V-max', type=float, default=10, metavar='V', help='Maximum of value distribution support')
-    parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
+    parser.add_argument('--model', type=str, default='./results/model.pth', metavar='PARAMS', help='Pretrained model (state dict)')
     parser.add_argument('--memory-capacity', type=int, default=int(10000), metavar='CAPACITY', help='Experience replay memory capacity')
     parser.add_argument('--replay-frequency', type=int, default=4, metavar='k', help='Frequency of sampling from memory')
     parser.add_argument('--priority-exponent', type=float, default=0.5, metavar='ω', help='Prioritised experience replay exponent (originally denoted α)')
@@ -40,8 +40,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--lr', type=float, default=0.0000625, metavar='η', help='Learning rate')
     parser.add_argument('--adam-eps', type=float, default=1.5e-4, metavar='ε', help='Adam epsilon')
     parser.add_argument('--batch-size', type=int, default=32, metavar='SIZE', help='Batch size')
-    parser.add_argument('--learn-start', type=int, default=int(10000), metavar='STEPS', help='Number of steps before starting training')
-    parser.add_argument('--evaluation-interval', type=int, default=2000, metavar='STEPS', help='Number of training steps between evaluations')
+    parser.add_argument('--learn-start', type=int, default=int(8000), metavar='STEPS', help='Number of steps before starting training')
     parser.add_argument('--evaluation-episodes', type=int, default=3, metavar='N', help='Number of evaluation episodes to average over')
     parser.add_argument('--evaluation-size', type=int, default=288, metavar='N', help='Number of transitions to use for validating Q')
     parser.add_argument('--log-interval', type=int, default=288, metavar='STEPS', help='Number of training steps between logging status')
@@ -54,7 +53,7 @@ def setup_torch_args(args: argparse.Namespace):
     logger.info('Options')
     for k, v in vars(args).items():
         logger.info(k + ': ' + str(v))
-    random.seed(args.seed)
+    # random.seed(args.seed)
     torch.manual_seed(random.randint(1, 10000))
     if torch.cuda.is_available() and not args.disable_cuda:
         args.device = torch.device('cuda:5')
@@ -75,13 +74,13 @@ def get_args() -> argparse.Namespace:
 
 
 def main():
+    args = get_args()
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s %(levelname)s %(funcName)s: %(message)s',
-        filename='./results/runtime.log',
+        filename=args.log_filename,
         filemode='w'
     )
-    args = get_args()
 
     controllers = {
         0: OptimizationController,
@@ -89,12 +88,15 @@ def main():
         2: TrainingController,
     }
 
-    execution_type: int = args.execution_type
-    execution_type: int = 1
-    controller = controllers[execution_type](args)
+    execution_mode: int = args.execution_mode
+    controller = controllers[execution_mode](args)
     try:
         controller.run()
-    except KeyboardInterrupt:
+    except InterruptedError:
+        logger.info('Met Interrupted Error. Closing environment...')
+    except Exception as e:
+        logger.error(e)
+    finally:
         controller.env.close()
 
 

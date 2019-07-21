@@ -8,7 +8,7 @@ from requests.exceptions import ConnectionError
 
 from optimizer.environment.spark.sparkapplicationtimedelaypredictor import SparkApplicationTimeDelayPredictor
 from optimizer.environment.stateinvalidexception import StateInvalidException
-from optimizer.environment.yarn.yarnmodel import *
+from optimizer.environment.stateobtaining.yarnmodel import *
 from optimizer.hyperparameters import STATE_SHAPE
 from optimizer.util import jsonutil
 
@@ -92,10 +92,8 @@ class StateBuilder(object):
         # Line 75-149: running apps and their resource requests
         for i, ra in enumerate(raw.running_apps[:75]):
             row = i + 75
-            # We assume the longest execution time is 10000s.
-            predicted_time_delay = ra.predicted_time_delay if ra.predicted_time_delay > 0 else 10000
             line = [ra.elapsed_time, ra.priority, ra.converted_location,
-                    ra.progress, ra.queue_usage_percentage, predicted_time_delay]
+                    ra.progress, ra.queue_usage_percentage, ra.predicted_time_delay]
             for rr in ra.request_resources[:65]:
                 line.extend([rr.priority, rr.memory, rr.cpu])
             line.extend([0.0] * (width - len(line)))
@@ -179,11 +177,15 @@ class StateBuilder(object):
         apps_json = j['apps']['app']
         apps = []
         for j in apps_json:
+            application_id = j['id']
             elapsed_time = j['elapsedTime']
             priority = j['priority']
             location = j['queue']
+            predicted_time_delay = 20000
+            self.logger.info('%s, Predicted time delay: %f' % (application_id, predicted_time_delay))
             request_resources = self.build_request_resources_from_json(j)
-            apps.append(WaitingApplication(elapsed_time, priority, location, request_resources))
+            apps.append(WaitingApplication(application_id, elapsed_time, priority, location,
+                                           predicted_time_delay, request_resources))
 
         return apps
 

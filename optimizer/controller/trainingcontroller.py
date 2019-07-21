@@ -34,35 +34,22 @@ class TrainingController(AbstractController):
 
     def _train_step(self):
         pre_train_set = self.env.generate_pre_train_set()
-        for action_index in range(self.action_space):
-            self.env.start(action_index, pre_train_set)
-            self._train_episode(action_index)
-            self._save_progress()
-            sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
+        self.env.start(pre_train_set)
+        self._train_episode()
+        self._save_progress()
+        sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
 
-    def _train_episode(self, action_index: int):
+    def _train_episode(self):
         done, interval = False, TRAINING_LOOP_INTERNAL
+        state = self.env.try_get_state(interval)
         while not done:
-            self._reset_noise()
-
-            state, reward, done = self.env.step(interval)
-            reward = self._clip_reward(reward)
-            self.mem.append(state, action_index, reward, done)
-
-            if done:
-                self.mem.terminate()
-            self.t += 1
-
-            self.logger.info("Episode {}: Action {}, Reward {}, Done {}".format(self.t, action_index, reward, done))
-
-            # Train
-            if self.t >= self.args.learn_start:
-                self._agent_learn()
-
+            state, action, reward, done = self.optimize_episode(state, self.agent.act, interval)
+            self.logger.info("Episode {}: Reward {}, Action {}, Done {}".format(self.t, reward, action, done))
             time.sleep(interval)
 
     def _save_progress(self):
         self.memory_serializer.save_as(self.TMP_MEMORY_FILENAME)
+        self.agent.save('./results')
 
     def _env(self, args):
         return TrainingEnv(self.args)

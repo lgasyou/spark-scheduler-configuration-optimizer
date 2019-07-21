@@ -2,10 +2,10 @@ from typing import Tuple
 
 import pandas as pd
 
-from optimizer.environment.communicator import Communicator
+from optimizer.environment.clustercommunication.icommunicator import ICommunicator
 
 
-class EvaluationCommunicator(Communicator):
+class IEvaluationCommunicator(ICommunicator):
 
     def reset(self):
         pass

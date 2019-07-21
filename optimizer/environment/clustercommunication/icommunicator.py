@@ -1,7 +1,7 @@
 import torch
 
 
-class Communicator(object):
+class ICommunicator(object):
     """
     The interface of Communicator.
     """

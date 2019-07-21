@@ -1,13 +1,13 @@
 import os
 from typing import List
 
-from optimizer.environment.abstractcommunicator import AbstractCommunicator
-from optimizer.environment.evaluationcommunicator import EvaluationCommunicator
-from optimizer.environment.yarn.yarnmodel import FinishedApplication
+from optimizer.environment.clustercommunication.abstractcommunicator import AbstractCommunicator
+from optimizer.environment.clustercommunication.ievaluationcommunicator import IEvaluationCommunicator
+from optimizer.environment.stateobtaining.yarnmodel import FinishedApplication
 from optimizer.util import jsonutil, yarnutil, sparkutil
 
 
-class SparkEvaluationCommunicator(AbstractCommunicator, EvaluationCommunicator):
+class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
 
     def __init__(self, rm_host: str, spark_history_server_host: str,
                  hadoop_home: str, spark_home: str, java_home: str):
@@ -65,7 +65,6 @@ class SparkEvaluationCommunicator(AbstractCommunicator, EvaluationCommunicator):
         return jobs
 
     def start_workload(self):
-        self.logger.info(self.WORKLOADS)
         sparkutil.async_start_workloads(self.WORKLOADS, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
 
     def get_scheduler_type(self) -> str:

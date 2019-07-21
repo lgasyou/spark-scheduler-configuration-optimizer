@@ -2,7 +2,7 @@ import abc
 import os
 from typing import Dict, Type
 
-from optimizer.environment.yarn.yarnmodel import *
+from optimizer.environment.stateobtaining.yarnmodel import *
 from optimizer.util import fileutil, jsonutil
 from optimizer.util.xmlmodifier import XmlModifier
 

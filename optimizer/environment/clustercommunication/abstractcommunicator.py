@@ -4,14 +4,15 @@ from typing import Optional
 
 import torch
 
-from optimizer.environment.communicator import Communicator
-from optimizer.environment.yarn.schedulerstrategy import SchedulerStrategyFactory
-from optimizer.environment.yarn.statebuilder import StateBuilder
-from optimizer.environment.yarn.yarnmodel import *
+from optimizer.environment.clustercommunication.icommunicator import ICommunicator
+from optimizer.environment.clustercommunication.schedulerstrategy import SchedulerStrategyFactory
+from optimizer.environment.stateobtaining.rewardcalculator import RewardCalculator
+from optimizer.environment.stateobtaining.statebuilder import StateBuilder
+from optimizer.environment.stateobtaining.yarnmodel import *
 from optimizer.util import yarnutil
 
 
-class AbstractCommunicator(Communicator):
+class AbstractCommunicator(ICommunicator):
 
     def __init__(self, rm_host: str, spark_history_server_host: str, hadoop_home: str):
         self.logger = logging.getLogger(__name__)
@@ -28,9 +29,9 @@ class AbstractCommunicator(Communicator):
         self.action_set = self.scheduler_strategy.action_set
 
         self.state_builder = StateBuilder(self.RM_API_URL, self.SPARK_HISTORY_SERVER_API_URL, self.scheduler_strategy)
+        self.reward_calculator = RewardCalculator()
 
         self.state: Optional[State] = None
-        self.last_sum_time_delay: Optional[float] = None
 
     def act(self, action_index: int) -> float:
         """
@@ -43,20 +44,7 @@ class AbstractCommunicator(Communicator):
     # TODO: Test if we should use function math.tanh to clap the value of reward.
     # TODO: Add waiting jobs' finish time prediction.
     def get_reward(self) -> float:
-        # waiting_jobs = self.state.waiting_apps
-        running_jobs = self.state.running_apps
-
-        # noinspection PyTypeChecker
-        sum_time_delay = sum([j.predicted_time_delay for j in running_jobs if j.predicted_time_delay > 0])
-
-        # If we just start this program, set the reward as 0.
-        if self.last_sum_time_delay is None or not self.last_sum_time_delay:
-            self.last_sum_time_delay = sum_time_delay
-            return 0
-
-        reward = (self.last_sum_time_delay - sum_time_delay) / self.last_sum_time_delay
-        self.last_sum_time_delay = sum_time_delay
-        return reward
+        return self.reward_calculator.get_reward(self.state)
 
     def get_state(self) -> State:
         """Get raw state of YARN."""

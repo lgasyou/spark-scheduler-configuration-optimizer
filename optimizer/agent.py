@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 
@@ -16,6 +17,7 @@ class Agent(object):
     """
 
     def __init__(self, args, env: AbstractEnv):
+        self.logger = logging.getLogger(__name__)
         self.action_space = env.action_space()
         self.atoms = args.atoms
         self.V_min = args.V_min
@@ -31,6 +33,7 @@ class Agent(object):
         if args.model and os.path.isfile(args.model):
             # Always load tensors onto CPU by default, will shift to GPU if necessary
             self.online_net.load_state_dict(torch.load(args.model, map_location='cpu'))
+            self.logger.info('Agent model %s loaded.' % args.model)
         self.online_net.train()
 
         self.target_net = DQN(args, self.action_space).to(device=args.device)
@@ -107,7 +110,9 @@ class Agent(object):
 
     # Save model parameters on current device (don't test move model between devices)
     def save(self, path) -> None:
-        torch.save(self.online_net.state_dict(), os.path.join(path, 'model.pth'))
+        filename = os.path.join(path, 'model.pth')
+        torch.save(self.online_net.state_dict(), filename)
+        self.logger.info('Agent model %s saved.' % filename)
 
     # Evaluates Q-value based on single state (no batch)
     def evaluate_q(self, state) -> float:
