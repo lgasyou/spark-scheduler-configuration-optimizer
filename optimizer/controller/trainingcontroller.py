@@ -26,11 +26,12 @@ class TrainingController(AbstractController):
             self.memory_serializer.try_load_by_filename(self.TMP_MEMORY_FILENAME)
             self.t = self.mem.index
             self.logger.info('Start from episode %d.' % self.t)
-            while True:
-                self._train_step()
-
-        # Pre-train DQN model by using training set
-        self.agent.learn(self.mem)
+            try:
+                while True:
+                    self._train_step()
+            except InterruptedError:
+                self._save_agent()
+                raise InterruptedError
 
     def _train_step(self):
         pre_train_set = self.env.generate_pre_train_set()
@@ -49,6 +50,9 @@ class TrainingController(AbstractController):
 
     def _save_progress(self):
         self.memory_serializer.save_as(self.TMP_MEMORY_FILENAME)
+        self._save_agent()
+
+    def _save_agent(self):
         self.agent.save('./results')
 
     def _env(self, args):

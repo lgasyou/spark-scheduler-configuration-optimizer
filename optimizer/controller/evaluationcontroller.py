@@ -74,13 +74,5 @@ class EvaluationController(AbstractController):
         self.logger.info('Summary %s saved.' % save_filename)
         sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
 
-    # def run_with_optimization(self):
-    #     agent.eval()  # Set DQN (online network) to evaluation mode
-    #     avg_reward, avg_Q, time_cost = self.validator.evaluate(T)  # Test
-    #     self.logger.info('T = ' + str(T) + ' / ' + str(num_training_steps) +
-    #                      ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q) +
-    #                      ' | Total Time Cost: ' + str(time_cost) + 'ms')
-    #     agent.train()  # Set DQN (online network) back to training mode
-
     def _env(self, args: argparse.Namespace):
         return EvaluationEnv(args)

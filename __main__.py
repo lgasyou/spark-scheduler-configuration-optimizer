@@ -94,10 +94,9 @@ def main():
         controller.run()
     except InterruptedError:
         logger.info('Met Interrupted Error. Closing environment...')
+        controller.env.close()
     except Exception as e:
         logger.error(e)
-    finally:
-        controller.env.close()
 
 
 if __name__ == '__main__':
