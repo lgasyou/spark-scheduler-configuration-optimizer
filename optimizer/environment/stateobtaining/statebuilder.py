@@ -1,14 +1,13 @@
 import logging
-import pickle
 from typing import Tuple
 
 import requests
 import torch
 from requests.exceptions import ConnectionError
 
-from optimizer.environment.spark.sparkapplicationtimedelaypredictor import SparkApplicationTimeDelayPredictor
 from optimizer.environment.stateinvalidexception import StateInvalidException
 from optimizer.environment.stateobtaining.yarnmodel import *
+from optimizer.environment.timedelayprediction import TimeDelayPredictor
 from optimizer.hyperparameters import STATE_SHAPE
 from optimizer.util import jsonutil
 
@@ -20,51 +19,7 @@ class StateBuilder(object):
         self.RM_API_URL = rm_api_url
         self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_api_url
         self.scheduler_strategy = scheduler_strategy
-        self.application_time_delay_predictor = SparkApplicationTimeDelayPredictor(spark_history_server_api_url)
-        self._tmp_add_models()
-
-    # TODO: Replace this with train set.
-    def _tmp_add_models(self):
-        with open('./results/algorithm-models.pk', 'rb') as f:
-            self.application_time_delay_predictor = pickle.load(f)
-
-        # builder = SparkApplicationBuilder(self.SPARK_HISTORY_SERVER_API_URL)
-        # analyzer = CompletedSparkApplicationAnalyzer()
-        # predictor = self.application_time_delay_predictor
-        #
-        # app = builder.build('application_1562834622700_0051')
-        # svm_model = analyzer.analyze(app)
-        # predictor.add_algorithm('linear', svm_model)
-        #
-        # # ALS
-        # app = builder.build('application_1562834622700_0039')
-        # als_model = analyzer.analyze(app)
-        # predictor.add_algorithm('als', als_model)
-        #
-        # # KMeans
-        # app = builder.build('application_1562834622700_0018')
-        # svm_model = analyzer.analyze(app)
-        # predictor.add_algorithm('kmeans', svm_model)
-        #
-        # # SVM
-        # app = builder.build('application_1562834622700_0014')
-        # svm_model = analyzer.analyze(app)
-        # predictor.add_algorithm('svm', svm_model)
-        #
-        # # Bayes
-        # app = builder.build('application_1562834622700_0043')
-        # svm_model = analyzer.analyze(app)
-        # predictor.add_algorithm('bayes', svm_model)
-        #
-        # # FPGrowth
-        # app = builder.build('application_1562834622700_0054')
-        # svm_model = analyzer.analyze(app)
-        # predictor.add_algorithm('FPGrowth', svm_model)
-        #
-        # # LDA
-        # app = builder.build('application_1562834622700_0058')
-        # svm_model = analyzer.analyze(app)
-        # predictor.add_algorithm('lda', svm_model)
+        self.time_delay_predictor = TimeDelayPredictor(spark_history_server_api_url)
 
     def build(self):
         try:
@@ -134,6 +89,11 @@ class StateBuilder(object):
         app_json = jsonutil.get_json(url)
         return self.build_running_apps_from_json(app_json)
 
+    def parse_and_build_finished_apps(self) -> List[FinishedApplication]:
+        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=FINISHED'
+        app_json = jsonutil.get_json(url)
+        return self.build_finished_jobs_from_json(app_json)
+
     def parse_and_build_resources(self) -> List[Resource]:
         url = self.RM_API_URL + 'ws/v1/cluster/nodes'
         conf = jsonutil.get_json(url)
@@ -153,18 +113,18 @@ class StateBuilder(object):
             return []
 
         apps_json, apps = j['apps']['app'], []
-        for j in apps_json:
-            application_id = j['id']
-            name = j['name']
-            started_time = j['startedTime']
-            elapsed_time = j['elapsedTime']
-            priority = j['priority']
-            progress = j['progress']
-            queue_usage_percentage = j['queueUsagePercentage']
-            location = j['queue']
-            predicted_time_delay = self.application_time_delay_predictor.predict(application_id, name, started_time)
+        for a in apps_json:
+            application_id = a['id']
+            name = a['name']
+            started_time = a['startedTime']
+            elapsed_time = a['elapsedTime']
+            priority = a['priority']
+            progress = a['progress']
+            queue_usage_percentage = a['queueUsagePercentage']
+            location = a['queue']
+            predicted_time_delay = self.time_delay_predictor.predict(application_id, name, started_time)
             self.logger.info('%s, Predicted time delay: %f' % (application_id, predicted_time_delay))
-            request_resources = self.build_request_resources_from_json(j)
+            request_resources = self.build_request_resources_from_json(a)
             apps.append(RunningApplication(application_id, elapsed_time, priority, location, progress,
                                            queue_usage_percentage, predicted_time_delay, request_resources))
 
@@ -174,18 +134,31 @@ class StateBuilder(object):
         if j['apps'] is None:
             return []
 
-        apps_json = j['apps']['app']
-        apps = []
-        for j in apps_json:
-            application_id = j['id']
-            elapsed_time = j['elapsedTime']
-            priority = j['priority']
-            location = j['queue']
+        apps_json, apps = j['apps']['app'], []
+        for a in apps_json:
+            application_id = a['id']
+            elapsed_time = a['elapsedTime']
+            priority = a['priority']
+            location = a['queue']
             predicted_time_delay = 20000
             self.logger.info('%s, Predicted time delay: %f' % (application_id, predicted_time_delay))
-            request_resources = self.build_request_resources_from_json(j)
+            request_resources = self.build_request_resources_from_json(a)
             apps.append(WaitingApplication(application_id, elapsed_time, priority, location,
                                            predicted_time_delay, request_resources))
+
+        return apps
+
+    @staticmethod
+    def build_finished_jobs_from_json(j: dict) -> List[FinishedApplication]:
+        if j['apps'] is None:
+            return []
+
+        apps_json, apps = j['apps']['app'], []
+        for a in apps_json:
+            started_time = a['startedTime']
+            finished_time = a['finishedTime']
+            elapsed_time = a['elapsedTime']
+            apps.append(FinishedApplication(started_time, finished_time, elapsed_time))
 
         return apps
 

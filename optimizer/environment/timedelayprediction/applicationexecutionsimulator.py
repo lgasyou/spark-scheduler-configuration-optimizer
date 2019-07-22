@@ -1,6 +1,6 @@
 from typing import List
 
-from optimizer.environment.spark import simulationmodel
+from optimizer.environment.timedelayprediction import simulationmodel
 
 
 class ApplicationExecutionSimulator(object):

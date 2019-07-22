@@ -1,7 +1,4 @@
 import argparse
-from typing import Tuple
-
-import torch
 
 from optimizer.environment import AbstractEnv
 from optimizer.environment.clustercommunication.evaluationcommunicator import EvaluationCommunicator
@@ -21,13 +18,6 @@ class EvaluationEnv(AbstractEnv):
     def reset(self):
         self.reset_buffer()
         self.communicator.reset()
-
-    # Return state, reward, done
-    def step(self, action: int, retry_interval: int) -> Tuple[torch.Tensor, float, bool]:
-        state = self.try_get_state(retry_interval)
-        reward = self.communicator.act(action)
-        done = self.communicator.is_done()
-        return state, reward, done
 
     def get_total_time_cost(self) -> tuple:
         return self.communicator.get_total_time_cost()

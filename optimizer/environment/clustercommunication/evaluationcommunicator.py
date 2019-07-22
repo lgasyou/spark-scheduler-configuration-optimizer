@@ -1,10 +1,8 @@
 import os
-from typing import List
 
 from optimizer.environment.clustercommunication.abstractcommunicator import AbstractCommunicator
 from optimizer.environment.clustercommunication.ievaluationcommunicator import IEvaluationCommunicator
-from optimizer.environment.stateobtaining.yarnmodel import FinishedApplication
-from optimizer.util import jsonutil, yarnutil, sparkutil
+from optimizer.util import yarnutil, sparkutil
 
 
 class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
@@ -14,23 +12,44 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         super().__init__(rm_host, spark_history_server_host, hadoop_home)
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
-
-        ITEMS = [['linear', 'queueB', '5'], ['bayes', 'queueA', '2'], ['linear', 'queueB', '8'],
-                 ['kmeans', 'queueA', '8'], ['lda', 'queueA', '2'], ['FPGrowth', 'queueB', '5'],
-                 ['lda', 'queueB', '5'], ['linear', 'queueA', '2'], ['lda', 'queueB', '8'],
-                 ['FPGrowth', 'queueA', '2'], ['kmeans', 'queueA', '5'], ['svm', 'queueA', '2'],
-                 ['FPGrowth', 'queueA', '8'], ['kmeans', 'queueB', '2'], ['svm', 'queueB', '5'],
-                 ['bayes', 'queueB', '5'], ['bayes', 'queueA', '8']]
-        self.WORKLOADS = {
-            'workloads': [
-                {
-                    "name": name,
-                    "interval": 5,
-                    "queue": queue,
-                    "dataSize": data_size
-                } for name, queue, data_size in ITEMS
-            ]
-        }
+        self.WORKLOADS = {'workloads': [
+            {'name': 'bayes', 'interval': 5, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'svm', 'interval': 3, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'lda', 'interval': 2, 'queue': 'queueA', 'dataSize': '2'},
+            {'name': 'FPGrowth', 'interval': 25, 'queue': 'queueB', 'dataSize': '4'},
+            {'name': 'bayes', 'interval': 9, 'queue': 'queueB', 'dataSize': '3'},
+            {'name': 'svm', 'interval': 2, 'queue': 'queueB', 'dataSize': '3'},
+            {'name': 'lda', 'interval': 7, 'queue': 'queueA', 'dataSize': '2'},
+            {'name': 'FPGrowth', 'interval': 1, 'queue': 'queueA', 'dataSize': '4'},
+            {'name': 'svm', 'interval': 3, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'lda', 'interval': 1, 'queue': 'queueA', 'dataSize': '1'},
+            {'name': 'lda', 'interval': 7, 'queue': 'queueB', 'dataSize': '3'},
+            {'name': 'kmeans', 'interval': 9, 'queue': 'queueA', 'dataSize': '2'},
+            {'name': 'FPGrowth', 'interval': 13, 'queue': 'queueB', 'dataSize': '6'},
+            {'name': 'lda', 'interval': 9, 'queue': 'queueB', 'dataSize': '2'},
+            {'name': 'svm', 'interval': 2, 'queue': 'queueA', 'dataSize': '4'},
+            {'name': 'bayes', 'interval': 3, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'FPGrowth', 'interval': 0, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'kmeans', 'interval': 20, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'FPGrowth', 'interval': 10, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'bayes', 'interval': 7, 'queue': 'queueA', 'dataSize': '2'},
+            {'name': 'lda', 'interval': 6, 'queue': 'queueB', 'dataSize': '3'},
+            {'name': 'svm', 'interval': 98, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'kmeans', 'interval': 10, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'bayes', 'interval': 17, 'queue': 'queueB', 'dataSize': '2'},
+            {'name': 'linear', 'interval': 31, 'queue': 'queueB', 'dataSize': '5'},
+            {'name': 'lda', 'interval': 3, 'queue': 'queueA', 'dataSize': '2'},
+            {'name': 'FPGrowth', 'interval': 2, 'queue': 'queueB', 'dataSize': '1'},
+            {'name': 'FPGrowth', 'interval': 7, 'queue': 'queueA', 'dataSize': '2'},
+            {'name': 'linear', 'interval': 1, 'queue': 'queueB', 'dataSize': '1'},
+            {'name': 'kmeans', 'interval': 1, 'queue': 'queueA', 'dataSize': '1'},
+            {'name': 'svm', 'interval': 3, 'queue': 'queueA', 'dataSize': '6'},
+            {'name': 'lda', 'interval': 27, 'queue': 'queueA', 'dataSize': '3'},
+            {'name': 'linear', 'interval': 125, 'queue': 'queueB', 'dataSize': '5'},
+            {'name': 'kmeans', 'interval': 1, 'queue': 'queueB', 'dataSize': '1'},
+            {'name': 'lda', 'interval': 4, 'queue': 'queueB', 'dataSize': '1'},
+            {'name': 'lda', 'interval': 39, 'queue': 'queueB', 'dataSize': '4'}
+        ]}
 
     def is_done(self) -> bool:
         return yarnutil.has_all_application_done(self.RM_API_URL)
@@ -46,23 +65,9 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         self.start_workload()
 
     def get_total_time_cost(self):
-        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=FINISHED'
-        job_json = jsonutil.get_json(url)
-        finished_jobs = self.build_finished_jobs_from_json(job_json)
+        finished_jobs = self.state_builder.parse_and_build_finished_apps()
         time_costs = [j.elapsed_time for j in finished_jobs]
         return time_costs, sum(time_costs)
-
-    @staticmethod
-    def build_finished_jobs_from_json(j: dict) -> List[FinishedApplication]:
-        if j['apps'] is None:
-            return []
-
-        apps, jobs = j['apps']['app'], []
-        for j in apps:
-            elapsed_time = j['elapsedTime']
-            jobs.append(FinishedApplication(elapsed_time))
-
-        return jobs
 
     def start_workload(self):
         sparkutil.async_start_workloads(self.WORKLOADS, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)

@@ -1,15 +1,15 @@
-from optimizer.environment.spark.sparkapplicationbuilder import SparkApplicationBuilder
-from optimizer.environment.spark.completedsparkapplicationanalyzer import CompletedSparkApplicationAnalyzer
-from optimizer.environment.spark.sparkapplicationtimedelaypredictor import SparkApplicationTimeDelayPredictor
-from optimizer.util import timeutil
+from optimizer.environment.timedelayprediction.completedsparkapplicationanalyzer import SparkModelAnalyzer
+from optimizer.environment.timedelayprediction.sparkapplicationtimedelaypredictor import TimeDelayPredictor
 
+from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.util import timeutil
 from test.completedapplicationbuilder import CompletedApplicationBuilder
 
 
 def print_helper(application_id, t, *args):
     global predictor, app_builder
     time = predictor.predict(application_id, t) + 5000
-    c = app_builder.build(application_id)
+    c = app_builder.build_application(application_id)
     predicted = time - c.start_time
     print(c,
           timeutil.convert_timestamp_to_str(time, '%H:%M:%S'),
@@ -26,15 +26,15 @@ if __name__ == '__main__':
     app_builder.build('application_1562834622700_0051')
 
     builder = SparkApplicationBuilder('http://omnisky:18080/api/v1/')
-    analyzer = CompletedSparkApplicationAnalyzer()
-    predictor = SparkApplicationTimeDelayPredictor('http://omnisky:18080/api/v1/')
+    analyzer = SparkModelAnalyzer()
+    predictor = TimeDelayPredictor('http://omnisky:18080/api/v1/')
 
     print('{:<8} {:<5} {:<5} {:<8} {:<4} {:<4} {:<4} {}'.format(
         '负载', '开始时间', '完成时间', '预测完成时间', '时长', '预测时长', '误差率', '原型?'
     ))
 
     # Linear
-    app = builder.build('application_1562834622700_0051')
+    app = builder.build_application('application_1562834622700_0051')
     svm_model = analyzer.analyze(app)
     predictor.add_algorithm('linear', svm_model)
     print_helper('application_1562834622700_0051', 'linear', '原型')
@@ -42,35 +42,35 @@ if __name__ == '__main__':
     print_helper('application_1562834622700_0037', 'linear')
 
     # ALS
-    app = builder.build('application_1562834622700_0039')
+    app = builder.build_application('application_1562834622700_0039')
     als_model = analyzer.analyze(app)
     predictor.add_algorithm('ALS', als_model)
     print_helper('application_1562834622700_0039', 'ALS', '原型')
     print_helper('application_1562834622700_0049', 'ALS')
 
     # KMeans
-    app = builder.build('application_1562834622700_0018')
+    app = builder.build_application('application_1562834622700_0018')
     svm_model = analyzer.analyze(app)
     predictor.add_algorithm('KMeans', svm_model)
     print_helper('application_1562834622700_0018', 'KMeans', '原型')
     print_helper('application_1562834622700_0016', 'KMeans')
 
     # SVM
-    app = builder.build('application_1562834622700_0014')
+    app = builder.build_application('application_1562834622700_0014')
     svm_model = analyzer.analyze(app)
     predictor.add_algorithm('SVM', svm_model)
     print_helper('application_1562834622700_0014', 'SVM', '原型')
     print_helper('application_1562834622700_0050', 'SVM')
 
     # Bayes
-    app = builder.build('application_1562834622700_0043')
+    app = builder.build_application('application_1562834622700_0043')
     svm_model = analyzer.analyze(app)
     predictor.add_algorithm('Bayes', svm_model)
     print_helper('application_1562834622700_0043', 'Bayes', '原型')
     print_helper('application_1562834622700_0044', 'Bayes')
 
     # FPGrowth
-    app = builder.build('application_1562834622700_0054')
+    app = builder.build_application('application_1562834622700_0054')
     svm_model = analyzer.analyze(app)
     predictor.add_algorithm('FPGrowth', svm_model)
     print_helper('application_1562834622700_0054', 'FPGrowth', '原型')
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     # LDA
     # TODO
-    app = builder.build('application_1562834622700_0058')
+    app = builder.build_application('application_1562834622700_0058')
     svm_model = analyzer.analyze(app)
     predictor.add_algorithm('LDA', svm_model)
     print_helper('application_1562834622700_0058', 'LDA', '原型')

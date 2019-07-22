@@ -7,7 +7,6 @@ from typing import List
 @dataclasses.dataclass
 class Application(object):
     application_id: str
-    start_time: int
     jobs: List[Job]
     executors: List[Executor]
     input_bytes: int
@@ -44,7 +43,3 @@ class Executor(object):
     is_active: bool
     start_time: int
     max_memory_gb: float
-
-
-class SparkGlobalConf(object):
-    spark_block_size_bytes: int = 256 * 1024 * 1024

@@ -1,4 +1,4 @@
-from optimizer.environment.spark.sparkworkloadrandomgenerator import SparkWorkloadRandomGenerator
+from optimizer.environment.timedelayprediction.sparkworkloadrandomgenerator import SparkWorkloadRandomGenerator
 from workloadsubmission.controlmodel import workload_interface
 
 

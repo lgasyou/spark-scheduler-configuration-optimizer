@@ -1,7 +1,7 @@
 import logging
 import pickle
 
-from optimizer.replaymemory import ReplayMemoryProxy
+from optimizer.replaymemory import ReplayMemory
 from optimizer.util import fileutil
 
 
@@ -9,15 +9,11 @@ class MemorySerializer(object):
 
     FINAL_SAVE_FILENAME = './results/pre-train-memory.pk'
 
-    def __init__(self, proxy: ReplayMemoryProxy):
+    def __init__(self, mem: ReplayMemory):
         self.logger = logging.getLogger(__name__)
-        self.mem = proxy.memory
+        self.mem = mem
 
     def try_load(self):
-        """
-        Load from file.
-        :return: Whether load succeed.
-        """
         return self.try_load_by_filename(self.FINAL_SAVE_FILENAME)
 
     def try_load_by_filename(self, filename):

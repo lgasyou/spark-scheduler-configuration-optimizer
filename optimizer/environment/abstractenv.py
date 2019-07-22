@@ -3,6 +3,7 @@ import argparse
 import logging
 import time
 from collections import deque
+from typing import Tuple
 
 import torch
 
@@ -20,12 +21,19 @@ class AbstractEnv(object):
         self.communicator = self._communicator(args)
         self.actions = self.communicator.action_set
 
+    # Return state, reward, done
+    def step(self, action: int) -> Tuple[torch.Tensor, float, bool]:
+        state = self.try_get_state()
+        reward = self.communicator.act(action)
+        done = self.communicator.is_done()
+        return state, reward, done
+
     def get_state(self) -> torch.Tensor:
         state = self.communicator.get_state_tensor().to(self.device)
         self.state_buffer.append(state)
         return torch.stack(list(self.state_buffer), 0)
 
-    def try_get_state(self, retry_interval: int = 5) -> torch.Tensor:
+    def try_get_state(self, retry_interval: int = 2) -> torch.Tensor:
         state = None
         while state is None:
             try:

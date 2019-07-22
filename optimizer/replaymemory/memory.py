@@ -29,6 +29,10 @@ class ReplayMemory(object):
                                 self.transitions.max)  # Store new transition with maximum priority
         self.t = 0 if terminal else self.t + 1  # Start new episodes with t = 0
 
+    @property
+    def index(self):
+        return self.transitions.index
+
     # Returns a transition with blank states where appropriate
     def _get_transition(self, idx):
         transition = np.array([None] * (self.history + self.n))

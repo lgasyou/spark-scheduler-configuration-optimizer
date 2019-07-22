@@ -2,11 +2,10 @@ import os
 import random
 
 
-class FacebookSampler(object):
+class FacebookWorkloadSampler(object):
 
     SAMPLE_FILENAMES = [
         'FB-2009_samples_24_times_1hr_0.tsv',
-        'FB-2009_samples_24_times_1hr_0_first50jobs.tsv',
         'FB-2009_samples_24_times_1hr_1.tsv',
         'FB-2010_samples_24_times_1hr_0.tsv',
         'FB-2010_samples_24_times_1hr_withInputPaths_0.tsv'
@@ -26,7 +25,7 @@ class FacebookSampler(object):
             interval = int(data[2])
             data_size = (len(data[3]) + 1) // 2
 
-            if interval < 100 and 1 <= data_size <= 8:
+            if interval < 360 and 1 <= data_size <= 8:
                 return interval, str(data_size)
 
 # data size statistic

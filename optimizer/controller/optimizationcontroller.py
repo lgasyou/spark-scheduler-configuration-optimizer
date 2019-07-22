@@ -14,7 +14,7 @@ class OptimizationController(AbstractController):
         self.env.reset_buffer()
         state = self.env.try_get_state(interval)
         while True:
-            state, action, reward, done = self.optimize_episode(state, self.agent.act, interval)
+            state, action, reward, done = self.optimize_episode(state, self.agent.act)
             self.logger.info("Episode {}: Reward {}, Action {}, Done {}".format(self.t, reward, action, done))
             time.sleep(interval)
 

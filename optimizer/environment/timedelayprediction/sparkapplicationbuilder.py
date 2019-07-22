@@ -1,4 +1,6 @@
-from optimizer.environment.spark import sparkmodel
+import requests
+
+from optimizer.environment.timedelayprediction import sparkmodel
 from optimizer.util import jsonutil, timeutil
 
 
@@ -8,34 +10,48 @@ class SparkApplicationBuilder(object):
         self.spark_history_server_api_url = spark_history_server_api_url
         self.application_id = None
 
-    def build(self, application_id: str):
+    def build_application(self, application_id: str):
         self.application_id = application_id
-        return self.parse_and_build_application()
-
-    # noinspection PyTypeChecker
-    def parse_and_build_application(self):
-        application_url = self.spark_history_server_api_url + 'applications/%s/1/' % self.application_id
-        application_json = jsonutil.get_json(application_url)
-        start_time = timeutil.convert_str_to_timestamp(application_json['startTime'])
-
-        jobs_url = self.spark_history_server_api_url + 'applications/%s/1/jobs' % self.application_id
-        jobs_json = jsonutil.get_json(jobs_url)
-        jobs = [self.parse_and_build_job(job_json) for job_json in jobs_json]
-        jobs.reverse()
+        jobs = self.parse_and_build_jobs()
+        executors = self.parse_and_build_executors()
 
         try:
             input_bytes = jobs[0].stages[0].input_bytes
         except IndexError:
             input_bytes = 0
 
+        return sparkmodel.Application(self.application_id, jobs, executors, input_bytes)
+
+    def build_partial_application(self, application_id: str):
+        self.application_id = application_id
+        executors = self.parse_and_build_executors()
+
+        try:
+            stage_url = self.spark_history_server_api_url + 'applications/%s/1/stages/0' % self.application_id
+            stage_json = jsonutil.get_json(stage_url)
+            stage0 = self.parse_and_build_stage(stage_json)
+            input_bytes = stage0.input_bytes
+        except requests.exceptions.HTTPError:
+            input_bytes = 0
+
+        return sparkmodel.Application(self.application_id, [], executors, input_bytes)
+
+    # noinspection PyTypeChecker
+    def parse_and_build_executors(self):
         executors_url = self.spark_history_server_api_url + 'applications/%s/1/allexecutors' % self.application_id
         executors_json = jsonutil.get_json(executors_url)
         executors = [
             self.parse_and_build_executor(executor_json)
             for executor_json in executors_json if executor_json['id'] != 'driver'
         ]
+        return executors
 
-        return sparkmodel.Application(self.application_id, start_time, jobs, executors, input_bytes)
+    def parse_and_build_jobs(self):
+        jobs_url = self.spark_history_server_api_url + 'applications/%s/1/jobs' % self.application_id
+        jobs_json = jsonutil.get_json(jobs_url)
+        jobs = [self.parse_and_build_job(job_json) for job_json in jobs_json]
+        jobs.reverse()
+        return jobs
 
     def parse_and_build_job(self, j):
         job_id = j['jobId']
@@ -70,7 +86,8 @@ class SparkApplicationBuilder(object):
         launch_time = timeutil.convert_str_to_timestamp(j['launchTime'])
         duration = j.get('duration', 0)
         host = j['host']
-        if 'taskMetrics' in j and 'inputMetrics' in j['taskMetrics'] and 'bytesRead' in j['taskMetrics']['inputMetrics']:
+        if 'taskMetrics' in j and 'inputMetrics' in j['taskMetrics'] and \
+                'bytesRead' in j['taskMetrics']['inputMetrics']:
             input_bytes = j['taskMetrics']['inputMetrics']['bytesRead']
         else:
             input_bytes = 0

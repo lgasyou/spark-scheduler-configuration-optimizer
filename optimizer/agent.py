@@ -8,7 +8,7 @@ from torch import optim
 from optimizer.environment import AbstractEnv
 from optimizer.hyperparameters import CUDA_DEVICES
 from optimizer.nn import DQN
-from optimizer.replaymemory import ReplayMemoryProxy
+from optimizer.replaymemory import ReplayMemory
 
 
 class Agent(object):
@@ -59,7 +59,7 @@ class Agent(object):
     def act_e_greedy(self, state, epsilon=0.001) -> int:
         return random.randrange(self.action_space) if random.random() < epsilon else self.act(state)
 
-    def learn(self, mem: ReplayMemoryProxy):
+    def learn(self, mem: ReplayMemory):
         # Sample transitions
         idxs, states, actions, returns, next_states, nonterminals, weights = mem.sample(self.batch_size)
 

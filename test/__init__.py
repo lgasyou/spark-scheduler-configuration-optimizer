@@ -14,7 +14,7 @@ for _ in range(1):
         print('waiting')
         time.sleep(1)
 
-    _1, _2 = SparkEvaluationCommunicator.get()
+    _1, _2 = SparkEvaluationCommunicator.get_time_delay()
     this.append((_1, _2))
     print(_1, _2)
 

@@ -2,7 +2,7 @@ import logging
 import random
 
 from optimizer import hyperparameters
-from optimizer.environment.workloadgenerating.facebooksampler import FacebookSampler
+from optimizer.environment.workloadgenerating.facebookworkloadsampler import FacebookWorkloadSampler
 
 
 class WorkloadRandomGenerator(object):
@@ -13,7 +13,7 @@ class WorkloadRandomGenerator(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.sampler = FacebookSampler()
+        self.sampler = FacebookWorkloadSampler()
 
     def generate(self, batch_size: int = None) -> dict:
         items = []

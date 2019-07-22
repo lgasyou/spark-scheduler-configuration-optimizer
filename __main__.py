@@ -69,34 +69,34 @@ def setup_torch_args(args: argparse.Namespace):
 def get_args() -> argparse.Namespace:
     parser = setup_arg_parser()
     args = parser.parse_args()
-    setup_torch_args(args)
-    return args
-
-
-def main():
-    args = get_args()
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s %(levelname)s %(funcName)s: %(message)s',
         filename=args.log_filename,
         filemode='w'
     )
+    setup_torch_args(args)
+    return args
 
-    controllers = {
-        0: OptimizationController,
-        1: EvaluationController,
-        2: TrainingController,
-    }
 
-    execution_mode: int = args.execution_mode
-    controller = controllers[execution_mode](args)
+def main():
+    # noinspection PyBroadException
     try:
+        args = get_args()
+
+        controller_classes = {
+            0: OptimizationController,
+            1: EvaluationController,
+            2: TrainingController,
+        }
+
+        execution_mode: int = args.execution_mode
+        controller = controller_classes[execution_mode](args)
         controller.run()
     except InterruptedError:
-        logger.info('Met Interrupted Error. Closing environment...')
-        controller.env.close()
-    except Exception as e:
-        logger.error(e)
+        logger.warning('Met Interrupted Error. Closing environment...')
+    except Exception:
+        logger.exception('Something bad happened.')
 
 
 if __name__ == '__main__':

@@ -15,11 +15,13 @@
       <w>facebooksamples</w>
       <w>idxs</w>
       <w>jobruntime</w>
+      <w>kmeans</w>
       <w>lxml</w>
       <w>minibatch</w>
       <w>nondeterministic</w>
       <w>nonterminal</w>
       <w>nonterminals</w>
+      <w>optim</w>
       <w>pretrained</w>
       <w>probs</w>
       <w>resample</w>

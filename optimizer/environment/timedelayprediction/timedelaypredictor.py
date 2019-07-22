@@ -1,25 +1,27 @@
-from typing import Dict, List
+from typing import List
 
-from optimizer.environment.spark import predictionsparkmodel, simulationmodel, sparkmodel
-from optimizer.environment.spark.applicationexecutionsimulator import ApplicationExecutionSimulator
-from optimizer.environment.spark.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.environment.timedelayprediction import predictionsparkmodel, simulationmodel, sparkmodel
+from optimizer.environment.timedelayprediction.algorithmmodelbuilder import AlgorithmModelBuilder
+from optimizer.environment.timedelayprediction.applicationexecutionsimulator import ApplicationExecutionSimulator
+from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
 
 
-class SparkApplicationTimeDelayPredictor(object):
+class TimeDelayPredictor(object):
 
     def __init__(self, spark_history_server_api_url: str):
         self.spark_history_server_api_url = spark_history_server_api_url
         self.spark_application_builder = SparkApplicationBuilder(self.spark_history_server_api_url)
         self.simulator = ApplicationExecutionSimulator()
 
-        self.models: Dict[str, predictionsparkmodel.Application] = {}
+        algorithm_model_builder = AlgorithmModelBuilder(self.spark_application_builder)
+        self.models = algorithm_model_builder.get_model()
         self.task_id = 0
 
     def add_algorithm(self, algorithm_type: str, model: predictionsparkmodel.Application):
         self.models[algorithm_type] = model
 
     def predict(self, application_id: str, algorithm_type: str, start_time: int) -> int:
-        app = self.spark_application_builder.build(application_id)
+        app = self.spark_application_builder.build_partial_application(application_id)
         return self._predict(algorithm_type, app.input_bytes, app.executors, start_time)
 
     def _predict(self, algorithm_type: str, input_bytes: int, executors: List[sparkmodel.Executor], start_time) -> int:

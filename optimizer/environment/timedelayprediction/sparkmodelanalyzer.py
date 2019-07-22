@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-from optimizer.environment.spark import sparkmodel, predictionsparkmodel
+from optimizer.environment.timedelayprediction import sparkmodel, predictionsparkmodel
 
 
-class CompletedSparkApplicationAnalyzer(object):
+class SparkModelAnalyzer(object):
 
     def __init__(self):
         self.ERROR_RATE = 0.2

@@ -46,6 +46,8 @@ class RunningApplication(object):
 
 @dataclasses.dataclass
 class FinishedApplication(object):
+    started_time: int
+    finished_time: int
     elapsed_time: int
 
 

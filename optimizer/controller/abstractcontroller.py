@@ -3,7 +3,7 @@ import argparse
 import logging
 
 from optimizer.agent import Agent
-from optimizer.replaymemory import ReplayMemoryProxy, MemorySerializer
+from optimizer.replaymemory import ReplayMemory, MemorySerializer
 
 
 class AbstractController(object):
@@ -14,7 +14,7 @@ class AbstractController(object):
 
         self.env = self._env(args)
         self.action_space = self.env.action_space()
-        self.mem = ReplayMemoryProxy(self.args, self.args.memory_capacity)
+        self.mem = ReplayMemory(self.args, self.args.memory_capacity)
         self.logger.info('Setup agent...')
         self.agent = Agent(self.args, self.env)
         self.logger.info('Agent setup finished.')
@@ -30,16 +30,13 @@ class AbstractController(object):
     def run(self):
         pass
 
-    def optimize_episode(self, state, act_func, interval):
+    def optimize_episode(self, state, act_func):
         self._reset_noise()
 
         action = act_func(state)
-        state, reward, done = self.env.step(action, interval)
+        state, reward, done = self.env.step(action)
         reward = self._clip_reward(reward)
         self.mem.append(state, action, reward, done)  # Append transition to memory
-
-        if done:
-            self.mem.terminate()
         self.t += 1
 
         # Train

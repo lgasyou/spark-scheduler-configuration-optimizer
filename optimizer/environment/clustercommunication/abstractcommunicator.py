@@ -1,9 +1,11 @@
 import abc
 import logging
+import time
 from typing import Optional
 
 import torch
 
+from optimizer import hyperparameters
 from optimizer.environment.clustercommunication.icommunicator import ICommunicator
 from optimizer.environment.clustercommunication.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.stateobtaining.rewardcalculator import RewardCalculator
@@ -39,10 +41,9 @@ class AbstractCommunicator(ICommunicator):
         :return: Reward this step gets.
         """
         self.set_and_refresh_queue_config(action_index)
+        self._wait_for_application()
         return self.get_reward()
 
-    # TODO: Test if we should use function math.tanh to clap the value of reward.
-    # TODO: Add waiting jobs' finish time prediction.
     def get_reward(self) -> float:
         return self.reward_calculator.get_reward(self.state)
 
@@ -66,9 +67,7 @@ class AbstractCommunicator(ICommunicator):
         return self.state_builder.build_tensor(self.state)
 
     def set_and_refresh_queue_config(self, action_index: int) -> None:
-        """
-        Use script "refresh-queues.sh" to refresh the configurations of queues.
-        """
+        """Use script "refresh-queues.sh" to refresh the configurations of queues."""
         self.scheduler_strategy.override_config(action_index)
         yarnutil.refresh_queues(self.HADOOP_HOME)
 
@@ -83,3 +82,7 @@ class AbstractCommunicator(ICommunicator):
 
     def override_config(self, action_index: int):
         self.scheduler_strategy.override_config(action_index)
+
+    @staticmethod
+    def _wait_for_application():
+        time.sleep(hyperparameters.WAIT_CONFIG_APPLY_TIME)
