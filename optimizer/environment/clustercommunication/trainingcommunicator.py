@@ -1,7 +1,7 @@
 import os
 
 from optimizer.environment.clustercommunication.abstractcommunicator import AbstractCommunicator
-from optimizer.environment.workloadgenerating.workloadrandomgenerator import WorkloadRandomGenerator
+from optimizer.environment.workloadgenerating.workloadgenerator import WorkloadGenerator
 from optimizer.util import yarnutil, sparkutil
 
 
@@ -12,7 +12,7 @@ class TrainingCommunicator(AbstractCommunicator):
         super().__init__(rm_host, spark_history_server_host, hadoop_home)
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
-        self.workload_generator = WorkloadRandomGenerator()
+        self.workload_generator = WorkloadGenerator()
 
     def is_done(self) -> bool:
         return yarnutil.has_all_application_done(self.RM_API_URL)
@@ -28,7 +28,7 @@ class TrainingCommunicator(AbstractCommunicator):
         self.start_workloads(workloads)
 
     def generate_pre_train_set(self) -> dict:
-        return self.workload_generator.generate()
+        return self.workload_generator.generate_randomly()
 
     def start_workloads(self, workloads):
         self.logger.info('Starting workloads...')

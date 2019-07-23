@@ -2,6 +2,7 @@ import os
 
 from optimizer.environment.clustercommunication.abstractcommunicator import AbstractCommunicator
 from optimizer.environment.clustercommunication.ievaluationcommunicator import IEvaluationCommunicator
+from optimizer.environment.workloadgenerating.workloadgenerator import WorkloadGenerator
 from optimizer.util import yarnutil, sparkutil
 
 
@@ -12,6 +13,8 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         super().__init__(rm_host, spark_history_server_host, hadoop_home)
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
+        # self.workload_generator = WorkloadGenerator()
+        # self.WORKLOADS = self.workload_generator.load_evaluation_workloads()
         self.WORKLOADS = {'workloads': [
             {'name': 'bayes', 'interval': 5, 'queue': 'queueA', 'dataSize': '3'},
             {'name': 'svm', 'interval': 3, 'queue': 'queueA', 'dataSize': '3'},

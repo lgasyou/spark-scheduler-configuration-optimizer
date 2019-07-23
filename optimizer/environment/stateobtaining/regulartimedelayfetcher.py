@@ -20,7 +20,7 @@ class RegularTimeDelayFetcher(object):
         time_delays = [a.elapsed_time for a in apps if a.finished_time > self.last_run_time]
         return sum(time_delays) / len(time_delays) if len(time_delays) else 0
 
-    def start_heartbeat(self, every_n_seconds: int = 120):
+    def start_heartbeat(self, every_n_seconds: int = 180):
         if self.running:
             self.logger.warning('There is already a thread running. Will not start another one.')
             return

@@ -12,7 +12,8 @@ class OptimizationController(AbstractController):
         self._load_memory()
         interval = OPTIMIZATION_LOOP_INTERNAL
         self.env.reset_buffer()
-        state = self.env.try_get_state(interval)
+        self.logger.info('Started optimizing cluster.')
+        state = self.env.try_get_state()
         while True:
             state, action, reward, done = self.optimize_episode(state, self.agent.act)
             self.logger.info("Episode {}: Reward {}, Action {}, Done {}".format(self.t, reward, action, done))

@@ -21,12 +21,20 @@ class FacebookWorkloadSampler(object):
         while True:
             line_num = random.randint(0, self.num_samples - 1)
             sample = self.samples[line_num]
-            data = sample.split('\t')
-            interval = int(data[2])
-            data_size = (len(data[3]) + 1) // 2
+            interval, data_size = self._parse_line(sample)
 
             if interval < 360 and 1 <= data_size <= 8:
                 return interval, str(data_size)
+
+    def get_all_samples(self):
+        return [self._parse_line(line) for line in self.samples]
+
+    @staticmethod
+    def _parse_line(line: str):
+        data = line.split('\t')
+        interval = int(data[2])
+        data_size = (len(data[3]) + 1) // 2
+        return interval, data_size
 
 # data size statistic
 # [0, 86, 752, 717, 1072, 1730, 208, 222, 343, 239, 249, 234, 41, 1, 0, 0, 0, 0, 0, 0]

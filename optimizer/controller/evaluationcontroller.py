@@ -18,11 +18,11 @@ class EvaluationController(AbstractController):
         self.episode = 0
 
     def run(self):
-        self.logger.info('Running with optimization.')
+        self.logger.info('Evaluating with optimization.')
         self.run_with_optimization()
 
-        self.logger.info('Running without optimization.')
-        for action_index in range(3, self.action_space):
+        self.logger.info('Evaluating without optimization.')
+        for action_index in range(self.action_space):
             self.run_without_optimization(action_index)
 
     def run_with_optimization(self):
