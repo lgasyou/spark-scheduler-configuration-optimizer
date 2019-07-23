@@ -6,12 +6,12 @@ from optimizer.environment.stateobtaining.statebuilder import StateBuilder
 from optimizer.util import timeutil
 
 
-class RegularTimeDelayGetter(object):
+class RegularTimeDelayFetcher(object):
 
     def __init__(self, state_builder: StateBuilder):
         self.logger = logging.getLogger(__name__)
         self.state_builder = state_builder
-        self.should_run = False
+        self.running = False
         self.last_run_time = 0
         self.time_delays = {}
 
@@ -21,12 +21,17 @@ class RegularTimeDelayGetter(object):
         return sum(time_delays) / len(time_delays) if len(time_delays) else 0
 
     def start_heartbeat(self, every_n_seconds: int = 120):
-        self.time_delays, self.should_run = {}, True
+        if self.running:
+            self.logger.warning('There is already a thread running. Will not start another one.')
+            return
+
+        self.time_delays, self.running = {}, True
         thread = threading.Thread(target=self._regular_get_time_delay, args=(every_n_seconds,))
         thread.start()
+        self.logger.info('RegularTimeDelayFetcher started.')
 
     def stop(self):
-        self.should_run = False
+        self.running = False
 
     def save_time_delays(self, filename: str):
         with open(filename, 'w') as f:
@@ -35,7 +40,7 @@ class RegularTimeDelayGetter(object):
 
     def _regular_get_time_delay(self, seconds: int):
         timer, t = 0, 0
-        while self.should_run:
+        while self.running:
             if timer % seconds == 0:
                 # noinspection PyBroadException
                 try:
