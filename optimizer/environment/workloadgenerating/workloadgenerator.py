@@ -49,11 +49,13 @@ class WorkloadGenerator(object):
 
         return {'workloads': items}
 
-    def load_evaluation_workloads(self, filename: str = None) -> dict:
+    def load_evaluation_workloads(self,  first_n: int = -1, filename: str = None) -> dict:
         filename = filename or self.SAVE_FILENAME
         with open(filename, 'r') as f:
             workloads = json.load(f)
-            self.logger.info('Workloads %s loaded.' % filename)
+            if first_n > 0:
+                workloads = {'workloads': workloads['workloads'][:first_n]}
+            self.logger.info('Workloads %s loaded with %d items.' % (filename, len(workloads['workloads'])))
             return workloads
 
     def save_evaluation_workloads(self, workloads: dict):
