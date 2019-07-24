@@ -65,5 +65,3 @@ class AlgorithmModelBuilder(object):
             self.models = pickle.load(f)
             self.logger.info('Algorithm models %s loaded.' % self.SAVE_FILENAME)
             return self.models
-
-

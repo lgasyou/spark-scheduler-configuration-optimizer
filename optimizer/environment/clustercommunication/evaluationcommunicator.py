@@ -16,7 +16,8 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
         self.workload_generator = WorkloadGenerator()
-        self.WORKLOADS = self.workload_generator.load_evaluation_workloads()
+        self.WORKLOADS = self.workload_generator.generate_randomly(200, queue_partial=True)
+        self.workload_generator.save_evaluation_workloads(self.WORKLOADS)
         self.workload_starter: Optional[threading.Thread] = None
 
     def is_done(self) -> bool:

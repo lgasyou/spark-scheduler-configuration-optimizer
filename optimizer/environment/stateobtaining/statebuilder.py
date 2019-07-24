@@ -27,7 +27,7 @@ class StateBuilder(object):
             resources = self.parse_and_build_resources()
             constraints = self.parse_and_build_constraints()
             return State(waiting_apps, running_apps, resources, constraints)
-        except (ConnectionError, TypeError, requests.exceptions.HTTPError):
+        except (TypeError, KeyError, ConnectionError, requests.exceptions.HTTPError):
             self.logger.exception('Met Error when built State.')
             raise StateInvalidException
 

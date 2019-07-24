@@ -4,6 +4,7 @@ import random
 
 from optimizer import hyperparameters
 from optimizer.environment.workloadgenerating.facebookworkloadsampler import FacebookWorkloadSampler
+from optimizer.util import randomutil
 
 
 class WorkloadGenerator(object):
@@ -18,15 +19,16 @@ class WorkloadGenerator(object):
         self.logger = logging.getLogger(__name__)
         self.sampler = FacebookWorkloadSampler()
 
-    def generate_randomly(self, batch_size: int = None) -> dict:
+    def generate_randomly(self, batch_size: int = None, queue_partial: bool = False) -> dict:
         items = []
         batch_size = batch_size or random.randint(5, 18)
-        for _ in range(batch_size):
+        for i in range(batch_size):
             interval, data_size = self.sampler.sample()
+            queue = self._generate_queue_by_rule(i, batch_size, queue_partial)
             item = {
                 "name": random.choice(self.WORKLOAD_TYPES),
                 "interval": interval,
-                "queue": random.choice(self.QUEUES),
+                "queue": queue,
                 "dataSize": data_size
             }
             items.append(item)
@@ -34,6 +36,19 @@ class WorkloadGenerator(object):
 
         random.shuffle(items)
         return {'workloads': items}
+
+    def _generate_queue_by_rule(self, current_index: int, total_num: int, queue_partial: bool):
+        if queue_partial:
+            part_size = total_num // 3
+            if current_index < part_size:
+                queue = randomutil.choice_p(self.QUEUES, [2, 1])
+            elif current_index < 2 * part_size:
+                queue = random.choice(self.QUEUES)
+            else:
+                queue = randomutil.choice_p(self.QUEUES, [1, 2])
+        else:
+            queue = random.choice(self.QUEUES)
+        return queue
 
     def generate_sequentially(self):
         all_samples = self.sampler.get_all_samples()
