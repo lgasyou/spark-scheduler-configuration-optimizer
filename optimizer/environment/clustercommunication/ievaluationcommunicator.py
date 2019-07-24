@@ -1,3 +1,4 @@
+import threading
 from typing import Tuple
 
 import pandas as pd
@@ -14,4 +15,7 @@ class IEvaluationCommunicator(ICommunicator):
         pass
 
     def get_total_time_cost(self) -> Tuple[pd.DataFrame, int]:
+        pass
+
+    def start_workloads(self) -> threading.Thread:
         pass

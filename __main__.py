@@ -41,7 +41,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--adam-eps', type=float, default=1.5e-4, metavar='ε', help='Adam epsilon')
     parser.add_argument('--batch-size', type=int, default=32, metavar='SIZE', help='Batch size')
     parser.add_argument('--learn-start', type=int, default=int(8000), metavar='STEPS', help='Number of steps before starting training')
-    parser.add_argument('--evaluation-episodes', type=int, default=3, metavar='N', help='Number of evaluation episodes to average over')
+    parser.add_argument('--evaluation-episodes', type=int, default=1, metavar='N', help='Number of evaluation episodes to average over')
     parser.add_argument('--evaluation-size', type=int, default=288, metavar='N', help='Number of transitions to use for validating Q')
     parser.add_argument('--log-interval', type=int, default=288, metavar='STEPS', help='Number of training steps between logging status')
 

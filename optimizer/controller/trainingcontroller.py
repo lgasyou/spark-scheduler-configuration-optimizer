@@ -34,8 +34,7 @@ class TrainingController(AbstractController):
                 raise InterruptedError
 
     def _train_step(self):
-        pre_train_set = self.env.generate_pre_train_set()
-        self.env.start(pre_train_set)
+        self.env.reset()
         self._train_episode()
         self._save_progress()
         sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)

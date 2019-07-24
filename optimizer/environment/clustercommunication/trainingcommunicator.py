@@ -1,11 +1,14 @@
 import os
+import threading
+from typing import Optional
 
 from optimizer.environment.clustercommunication.abstractcommunicator import AbstractCommunicator
+from optimizer.environment.clustercommunication.ievaluationcommunicator import IEvaluationCommunicator
 from optimizer.environment.workloadgenerating.workloadgenerator import WorkloadGenerator
-from optimizer.util import yarnutil, sparkutil
+from optimizer.util import yarnutil, sparkutil, processutil
 
 
-class TrainingCommunicator(AbstractCommunicator):
+class TrainingCommunicator(AbstractCommunicator, IEvaluationCommunicator):
 
     def __init__(self, rm_host: str, spark_history_server_host: str,
                  hadoop_home: str, spark_home: str, java_home: str):
@@ -13,9 +16,11 @@ class TrainingCommunicator(AbstractCommunicator):
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
         self.workload_generator = WorkloadGenerator()
+        self.workload_starter: Optional[threading.Thread] = None
 
     def is_done(self) -> bool:
-        return yarnutil.has_all_application_done(self.RM_API_URL)
+        return yarnutil.has_all_application_done(self.RM_API_URL) and \
+               processutil.has_thread_finished(self.workload_starter)
 
     def close(self):
         self.logger.info('Restarting YARN...')
@@ -23,16 +28,18 @@ class TrainingCommunicator(AbstractCommunicator):
         restart_process.wait()
         self.logger.info('YARN restarted.')
 
-    def reset(self, workloads):
+    def reset(self):
         self.close()
-        self.start_workloads(workloads)
+        self.start_workloads()
 
-    def generate_pre_train_set(self) -> dict:
+    def generate_train_set(self) -> dict:
         return self.workload_generator.generate_randomly()
 
-    def start_workloads(self, workloads):
+    def start_workloads(self):
+        workloads = self.generate_train_set()
         self.logger.info('Starting workloads...')
-        sparkutil.async_start_workloads(workloads, self.SPARK_HOME, self.HADOOP_HOME, self.JAVA_HOME)
+        self.workload_starter = sparkutil.async_start_workloads(workloads, self.SPARK_HOME,
+                                                                self.HADOOP_HOME, self.JAVA_HOME)
         self.logger.info('Workloads started.')
 
     def get_scheduler_type(self) -> str:

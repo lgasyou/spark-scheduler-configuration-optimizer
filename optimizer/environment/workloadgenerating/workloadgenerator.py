@@ -1,6 +1,6 @@
+import json
 import logging
 import random
-import json
 
 from optimizer import hyperparameters
 from optimizer.environment.workloadgenerating.facebookworkloadsampler import FacebookWorkloadSampler
@@ -16,7 +16,7 @@ class WorkloadGenerator(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.sampler = FacebookWorkloadSampler(0, '../../../data/facebooksamples')
+        self.sampler = FacebookWorkloadSampler()
 
     def generate_randomly(self, batch_size: int = None) -> dict:
         items = []
