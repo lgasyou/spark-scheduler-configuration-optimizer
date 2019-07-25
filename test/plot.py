@@ -15,18 +15,18 @@ def get_one(action, episode) -> dict:
 
 def get_all_no_optim():
     a = []
-    # for i in [2, 5, 8]:
-    #     cur = {}
-    #     for j in range(1):
-    #         d = get_one(i, j)
-    #         for k, v in d.items():
-    #             if k in cur:
-    #                 cur[k] += v
-    #             else:
-    #                 cur[k] = v
-    #     for k, v in cur.items():
-    #         cur[k] /= 1
-    #     a.append(cur)
+    for i in [2, 5, 8]:
+        cur = {}
+        for j in range(1):
+            d = get_one(i, j)
+            for k, v in d.items():
+                if k in cur:
+                    cur[k] += v
+                else:
+                    cur[k] = v
+        for k, v in cur.items():
+            cur[k] /= 1
+        a.append(cur)
 
     cur = {}
     for i in range(1):
@@ -53,18 +53,18 @@ def draw(a: list, inter: bool = True):
     plt.xlabel("Time (Minutes)")
     plt.ylabel("Time Delay (Milliseconds)")
     num_items = max([len(item.keys()) for item in a])
-    # num_items = 21
+    num_items = 21
     x = [i * 3 for i in range(num_items)]
 
-    # legends = ['Fixed Configuration 2', 'Fixed Configuration 5', 'Fixed Configuration 8', 'Optimized']
-    legends = ['Optimized']
+    legends = ['Fixed Configuration 2', 'Fixed Configuration 5', 'Fixed Configuration 8', 'Optimized']
+    # legends = ['Fixed Configuration 2', 'Optimized']
     for i, one in enumerate(a):
         y = [0] * num_items
         for j, v in enumerate(one.values()):
-            # if j < 21:
-            y[j] = v
-            # else:
-            #     break
+            if j < 21:
+                y[j] = v
+            else:
+                break
         if inter:
             func = interpolate.interp1d(x, y, kind='cubic')
             x_new = np.arange(0, 57.1, 0.1)
