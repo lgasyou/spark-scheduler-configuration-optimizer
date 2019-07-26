@@ -40,11 +40,11 @@ class WorkloadGenerator(object):
         if queue_partial:
             part_size = total_num // 3
             if current_index < part_size:
-                queue = randomutil.choice_p(self.QUEUES, [2, 1])
+                queue = randomutil.choice_p(self.QUEUES, [3, 1])
             elif current_index < 2 * part_size:
                 queue = random.choice(self.QUEUES)
             else:
-                queue = randomutil.choice_p(self.QUEUES, [1, 2])
+                queue = randomutil.choice_p(self.QUEUES, [1, 3])
         else:
             queue = random.choice(self.QUEUES)
         return queue
