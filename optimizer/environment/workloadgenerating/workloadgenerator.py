@@ -34,7 +34,6 @@ class WorkloadGenerator(object):
             items.append(item)
         self.logger.info('Generated workloads with batch size %d.' % batch_size)
 
-        random.shuffle(items)
         return {'workloads': items}
 
     def _generate_queue_by_rule(self, current_index: int, total_num: int, queue_partial: bool):
