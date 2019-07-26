@@ -16,14 +16,18 @@ class EvaluationController(AbstractController):
         self.time_delay_fetcher = RegularTimeDelayFetcher(self.env.communicator.state_builder)
         self.costs = []
         self.episode = 0
+        self.test_index = 0
 
     def run(self):
-        self.logger.info('Evaluating with optimization.')
-        self.run_with_optimization()
+        for test_index in range(3):
+            self.test_index = test_index
+            self.env.test_index = test_index
+            self.logger.info('Evaluating with optimization.')
+            self.run_with_optimization()
 
-        self.logger.info('Evaluating without optimization.')
-        for action_index in [2, 5, 8]:
-            self.run_without_optimization(action_index)
+            self.logger.info('Evaluating without optimization.')
+            for action_index in [2, 5, 8]:
+                self.run_without_optimization(action_index)
 
     def run_with_optimization(self):
         self._load_memory()
@@ -38,8 +42,8 @@ class EvaluationController(AbstractController):
             self.time_delay_fetcher.start_heartbeat()
             self.with_optimize_episode()
             self.cleanup(
-                time_costs_filename='./results/optim-time-costs-%d.xlsx' % i,
-                time_delays_filename='./results/optim-time-delays-%d.txt' % i
+                time_costs_filename='./results/optim-time-costs-%d-%d.xlsx' % (self.test_index, i),
+                time_delays_filename='./results/optim-time-delays-%d-%d.txt' % (self.test_index, i)
             )
 
     def with_optimize_episode(self):
@@ -60,8 +64,8 @@ class EvaluationController(AbstractController):
             self.time_delay_fetcher.start_heartbeat()
             self.without_optimize_episode(action_index)
             self.cleanup(
-                time_costs_filename='./results/no-optim-time-costs-%d-%d.xlsx' % (action_index, i),
-                time_delays_filename='./results/no-optim-time-delays-%d-%d.txt' % (action_index, i)
+                time_costs_filename='./results/no-optim-time-costs-%d-%d-%d.xlsx' % (self.test_index, action_index, i),
+                time_delays_filename='./results/no-optim-time-delays-%d-%d-%d.txt' % (self.test_index, action_index, i)
             )
 
     def without_optimize_episode(self, action_index: int):

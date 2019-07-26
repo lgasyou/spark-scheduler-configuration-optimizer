@@ -15,10 +15,19 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         super().__init__(rm_host, spark_history_server_host, hadoop_home)
         self.SPARK_HOME = spark_home
         self.JAVA_HOME = java_home
+
         self.workload_generator = WorkloadGenerator()
-        self.WORKLOADS = self.workload_generator.generate_randomly(200, queue_partial=True)
-        self.workload_generator.save_evaluation_workloads(self.WORKLOADS)
+        self.workloads_list = [
+            self.workload_generator.generate_randomly(70, queue_partial=True, queue_index=0),
+            self.workload_generator.generate_randomly(70, queue_partial=True, queue_index=1),
+            self.workload_generator.generate_randomly(70, queue_partial=True, queue_index=2)
+        ]
+        for i, workloads in enumerate(self.workloads_list):
+            self.workload_generator.save_evaluation_workloads(workloads, './data/testset/workloads%d.json' % i)
+
         self.workload_starter: Optional[threading.Thread] = None
+
+        self.test_index = 0
 
     def is_done(self) -> bool:
         return yarnutil.has_all_application_done(self.RM_API_URL) and \
@@ -40,7 +49,8 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         return time_costs, sum(time_costs)
 
     def start_workloads(self):
-        self.workload_starter = sparkutil.async_start_workloads(self.WORKLOADS, self.SPARK_HOME,
+        self.logger.info('Starting workload %d...' % self.test_index)
+        self.workload_starter = sparkutil.async_start_workloads(self.workloads_list[self.test_index], self.SPARK_HOME,
                                                                 self.HADOOP_HOME, self.JAVA_HOME)
 
     def get_scheduler_type(self) -> str:

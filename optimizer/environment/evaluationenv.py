@@ -14,9 +14,11 @@ class EvaluationEnv(AbstractEnv):
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
         self.training = True  # Consistent with model training mode
+        self.test_index = 0
 
     def reset(self):
         self.reset_buffer()
+        self.communicator.test_index = self.test_index
         self.communicator.reset()
 
     def get_total_time_cost(self) -> tuple:

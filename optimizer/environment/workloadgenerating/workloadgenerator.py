@@ -19,12 +19,12 @@ class WorkloadGenerator(object):
         self.logger = logging.getLogger(__name__)
         self.sampler = FacebookWorkloadSampler()
 
-    def generate_randomly(self, batch_size: int = None, queue_partial: bool = False) -> dict:
+    def generate_randomly(self, batch_size: int = None, queue_partial: bool = False, queue_index: int = -1) -> dict:
         items = []
         batch_size = batch_size or random.randint(5, 18)
         for i in range(batch_size):
             interval, data_size = self.sampler.sample()
-            queue = self._generate_queue_by_rule(i, batch_size, queue_partial)
+            queue = self._generate_queue_by_rule(i, batch_size, queue_partial, queue_index)
             item = {
                 "name": random.choice(self.WORKLOAD_TYPES),
                 "interval": interval,
@@ -36,7 +36,17 @@ class WorkloadGenerator(object):
 
         return {'workloads': items}
 
-    def _generate_queue_by_rule(self, current_index: int, total_num: int, queue_partial: bool):
+    def _generate_queue_by_rule(self, current_index: int, total_num: int, queue_partial: bool, queue_index):
+        if queue_index == 0:
+            queue = randomutil.choice_p(self.QUEUES, [3, 1])
+        elif queue_index == 1:
+            queue = random.choice(self.QUEUES)
+        elif queue_index == 2:
+            queue = randomutil.choice_p(self.QUEUES, [1, 3])
+        else:
+            self.logger.error("Unexcept %d" % queue_index)
+        return queue
+
         if queue_partial:
             part_size = total_num // 3
             if current_index < part_size:
@@ -72,7 +82,7 @@ class WorkloadGenerator(object):
             self.logger.info('Workloads %s loaded with %d items.' % (filename, len(workloads['workloads'])))
             return workloads
 
-    def save_evaluation_workloads(self, workloads: dict):
-        with open(self.SAVE_FILENAME, 'w') as f:
+    def save_evaluation_workloads(self, workloads: dict, filename: str = None):
+        with open(filename or self.SAVE_FILENAME, 'w') as f:
             json.dump(workloads, f)
-            self.logger.info('Workloads %s saved.' % self.SAVE_FILENAME)
+            self.logger.info('Workloads %s saved.' % filename)
