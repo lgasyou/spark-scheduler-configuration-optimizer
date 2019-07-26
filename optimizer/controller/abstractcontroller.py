@@ -4,9 +4,12 @@ import logging
 
 from optimizer.agent import Agent
 from optimizer.replaymemory import ReplayMemory, MemorySerializer
+from optimizer.util import fileutil
 
 
 class AbstractController(object):
+
+    STEP_SAVE_FILENAME = './results/steps.txt'
 
     def __init__(self, args: argparse.Namespace):
         self.args = args
@@ -37,11 +40,13 @@ class AbstractController(object):
         state, reward, done = self.env.step(action)
         reward = self._clip_reward(reward)
         self.mem.append(state, action, reward, done)  # Append transition to memory
-        self.t += 1
+        self.log_step(action, reward)
 
         # Train
         if self.t >= self.args.learn_start:
             self._agent_learn()
+
+        self.t += 1
 
         return state, action, reward, done
 
@@ -68,10 +73,14 @@ class AbstractController(object):
         mem.priority_weight = min(mem.priority_weight + self.priority_weight_increase, 1)
 
         if self.t % replay_frequency == 0:
-            agent.learn(mem)  # Train with n-step distributional double-Q learning
+            agent.learn(mem, self.t)  # Train with n-step distributional double-Q learning
             self.logger.info('Agent learnt.')
 
         # Update target network
         if self.t % target_update == 0:
             agent.update_target_net()
             self.logger.info('Target net updated.')
+
+    def log_step(self, action: int, reward: float):
+        data = '%d,%d,%f' % (self.t, action, reward)
+        fileutil.log_into_file(data, self.STEP_SAVE_FILENAME)

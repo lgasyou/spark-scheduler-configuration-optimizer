@@ -9,12 +9,15 @@ from optimizer.environment import AbstractEnv
 from optimizer.hyperparameters import CUDA_DEVICES
 from optimizer.nn import DQN
 from optimizer.replaymemory import ReplayMemory
+from optimizer.util import fileutil
 
 
 class Agent(object):
     """
     The DRL agent of this project.
     """
+
+    SAVE_FILENAME = './results/losses.txt'
 
     def __init__(self, args, env: AbstractEnv):
         self.logger = logging.getLogger(__name__)
@@ -59,7 +62,7 @@ class Agent(object):
     def act_e_greedy(self, state, epsilon=0.001) -> int:
         return random.randrange(self.action_space) if random.random() < epsilon else self.act(state)
 
-    def learn(self, mem: ReplayMemory):
+    def learn(self, mem: ReplayMemory, time: int):
         # Sample transitions
         idxs, states, actions, returns, next_states, nonterminals, weights = mem.sample(self.batch_size)
 
@@ -99,6 +102,9 @@ class Agent(object):
                                   (pns_a * (b - l.float())).view(-1))  # m_u = m_u + p(s_t+n, a*)(b - l)
 
         loss = -torch.sum(m * log_ps_a, 1)  # Cross-entropy loss (minimises DKL(m||p(s_t, a_t)))
+        self.logger.info('Learnt with loss %f.' % loss)
+        self.log_loss(loss, time)
+
         self.online_net.zero_grad()
         (weights * loss).mean().backward()  # Backpropagate importance-weighted minibatch loss
         self.optimiser.step()
@@ -124,3 +130,7 @@ class Agent(object):
 
     def eval(self):
         self.online_net.eval()
+
+    def log_loss(self, loss: float, time: int, filename: str = None):
+        data = '%d,%f' % (time, loss)
+        fileutil.log_into_file(data, filename or self.SAVE_FILENAME)
