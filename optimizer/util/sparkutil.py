@@ -30,6 +30,7 @@ def start_workload_process(workload_type, queue, data_size, wd, spark_home, hado
 
 
 def clean_spark_log(wd, hadoop_home):
-    logging.info('Cleaning Spark logs...')
-    cmd = ['%s/bin/clean-spark-log.sh' % wd, hadoop_home]
-    return processutil.start_process(cmd)
+    logging.info('Called clean_spark_log(). Do nothing for now because the space is affluent.')
+    # logging.info('Cleaning Spark logs...')
+    # cmd = ['%s/bin/clean-spark-log.sh' % wd, hadoop_home]
+    # return processutil.start_process(cmd)

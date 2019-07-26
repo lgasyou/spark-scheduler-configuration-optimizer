@@ -29,7 +29,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--V-min', type=float, default=-10, metavar='V', help='Minimum of value distribution support')
     parser.add_argument('--V-max', type=float, default=10, metavar='V', help='Maximum of value distribution support')
     parser.add_argument('--model', type=str, default='./results/model.pth', metavar='PARAMS', help='Pretrained model (state dict)')
-    parser.add_argument('--memory-capacity', type=int, default=int(10000), metavar='CAPACITY', help='Experience replay memory capacity')
+    parser.add_argument('--memory-capacity', type=int, default=int(1000000), metavar='CAPACITY', help='Experience replay memory capacity')
     parser.add_argument('--replay-frequency', type=int, default=4, metavar='k', help='Frequency of sampling from memory')
     parser.add_argument('--priority-exponent', type=float, default=0.5, metavar='ω', help='Prioritised experience replay exponent (originally denoted α)')
     parser.add_argument('--priority-weight', type=float, default=0.4, metavar='β', help='Initial prioritised experience replay importance sampling weight')
@@ -56,7 +56,7 @@ def setup_torch_args(args: argparse.Namespace):
     # random.seed(args.seed)
     torch.manual_seed(random.randint(1, 10000))
     if torch.cuda.is_available() and not args.disable_cuda:
-        args.device = torch.device('cuda:5')
+        args.device = torch.device('cuda:0')
         torch.cuda.manual_seed(random.randint(1, 10000))
         # Disable nondeterministic ops (not sure if critical but better safe than sorry)
         torch.backends.cudnn.enabled = False

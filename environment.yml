@@ -7,8 +7,7 @@ dependencies:
   - psutil
   - pandas
   - tqdm
+  - requests
   - pip:
-    - atari-py
-    - opencv-python
     - bs4
     - lxml

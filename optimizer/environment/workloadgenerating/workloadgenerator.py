@@ -9,6 +9,9 @@ from optimizer.util import randomutil
 
 class WorkloadGenerator(object):
 
+    # TODO: For now we only have 6 workloads.
+    # WORKLOAD_TYPES = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm',
+    #                   'rnn', 'lenet', 'resnet', 'vgg', 'autoencoder']
     WORKLOAD_TYPES = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm']
     QUEUES = hyperparameters.QUEUES['names']
     DATA_SIZES = [str(i) for i in range(1, 9)]
@@ -21,7 +24,7 @@ class WorkloadGenerator(object):
 
     def generate_randomly(self, batch_size: int = None, queue_partial: bool = False) -> dict:
         items = []
-        batch_size = batch_size or random.randint(5, 18)
+        batch_size = batch_size or random.randint(120, 210)
         for i in range(batch_size):
             interval, data_size = self.sampler.sample()
             queue = self._generate_queue_by_rule(i, batch_size, queue_partial)
