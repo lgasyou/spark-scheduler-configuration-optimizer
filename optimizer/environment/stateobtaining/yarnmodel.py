@@ -11,7 +11,6 @@ class ApplicationRequestResource(object):
     cpu: int
 
 
-# TODO: We may need more information to calculate its predicted time delay.
 @dataclasses.dataclass
 class WaitingApplication(object):
 

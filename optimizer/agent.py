@@ -102,12 +102,14 @@ class Agent(object):
                                   (pns_a * (b - l.float())).view(-1))  # m_u = m_u + p(s_t+n, a*)(b - l)
 
         loss = -torch.sum(m * log_ps_a, 1)  # Cross-entropy loss (minimises DKL(m||p(s_t, a_t)))
-        str_loss = ','.join([str(float(i)) for i in loss])
-        self.logger.info('Learnt with losses %s.' % str_loss)
-        self.log_loss(str_loss, time)
-
         self.online_net.zero_grad()
-        (weights * loss).mean().backward()  # Backpropagate importance-weighted minibatch loss
+
+        loss_tensor = (weights * loss).mean()
+        real_loss = float(loss_tensor)
+        self.logger.info('Learnt with losses %f.' % real_loss)
+        self.log_loss(real_loss, time)
+
+        loss_tensor.backward()  # Backpropagate importance-weighted minibatch loss
         self.optimiser.step()
 
         mem.update_priorities(idxs, loss.detach().cpu().numpy())  # Update priorities of sampled transitions
@@ -132,6 +134,6 @@ class Agent(object):
     def eval(self):
         self.online_net.eval()
 
-    def log_loss(self, loss: str, time: int, filename: str = None):
-        data = '%d,%s' % (time, loss)
+    def log_loss(self, loss: float, time: int, filename: str = None):
+        data = '%d,%f' % (time, loss)
         fileutil.log_into_file(data, filename or self.SAVE_FILENAME)

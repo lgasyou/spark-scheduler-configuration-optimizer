@@ -73,7 +73,7 @@ def get_args() -> argparse.Namespace:
         level=logging.INFO,
         format='%(asctime)s %(levelname)s %(funcName)s: %(message)s',
         filename=args.log_filename,
-        filemode='w'
+        filemode='a'
     )
     setup_torch_args(args)
     return args

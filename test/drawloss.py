@@ -28,8 +28,10 @@ plt.subplot(2, 1, 2)
 plt.title('Actions')
 plt.plot(times, actions)
 
+plt.savefig('../results/fig-%d-RA.png' % times[-1], format='png')
 plt.show()
 
-plt.title('Losses')
+plt.title('Loss')
 plt.plot(loss_times, losses)
+plt.savefig('../results/fig-%d-L.png' % loss_times[-1], format='png')
 plt.show()
