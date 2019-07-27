@@ -18,13 +18,9 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
 
         self.workload_generator = WorkloadGenerator()
         self.workloads_list = [
-            self.workload_generator.generate_randomly(70, queue_partial=True, queue_index=0),
-            self.workload_generator.generate_randomly(70, queue_partial=True, queue_index=1),
-            self.workload_generator.generate_randomly(70, queue_partial=True, queue_index=2)
+            self.workload_generator.load_evaluation_workloads(-1, './data/testset/workloads%d.json' % i)
+            for i in range(3)
         ]
-        for i, workloads in enumerate(self.workloads_list):
-            self.workload_generator.save_evaluation_workloads(workloads, './data/testset/workloads%d.json' % i)
-
         self.workload_starter: Optional[threading.Thread] = None
 
         self.test_index = 0
