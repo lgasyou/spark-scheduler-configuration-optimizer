@@ -1,4 +1,4 @@
-CUDA_DEVICES = [i for i in range(10)]
+CUDA_DEVICES = [5, 6, 7]
 
 STATE_SHAPE = (200, 200)
 

@@ -1,16 +1,35 @@
 from matplotlib import pyplot as plt
 
-from optimizer.util import fileutil
+plt.rcParams['figure.dpi'] = 200
 
-
-def log_loss(loss: float, filename: str = None):
-    with open(filename, 'a') as f:
-        f.write(str(loss) + '\n')
-
-
-fileutil.log_into_file(666, '../results/losses.txt')
+with open('../results/steps.txt', 'r') as f:
+    times = []
+    actions = []
+    rewards = []
+    for l in f.readlines():
+        s = l.split(',')
+        times.append(int(s[0]))
+        actions.append(int(s[1]))
+        rewards.append(float(s[2]))
 
 with open('../results/losses.txt', 'r') as f:
-    losses = list(map(lambda item: float(item), f.readlines()))
-    plt.plot([i for i in range(len(losses))], losses)
-    plt.show()
+    loss_times = []
+    losses = []
+    for l in f.readlines():
+        s = l.split(',')
+        loss_times.append(int(s[0]))
+        losses.append(float(s[1]))
+
+plt.subplot(2, 1, 1)
+plt.title('Rewards')
+plt.plot(times, rewards)
+
+plt.subplot(2, 1, 2)
+plt.title('Actions')
+plt.plot(times, actions)
+
+plt.show()
+
+plt.title('Losses')
+plt.plot(loss_times, losses)
+plt.show()
