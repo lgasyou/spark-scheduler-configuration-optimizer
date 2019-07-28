@@ -27,8 +27,8 @@ class StateBuilder(object):
             resources = self.parse_and_build_resources()
             constraints = self.parse_and_build_constraints()
             return State(waiting_apps, running_apps, resources, constraints)
-        except (TypeError, KeyError, ConnectionError, requests.exceptions.HTTPError):
-            self.logger.exception('Met Error when built State.')
+        except (TypeError, KeyError, ConnectionError, requests.exceptions.HTTPError) as e:
+            self.logger.warning(e)
             raise StateInvalidException
 
     @staticmethod
@@ -114,7 +114,7 @@ class StateBuilder(object):
 
         apps_json, apps = j['apps']['app'], []
         for a in apps_json:
-            application_id = a['id']
+            app_id = a['id']
             name = a['name']
             started_time = a['startedTime']
             elapsed_time = a['elapsedTime']
@@ -122,10 +122,11 @@ class StateBuilder(object):
             progress = a['progress']
             queue_usage_percentage = a['queueUsagePercentage']
             location = a['queue']
-            predicted_time_delay = self.time_delay_predictor.predict(application_id, name, started_time)
-            self.logger.info('%s, Predicted time delay: %f' % (application_id, predicted_time_delay))
+            elapsed_seconds = elapsed_time / 1000
+            predicted_time_delay = self.time_delay_predictor.predict(app_id, name, started_time, elapsed_seconds)
+            self.logger.info('%s, Predicted time delay: %f' % (app_id, predicted_time_delay))
             request_resources = self.build_request_resources_from_json(a)
-            apps.append(RunningApplication(application_id, elapsed_time, priority, location, progress,
+            apps.append(RunningApplication(app_id, elapsed_time, priority, location, progress,
                                            queue_usage_percentage, predicted_time_delay, request_resources))
 
         return apps
@@ -140,7 +141,7 @@ class StateBuilder(object):
             elapsed_time = a['elapsedTime']
             priority = a['priority']
             location = a['queue']
-            predicted_time_delay = 20000
+            predicted_time_delay = 20000 + elapsed_time / 1000
             self.logger.info('%s, Predicted time delay: %f' % (application_id, predicted_time_delay))
             request_resources = self.build_request_resources_from_json(a)
             apps.append(WaitingApplication(application_id, elapsed_time, priority, location,
