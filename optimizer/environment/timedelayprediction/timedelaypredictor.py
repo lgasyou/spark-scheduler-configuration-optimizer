@@ -20,20 +20,19 @@ class TimeDelayPredictor(object):
     def add_algorithm(self, algorithm_type: str, model: predictionsparkmodel.Application):
         self.models[algorithm_type] = model
 
-    def predict(self, application_id: str, algorithm_type: str, start_time: int, elapsed_time: float) -> int:
+    def predict(self, application_id: str, algorithm_type: str, start_time: int) -> int:
         app = self.spark_application_builder.build_partial_application(application_id)
-        return self._predict(algorithm_type, app.input_bytes, app.executors, start_time, elapsed_time)
+        return self._predict(algorithm_type, app.input_bytes, app.executors, start_time)
 
     def _predict(self, algorithm_type: str, input_bytes: int,
-                 executors: List[sparkmodel.Executor], start_time, elapsed_time: float) -> int:
+                 executors: List[sparkmodel.Executor], start_time) -> int:
         self.task_id = 0
         model = self.models[algorithm_type]
 
         tasks = self._build_tasks(input_bytes, model)
         containers = self._build_containers(executors)
         predicted_finish_time = self.simulator.simulate(containers, tasks)
-        # We assume the longest execution time is 10000s.
-        return (predicted_finish_time - start_time) / 1000 if predicted_finish_time > 0 else 10000 + elapsed_time
+        return (predicted_finish_time - start_time) / 1000 if predicted_finish_time > 0 else -1
 
     def _build_tasks(self, input_bytes: int, model: predictionsparkmodel.Application):
         tasks = []

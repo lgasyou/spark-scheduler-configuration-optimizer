@@ -8,7 +8,7 @@ from scipy import interpolate
 
 
 def get_one(action, episode) -> dict:
-    with open('../results/no-optim-time-delays-2-%d-%d.txt' % (action, episode), 'r') as f:
+    with open('../results/no-optim-time-delays-0-%d-%d.txt' % (action, episode), 'r') as f:
         d = eval(f.readline())
         return d
 
@@ -30,7 +30,7 @@ def get_all_no_optim():
 
     cur = {}
     for i in range(1):
-        with open('../results/optim-time-delays-2-%d.txt' % i, 'r') as f:
+        with open('../results/optim-time-delays-0-%d.txt' % i, 'r') as f:
             d = eval(f.readline())
         for k, v in d.items():
             if k in cur:
@@ -53,7 +53,7 @@ def draw(a: list, inter: bool = True):
     plt.xlabel("Time (Minutes)")
     plt.ylabel("Time Delay (Milliseconds)")
     num_items = max([len(item.keys()) for item in a])
-    num_items = 30
+    num_items = 50
     x = [i * 3 for i in range(num_items)]
 
     legends = ['Fixed Configuration 2(25, 75)',
@@ -72,7 +72,6 @@ def draw(a: list, inter: bool = True):
             func = interpolate.interp1d(x, y, kind='cubic')
             x_new = np.arange(0, num_items, 0.1)
             y_smooth = func(x_new)
-            x_new = [i * 3 for i in x_new]
             plt.plot(x_new, y_smooth, label=legends[i])
         else:
             plt.plot(x, y, label=legends[i])

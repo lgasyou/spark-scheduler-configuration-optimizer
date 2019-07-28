@@ -122,8 +122,9 @@ class StateBuilder(object):
             progress = a['progress']
             queue_usage_percentage = a['queueUsagePercentage']
             location = a['queue']
-            elapsed_seconds = elapsed_time / 1000
-            predicted_time_delay = self.time_delay_predictor.predict(app_id, name, started_time, elapsed_seconds)
+            predicted_time_delay = self.time_delay_predictor.predict(app_id, name, started_time)
+            if predicted_time_delay == -1:
+                predicted_time_delay = 10000 + elapsed_time / 1000
             self.logger.info('%s, Predicted time delay: %f' % (app_id, predicted_time_delay))
             request_resources = self.build_request_resources_from_json(a)
             apps.append(RunningApplication(app_id, elapsed_time, priority, location, progress,
@@ -141,7 +142,7 @@ class StateBuilder(object):
             elapsed_time = a['elapsedTime']
             priority = a['priority']
             location = a['queue']
-            predicted_time_delay = 20000 + elapsed_time / 1000
+            predicted_time_delay = 10000 + elapsed_time / 1000
             self.logger.info('%s, Predicted time delay: %f' % (application_id, predicted_time_delay))
             request_resources = self.build_request_resources_from_json(a)
             apps.append(WaitingApplication(application_id, elapsed_time, priority, location,
