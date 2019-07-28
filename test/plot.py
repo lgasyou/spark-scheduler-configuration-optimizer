@@ -49,7 +49,7 @@ def draw(a: list, inter: bool = True):
     # plt.title("作业时延（每三分钟统计一次）")
     # plt.xlabel("时间（分钟）")
     # plt.ylabel("两分钟内完成的作业的时延（毫秒）")
-    plt.title('Time Delay Every 3 Minutes (Workload on QueueA : QueueB = 1 : 3)')
+    plt.title('Time Delay Every 3 Minutes (Workload on QueueA : QueueB = 3 : 1)')
     plt.xlabel("Time (Minutes)")
     plt.ylabel("Time Delay (Milliseconds)")
     num_items = max([len(item.keys()) for item in a])

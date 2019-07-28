@@ -98,5 +98,4 @@ class SparkApplicationBuilder(object):
         executor_id = int(j['id'])
         is_active = j['isActive']
         start_time = timeutil.convert_str_to_timestamp(j['addTime'])
-        max_memory_gb = j['maxMemory'] / 1024**3
-        return sparkmodel.Executor(executor_id, is_active, start_time, max_memory_gb)
+        return sparkmodel.Executor(executor_id, is_active, start_time)

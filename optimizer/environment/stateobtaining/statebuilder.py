@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 
 import requests
 import torch
@@ -8,7 +7,7 @@ from requests.exceptions import ConnectionError
 from optimizer.environment.stateinvalidexception import StateInvalidException
 from optimizer.environment.stateobtaining.yarnmodel import *
 from optimizer.environment.timedelayprediction import TimeDelayPredictor
-from optimizer.hyperparameters import STATE_SHAPE
+from optimizer.hyperparameters import STATE_SHAPE, CONTAINER_NUM_VCORES, CONTAINER_MEM
 from optimizer.util import jsonutil
 
 
@@ -19,16 +18,19 @@ class StateBuilder(object):
         self.RM_API_URL = rm_api_url
         self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_api_url
         self.scheduler_strategy = scheduler_strategy
-        self.time_delay_predictor = TimeDelayPredictor(spark_history_server_api_url)
+        self.delay_predictor = TimeDelayPredictor(spark_history_server_api_url)
 
     def build(self):
         try:
-            waiting_apps, running_apps = self.parse_and_build_applications()
             resources = self.parse_and_build_resources()
             constraints = self.parse_and_build_constraints()
+            running_apps = self.parse_and_build_running_apps()
+            waiting_apps = self.parse_and_build_waiting_apps()
+            queue_resources = self.parse_and_build_queue_resources(resources, constraints)
+            self.predict_time_delays(queue_resources, running_apps, waiting_apps)
             return State(waiting_apps, running_apps, resources, constraints)
         except (TypeError, KeyError, ConnectionError, requests.exceptions.HTTPError) as e:
-            self.logger.warning(e)
+            self.logger.debug(e, exc_info=True)
             raise StateInvalidException
 
     @staticmethod
@@ -74,20 +76,18 @@ class StateBuilder(object):
 
         return tensor
 
-    def parse_and_build_applications(self) -> Tuple[List[WaitingApplication], List[RunningApplication]]:
-        waiting_apps = self.parse_and_build_waiting_apps()
-        running_apps = self.parse_and_build_running_apps()
-        return waiting_apps, running_apps
+    def parse_and_build_running_apps(self) -> List[RunningApplication]:
+        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=RUNNING'
+        app_json = jsonutil.get_json(url)
+        return self.build_running_apps_from_json(app_json)
 
     def parse_and_build_waiting_apps(self) -> List[WaitingApplication]:
         url = self.RM_API_URL + 'ws/v1/cluster/apps?states=NEW,NEW_SAVING,SUBMITTED,ACCEPTED'
         app_json = jsonutil.get_json(url)
         return self.build_waiting_apps_from_json(app_json)
 
-    def parse_and_build_running_apps(self) -> List[RunningApplication]:
-        url = self.RM_API_URL + 'ws/v1/cluster/apps?states=RUNNING'
-        app_json = jsonutil.get_json(url)
-        return self.build_running_apps_from_json(app_json)
+    def predict_time_delays(self, resources, running_apps, waiting_apps):
+        self.delay_predictor.predict(resources, running_apps, waiting_apps)
 
     def parse_and_build_finished_apps(self) -> List[FinishedApplication]:
         url = self.RM_API_URL + 'ws/v1/cluster/apps?states=FINISHED'
@@ -108,6 +108,21 @@ class StateBuilder(object):
     def parse_and_build_constraints(self) -> List[QueueConstraint]:
         return self.scheduler_strategy.get_queue_constraints()
 
+    @staticmethod
+    def parse_and_build_queue_resources(resources, constraints) -> list:
+        sum_vcore_num, sum_memory = 0, 0
+        for r in resources:
+            sum_vcore_num += r.vcore_num
+            sum_memory += r.mem
+        cluster_num_containers = min(sum_vcore_num // CONTAINER_NUM_VCORES, sum_memory // CONTAINER_MEM)
+
+        queue_resources = []
+        constraints.sort(key=lambda i: i.converted_name)
+        for c in constraints:
+            queue_resources.append(int(c.capacity / 100 * cluster_num_containers))
+
+        return queue_resources
+
     def build_running_apps_from_json(self, j: dict) -> List[RunningApplication]:
         if j['apps'] is None:
             return []
@@ -118,17 +133,14 @@ class StateBuilder(object):
             name = a['name']
             started_time = a['startedTime']
             elapsed_time = a['elapsedTime']
+            running_containers = a['runningContainers']
             priority = a['priority']
             progress = a['progress']
             queue_usage_percentage = a['queueUsagePercentage']
             location = a['queue']
-            predicted_time_delay = self.time_delay_predictor.predict(app_id, name, started_time)
-            if predicted_time_delay == -1:
-                predicted_time_delay = 10000 + elapsed_time / 1000
-            self.logger.info('%s, Predicted time delay: %f' % (app_id, predicted_time_delay))
             request_resources = self.build_request_resources_from_json(a)
-            apps.append(RunningApplication(app_id, elapsed_time, priority, location, progress,
-                                           queue_usage_percentage, predicted_time_delay, request_resources))
+            apps.append(RunningApplication(app_id, name, started_time, elapsed_time, running_containers, priority,
+                                           location, progress, queue_usage_percentage, request_resources))
 
         return apps
 
@@ -139,14 +151,14 @@ class StateBuilder(object):
         apps_json, apps = j['apps']['app'], []
         for a in apps_json:
             application_id = a['id']
+            name = a['name']
+            started_time = a['startedTime']
             elapsed_time = a['elapsedTime']
             priority = a['priority']
             location = a['queue']
-            predicted_time_delay = 10000 + elapsed_time / 1000
-            self.logger.info('%s, Predicted time delay: %f' % (application_id, predicted_time_delay))
             request_resources = self.build_request_resources_from_json(a)
-            apps.append(WaitingApplication(application_id, elapsed_time, priority, location,
-                                           predicted_time_delay, request_resources))
+            apps.append(WaitingApplication(application_id, name, started_time,
+                                           elapsed_time, priority, location, request_resources))
 
         return apps
 

@@ -1,13 +1,13 @@
 from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
 from optimizer.environment.timedelayprediction.sparkmodelanalyzer import SparkModelAnalyzer
-from optimizer.environment.timedelayprediction.timedelaypredictor import TimeDelayPredictor
+from optimizer.environment.timedelayprediction.timedelaypredictor import SingleTimeDelayPredictor
 from optimizer.util import timeutil
 from test.completedapplicationbuilder import CompletedApplicationBuilder
 
 
 def print_helper(application_id, t, *args):
     global predictor, app_builder
-    time = predictor.predict(application_id, t) + 5000
+    time = predictor.predict_running_app(application_id, t) + 5000
     c = app_builder.build_application(application_id)
     predicted = time - c.start_time
     print(c,
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     builder = SparkApplicationBuilder('http://omnisky:18080/api/v1/')
     analyzer = SparkModelAnalyzer()
-    predictor = TimeDelayPredictor('http://omnisky:18080/api/v1/')
+    predictor = SingleTimeDelayPredictor('http://omnisky:18080/api/v1/')
 
     print('{:<8} {:<5} {:<5} {:<8} {:<4} {:<4} {:<4} {}'.format(
         '负载', '开始时间', '完成时间', '预测完成时间', '时长', '预测时长', '误差率', '原型?'

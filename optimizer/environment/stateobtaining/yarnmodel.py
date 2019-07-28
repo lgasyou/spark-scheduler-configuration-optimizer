@@ -15,11 +15,13 @@ class ApplicationRequestResource(object):
 class WaitingApplication(object):
 
     application_id: str
+    name: str
+    started_time: int
     elapsed_time: int
     priority: int
     location: str
-    predicted_time_delay: int
     request_resources: List[ApplicationRequestResource] = dataclasses.field(default_factory=list)
+    predicted_time_delay: int = -1
 
     @property
     def converted_location(self):
@@ -30,13 +32,16 @@ class WaitingApplication(object):
 class RunningApplication(object):
 
     application_id: str
+    name: str
+    started_time: int
     elapsed_time: int
+    running_containers: int
     priority: int
     location: str
     progress: float
     queue_usage_percentage: float
-    predicted_time_delay: int
     request_resources: List[ApplicationRequestResource] = dataclasses.field(default_factory=list)
+    predicted_time_delay: int = -1
 
     @property
     def converted_location(self):

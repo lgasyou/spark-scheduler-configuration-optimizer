@@ -42,4 +42,3 @@ class Executor(object):
     executor_id: int
     is_active: bool
     start_time: int
-    max_memory_gb: float

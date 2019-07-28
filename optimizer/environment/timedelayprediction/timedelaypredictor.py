@@ -1,59 +1,84 @@
+import logging
 from typing import List
 
-from optimizer.environment.timedelayprediction import predictionsparkmodel, simulationmodel, sparkmodel
-from optimizer.environment.timedelayprediction.algorithmmodelbuilder import AlgorithmModelBuilder
-from optimizer.environment.timedelayprediction.applicationexecutionsimulator import ApplicationExecutionSimulator
+from optimizer.environment.stateobtaining import yarnmodel
+from optimizer.environment.timedelayprediction import sparkmodel
+from optimizer.environment.timedelayprediction.resourceallocationsimulator import ResourceAllocationSimulator
+from optimizer.environment.timedelayprediction.singletimedelaypredictor import SingleTimeDelayPredictor
 from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
 
 
 class TimeDelayPredictor(object):
 
+    DEFAULT_INPUT_BYTES = 5 * 1024**3
+    DEFAULT_NUM_EXECUTORS = 5
+
     def __init__(self, spark_history_server_api_url: str):
-        self.spark_history_server_api_url = spark_history_server_api_url
-        self.spark_application_builder = SparkApplicationBuilder(self.spark_history_server_api_url)
-        self.simulator = ApplicationExecutionSimulator()
+        self.logger = logging.getLogger(__name__)
+        self.spark_application_builder = SparkApplicationBuilder(spark_history_server_api_url)
+        self.single_predictor = SingleTimeDelayPredictor(spark_history_server_api_url)
+        self.simulator = ResourceAllocationSimulator()
 
-        algorithm_model_builder = AlgorithmModelBuilder(self.spark_application_builder)
-        self.models = algorithm_model_builder.get_model()
-        self.task_id = 0
+    def predict(self, resources: list, running_apps: List[yarnmodel.RunningApplication],
+                waiting_apps: List[yarnmodel.WaitingApplication]):
+        self.simulator.set_resources(resources)
+        false_running_apps = self.predict_running_apps(running_apps)
+        self.predict_false_running_apps(false_running_apps)
+        self.predict_waiting_apps(waiting_apps)
 
-    def add_algorithm(self, algorithm_type: str, model: predictionsparkmodel.Application):
-        self.models[algorithm_type] = model
-
-    def predict(self, application_id: str, algorithm_type: str, start_time: int) -> int:
+    def predict_running_app(self, application_id: str, algorithm_type: str, start_time: int) -> tuple:
         app = self.spark_application_builder.build_partial_application(application_id)
-        return self._predict(algorithm_type, app.input_bytes, app.executors, start_time)
+        return self.single_predictor.predict(algorithm_type, app.input_bytes, app.executors, start_time)
 
-    def _predict(self, algorithm_type: str, input_bytes: int,
-                 executors: List[sparkmodel.Executor], start_time) -> int:
-        self.task_id = 0
-        model = self.models[algorithm_type]
+    def predict_running_apps(self, running_apps):
+        false_running_apps, real_running_apps = [], []
+        for app in running_apps:
+            app_id = app.application_id
+            name = app.name
+            start_time = app.started_time
+            queue = app.converted_location
+            delay, finish_time = self.predict_running_app(app_id, name, start_time)
+            app.predicted_time_delay = delay
+            if delay != -1:
+                self.logger.info('%s, Delay: %f' % (app_id, delay))
+                num_containers = app.running_containers
+                self.simulator.release(finish_time, queue, num_containers)
+            else:
+                false_running_apps.append(app)
+        return false_running_apps
 
-        tasks = self._build_tasks(input_bytes, model)
-        containers = self._build_containers(executors)
-        predicted_finish_time = self.simulator.simulate(containers, tasks)
-        return (predicted_finish_time - start_time) / 1000 if predicted_finish_time > 0 else -1
+    def predict_false_running_apps(self, false_running_apps):
+        false_running_apps.sort(key=lambda i: i.application_id)
+        for app in false_running_apps:
+            app_id = app.application_id
+            name = app.name
+            start_time = app.started_time
+            queue = app.converted_location
+            allocated = self.simulator.allocate(queue, self.DEFAULT_NUM_EXECUTORS)
+            executors = self._build_executors(allocated)
+            delay, finish_time = self.single_predictor.predict(name, self.DEFAULT_INPUT_BYTES, executors, start_time)
+            app.predicted_time_delay = delay
+            self.logger.info('%s, Delay: %f' % (app_id, delay))
+            self.simulator.release(finish_time, queue, len(executors))
 
-    def _build_tasks(self, input_bytes: int, model: predictionsparkmodel.Application):
-        tasks = []
-        for stage in model.stages:
-            stage_name = stage.name
-            block_size = stage.block_size
-            stage_input_bytes = input_bytes * stage.input_ratio
-            num_tasks = int(stage_input_bytes / block_size)
-            process_rate = model.average_action_process_rates[stage_name]
-
-            for _ in range(num_tasks):
-                tasks.append(simulationmodel.Task(self.task_id, block_size / process_rate))
-                self.task_id += 1
-
-            last_task_input_bytes = stage_input_bytes % block_size
-            if last_task_input_bytes:
-                tasks.append(simulationmodel.Task(self.task_id, last_task_input_bytes / process_rate))
-                self.task_id += 1
-
-        return tasks
+    def predict_waiting_apps(self, waiting_apps):
+        waiting_apps.sort(key=lambda i: i.application_id)
+        for app in waiting_apps:
+            app_id = app.application_id
+            name = app.name
+            start_time = app.started_time
+            queue = app.converted_location
+            allocated = self.simulator.allocate(queue, self.DEFAULT_NUM_EXECUTORS)
+            executors = self._build_executors(allocated)[1:]
+            delay, finish_time = self.single_predictor.predict(name, self.DEFAULT_INPUT_BYTES, executors, start_time)
+            app.predicted_time_delay = delay
+            self.logger.info('%s, Delay: %f' % (app_id, delay))
+            self.simulator.release(finish_time, queue, len(executors) + 1)
 
     @staticmethod
-    def _build_containers(executors: List[sparkmodel.Executor]):
-        return [simulationmodel.Container(e.start_time, e.is_active) for e in executors]
+    def _build_executors(allocated_containers: list) -> List[sparkmodel.Executor]:
+        executors = []
+        for idx, step in enumerate(allocated_containers):
+            time, num_containers = step
+            executors.extend([sparkmodel.Executor(idx, True, time)] * num_containers)
+        return executors
