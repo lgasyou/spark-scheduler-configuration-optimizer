@@ -26,11 +26,6 @@ class EvaluationController(AbstractController):
             self.run_without_optimization(action_index)
 
     def run_with_optimization(self):
-        self._load_memory()
-        self.agent.train()
-        self.agent.learn(self.mem)
-        self.agent.eval()
-
         self.costs.clear()
         for i in range(self.args.evaluation_episodes):
             self.episode = i
