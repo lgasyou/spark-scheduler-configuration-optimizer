@@ -33,7 +33,7 @@ class TrainingCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         self.start_workloads()
 
     def generate_train_set(self) -> dict:
-        return self.workload_generator.generate_randomly(batch_size=240)
+        return self.workload_generator.generate_randomly(batch_size=240, queue_partial=True)
 
     def start_workloads(self):
         workloads = self.generate_train_set()
