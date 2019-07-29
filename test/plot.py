@@ -8,14 +8,14 @@ from scipy import interpolate
 
 
 def get_one(action, episode) -> dict:
-    with open('../results/no-optim-time-delays-0-%d-%d.txt' % (action, episode), 'r') as f:
+    with open('../results/no-optim-time-delays-%d-%d.txt' % (action, episode), 'r') as f:
         d = eval(f.readline())
         return d
 
 
 def get_all_no_optim():
     a = []
-    for i in [2, 5, 8]:
+    for i in [0, 1, 2]:
         cur = {}
         for j in range(1):
             d = get_one(i, j)
@@ -30,7 +30,7 @@ def get_all_no_optim():
 
     cur = {}
     for i in range(1):
-        with open('../results/optim-time-delays-0-%d.txt' % i, 'r') as f:
+        with open('../results/optim-time-delays-0.txt', 'r') as f:
             d = eval(f.readline())
         for k, v in d.items():
             if k in cur:
@@ -42,23 +42,23 @@ def get_all_no_optim():
             cur[k] /= 1
     a.append(cur)
 
-    draw(a)
+    draw(a, False)
 
 
 def draw(a: list, inter: bool = True):
     # plt.title("作业时延（每三分钟统计一次）")
     # plt.xlabel("时间（分钟）")
     # plt.ylabel("两分钟内完成的作业的时延（毫秒）")
-    plt.title('Time Delay Every 3 Minutes (Workload on QueueA : QueueB = 3 : 1)')
+    plt.title('Time Delay Every 3 Minutes')
     plt.xlabel("Time (Minutes)")
     plt.ylabel("Time Delay (Milliseconds)")
     num_items = max([len(item.keys()) for item in a])
-    num_items = 50
+    num_items = 25
     x = [i * 3 for i in range(num_items)]
 
-    legends = ['Fixed Configuration 2(25, 75)',
-               'Fixed Configuration 5(50, 50)',
-               'Fixed Configuration 8(75, 25)',
+    legends = ['Fixed Configuration 0(25, 75)',
+               'Fixed Configuration 1(50, 50)',
+               'Fixed Configuration 2(75, 25)',
                'Optimized']
     # legends = ['Fixed Configuration 2', 'Optimized']
     for i, one in enumerate(a):
