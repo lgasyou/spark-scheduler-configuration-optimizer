@@ -26,7 +26,7 @@ class EvaluationController(AbstractController):
             self.run_with_optimization()
 
             self.logger.info('Evaluating without optimization.')
-            for action_index in [2, 5, 8]:
+            for action_index in range(self.action_space):
                 self.run_without_optimization(action_index)
 
     def run_with_optimization(self):
