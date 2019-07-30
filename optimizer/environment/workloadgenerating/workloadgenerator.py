@@ -9,9 +9,6 @@ from optimizer.util import randomutil
 
 class WorkloadGenerator(object):
 
-    # TODO: For now we only have 6 workloads.
-    # WORKLOAD_TYPES = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm',
-    #                   'rnn', 'lenet', 'resnet', 'vgg', 'autoencoder']
     WORKLOAD_TYPES = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm']
     QUEUES = hyperparameters.QUEUES['names']
     DATA_SIZES = [str(i) for i in range(1, 9)]
@@ -20,7 +17,7 @@ class WorkloadGenerator(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.sampler = FacebookWorkloadSampler(1)
+        self.sampler = FacebookWorkloadSampler(3)
 
     def generate_randomly(self, batch_size: int = None, queue_partial: bool = False) -> dict:
         items = []

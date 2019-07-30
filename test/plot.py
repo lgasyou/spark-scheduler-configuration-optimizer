@@ -53,7 +53,7 @@ def draw(a: list, inter: bool = True):
     plt.xlabel("Time (Minutes)")
     plt.ylabel("Time Delay (Milliseconds)")
     num_items = max([len(item.keys()) for item in a])
-    num_items = 25
+    num_items = 27
     x = [i * 3 for i in range(num_items)]
 
     legends = ['Fixed Configuration 0(25, 75)',
