@@ -20,7 +20,7 @@ class WorkloadGenerator(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.sampler = FacebookWorkloadSampler()
+        self.sampler = FacebookWorkloadSampler(1)
 
     def generate_randomly(self, batch_size: int = None, queue_partial: bool = False) -> dict:
         items = []

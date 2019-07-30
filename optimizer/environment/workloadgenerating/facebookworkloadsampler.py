@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 
@@ -12,6 +13,7 @@ class FacebookWorkloadSampler(object):
     ]
 
     def __init__(self, sampler_index: int = 0, directory: str = './data/facebooksamples'):
+        logging.info('%s' % self.SAMPLE_FILENAMES[sampler_index])
         filename = os.path.join(directory, self.SAMPLE_FILENAMES[sampler_index])
         with open(filename, 'r') as f:
             self.samples = f.readlines()
