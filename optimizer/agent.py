@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import argparse
 
 import torch
 from torch import optim
@@ -13,13 +14,10 @@ from optimizer.util import fileutil
 
 
 class Agent(object):
-    """
-    The DRL agent of this project.
-    """
 
     SAVE_FILENAME = './results/losses.txt'
 
-    def __init__(self, args, env: AbstractEnv):
+    def __init__(self, args: argparse.Namespace, env: AbstractEnv):
         self.logger = logging.getLogger(__name__)
         self.action_space = env.action_space()
         self.atoms = args.atoms
@@ -53,13 +51,13 @@ class Agent(object):
         self.online_net.module.reset_noise()
 
     # Acts based on single state (no batch)
-    def act(self, state):
+    def act(self, state: torch.Tensor):
         with torch.no_grad():
             return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).argmax(1).item()
 
     # Acts with an ε-greedy policy (used for evaluation only)
     # High ε can reduce evaluation scores drastically
-    def act_e_greedy(self, state, epsilon=0.001) -> int:
+    def act_e_greedy(self, state: torch.Tensor, epsilon=0.001) -> int:
         return random.randrange(self.action_space) if random.random() < epsilon else self.act(state)
 
     def learn(self, mem: ReplayMemory, time: int):
@@ -118,13 +116,13 @@ class Agent(object):
         self.target_net.load_state_dict(self.online_net.state_dict())
 
     # Save model parameters on current device (don't test move model between devices)
-    def save(self, path) -> None:
+    def save(self, path: str) -> None:
         filename = os.path.join(path, 'model.pth')
         torch.save(self.online_net.state_dict(), filename)
         self.logger.info('Agent model %s saved.' % filename)
 
     # Evaluates Q-value based on single state (no batch)
-    def evaluate_q(self, state) -> float:
+    def evaluate_q(self, state: torch.Tensor) -> float:
         with torch.no_grad():
             return (self.online_net(state.unsqueeze(0)) * self.support).sum(2).max(1)[0].item()
 
@@ -136,4 +134,4 @@ class Agent(object):
 
     def log_loss(self, loss: float, time: int, filename: str = None):
         data = '%d,%f' % (time, loss)
-        fileutil.log_into_file(data, filename or self.SAVE_FILENAME)
+        fileutil.append_file(data, filename or self.SAVE_FILENAME)

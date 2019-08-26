@@ -18,6 +18,7 @@ class TrainingCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         self.workload_generator = WorkloadGenerator()
         self.workload_starter: Optional[threading.Thread] = None
 
+    # TODO: We must decide when is done.
     def is_done(self) -> bool:
         return yarnutil.has_all_application_done(self.RM_API_URL) and \
                processutil.has_thread_finished(self.workload_starter)

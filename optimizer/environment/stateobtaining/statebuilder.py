@@ -20,6 +20,7 @@ class StateBuilder(object):
         self.scheduler_strategy = scheduler_strategy
         self.delay_predictor = TimeDelayPredictor(spark_history_server_api_url)
 
+    # TODO: async, await get json
     def build(self):
         try:
             resources = self.parse_and_build_resources()
@@ -33,6 +34,7 @@ class StateBuilder(object):
             self.logger.debug(e, exc_info=True)
             raise StateInvalidException
 
+    # TODO: Redesign this, with three channels.
     @staticmethod
     def build_tensor(raw: State):
         height, width = STATE_SHAPE

@@ -17,51 +17,52 @@ class AlgorithmModelBuilder(object):
         self.app_builder = application_builder
         self.models = {}
 
-    def get_model(self):
+    def load_or_build_model(self):
         filename = self.SAVE_FILENAME
         if not (os.path.exists(filename) and os.path.isfile(filename)):
-            self.build()
-            self.save()
+            self.models = self.build()
+            self.save(self.models)
         else:
-            self.load()
+            self.models = self.load()
         return self.models
 
     def build(self) -> Dict[str, predictionsparkmodel.Application]:
         analyzer = SparkModelAnalyzer()
+        models = {}
 
         # Linear
         app = self.app_builder.build_application('application_1563794174354_0025')
-        self.models['linear'] = analyzer.analyze(app)
+        models['linear'] = analyzer.analyze(app)
 
         # KMeans
         app = self.app_builder.build_application('application_1563794174354_0020')
-        self.models['kmeans'] = analyzer.analyze(app)
+        models['kmeans'] = analyzer.analyze(app)
 
         # SVM
         app = self.app_builder.build_application('application_1563794174354_0038')
-        self.models['svm'] = analyzer.analyze(app)
+        models['svm'] = analyzer.analyze(app)
 
         # Bayes
         app = self.app_builder.build_application('application_1563794174354_0023')
-        self.models['bayes'] = analyzer.analyze(app)
+        models['bayes'] = analyzer.analyze(app)
 
         # FPGrowth
         app = self.app_builder.build_application('application_1563794174354_0029')
-        self.models['FPGrowth'] = analyzer.analyze(app)
+        models['FPGrowth'] = analyzer.analyze(app)
 
         # LDA
         app = self.app_builder.build_application('application_1563794174354_0036')
-        self.models['lda'] = analyzer.analyze(app)
+        models['lda'] = analyzer.analyze(app)
 
-        return self.models
+        return models
 
-    def save(self):
+    def save(self, models: dict):
         with open(self.SAVE_FILENAME, 'wb') as f:
-            pickle.dump(self.models, f)
+            pickle.dump(models, f)
             self.logger.info('Algorithm models %s saved.' % self.SAVE_FILENAME)
 
     def load(self) -> dict:
         with open(self.SAVE_FILENAME, 'rb') as f:
-            self.models = pickle.load(f)
+            models = pickle.load(f)
             self.logger.info('Algorithm models %s loaded.' % self.SAVE_FILENAME)
-            return self.models
+            return models

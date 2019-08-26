@@ -11,6 +11,6 @@ def file_exists(filename: str):
     return os.path.exists(filename) and os.path.isfile(filename)
 
 
-def log_into_file(data, filename: str):
+def append_file(data, filename: str):
     with open(filename, 'a') as f:
         f.write(str(data) + '\n')

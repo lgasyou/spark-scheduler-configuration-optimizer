@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 def setup_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='cluster-scheduler-configuration-optimizer')
-    parser.add_argument('--java-home', type=str, default='/home/lzq/library/jdk1.8.0_211', help='java home path')
-    parser.add_argument('--hadoop-home', type=str, default='/home/lzq/library/hadoop', help='Hadoop home path')
-    parser.add_argument('--spark-home', type=str, default='/home/lzq/library/spark-2.4.1-bin-hadoop2.7', help='Spark home path')
-    parser.add_argument('--resource-manager-host', type=str, default='http://omnisky:8088/', help='Address:port of ResourceManager')
-    parser.add_argument('--spark-history-server-host', type=str, default='http://omnisky:18080/', help='Address:port of Spark history server')
+    parser.add_argument('--java-home', type=str, default='/home/lizeqing/library/jdk1.8.0_211', help='java home path')
+    parser.add_argument('--hadoop-home', type=str, default='/home/lizeqing/library/hadoop', help='Hadoop home path')
+    parser.add_argument('--spark-home', type=str, default='/home/lizeqing/library/spark-2.4.1-bin-hadoop2.7', help='Spark home path')
+    parser.add_argument('--resource-manager-host', type=str, default='http://10.4.20.11:8088/', help='Address:port of ResourceManager')
+    parser.add_argument('--spark-history-server-host', type=str, default='http://10.4.20.11:18080/', help='Address:port of Spark history server')
     parser.add_argument('--execution-mode', type=int, default=int(0), help='Set program execution mode.')
     parser.add_argument('--log-filename', type=str, default='./results/runtime.log', help='Runtime log filename.')
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
@@ -53,7 +53,7 @@ def setup_torch_args(args: argparse.Namespace):
     logger.info('Options')
     for k, v in vars(args).items():
         logger.info(k + ': ' + str(v))
-    # random.seed(args.seed)
+    random.seed(args.seed)
     torch.manual_seed(random.randint(1, 10000))
     if torch.cuda.is_available() and not args.disable_cuda:
         args.device = torch.device('cuda:5')

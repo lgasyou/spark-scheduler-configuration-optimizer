@@ -12,8 +12,8 @@ class FacebookWorkloadSampler(object):
         'FB-2010_samples_24_times_1hr_withInputPaths_0.tsv'
     ]
 
-    def __init__(self, sampler_index: int = 0, directory: str = './data/facebooksamples'):
-        logging.info('%s' % self.SAMPLE_FILENAMES[sampler_index])
+    def __init__(self, sampler_index: int, directory: str = './data/facebooksamples'):
+        logging.info('Using sample file: %s' % self.SAMPLE_FILENAMES[sampler_index])
         filename = os.path.join(directory, self.SAMPLE_FILENAMES[sampler_index])
         with open(filename, 'r') as f:
             self.samples = f.readlines()

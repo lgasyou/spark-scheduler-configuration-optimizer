@@ -15,9 +15,15 @@ class WorkloadGenerator(object):
 
     SAVE_FILENAME = './data/testset/workloads.json'
 
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
-        self.sampler = FacebookWorkloadSampler(3)
+    def __init__(self, sample_index: int = 0):
+        self.sampler = self.get_sampler_by_index(sample_index)
+
+    @staticmethod
+    def get_sampler_by_index(sample_index: int):
+        return FacebookWorkloadSampler(sample_index)
+
+    def reset_sampler(self, sample_index: int):
+        self.sampler = FacebookWorkloadSampler(sample_index)
 
     def generate_randomly(self, batch_size: int = None, queue_partial: bool = False) -> dict:
         items = []
@@ -32,7 +38,7 @@ class WorkloadGenerator(object):
                 "dataSize": data_size
             }
             items.append(item)
-        self.logger.info('Generated workloads with batch size %d.' % batch_size)
+        logging.info('Generated workloads with batch size %d.' % batch_size)
 
         return {'workloads': items}
 
@@ -63,16 +69,19 @@ class WorkloadGenerator(object):
 
         return {'workloads': items}
 
-    def load_evaluation_workloads(self,  first_n: int = -1, filename: str = None) -> dict:
-        filename = filename or self.SAVE_FILENAME
+    @staticmethod
+    def load_workloads(first_n: int = -1, filename: str = None) -> dict:
+        filename = filename or WorkloadGenerator.SAVE_FILENAME
         with open(filename, 'r') as f:
             workloads = json.load(f)
             if first_n > 0:
-                workloads = {'workloads': workloads['workloads'][:first_n]}
-            self.logger.info('Workloads %s loaded with %d items.' % (filename, len(workloads['workloads'])))
+                workloads['workloads'] = workloads['workloads'][:first_n]
+            logging.info('Workloads %s loaded with %d items.' % (filename, len(workloads['workloads'])))
             return workloads
 
-    def save_evaluation_workloads(self, workloads: dict):
-        with open(self.SAVE_FILENAME, 'w') as f:
+    @staticmethod
+    def save_workloads(workloads: dict, filename: str = None):
+        filename = filename or WorkloadGenerator.SAVE_FILENAME
+        with open(filename, 'w') as f:
             json.dump(workloads, f)
-            self.logger.info('Workloads %s saved.' % self.SAVE_FILENAME)
+            logging.info('Workloads %s saved.' % filename)

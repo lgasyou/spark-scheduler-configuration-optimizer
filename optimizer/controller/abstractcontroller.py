@@ -1,6 +1,8 @@
 import abc
 import argparse
 import logging
+from typing import Callable
+import torch
 
 from optimizer.agent import Agent
 from optimizer.replaymemory import ReplayMemory, MemorySerializer
@@ -33,7 +35,7 @@ class AbstractController(object):
     def run(self):
         pass
 
-    def optimize_episode(self, state, act_func):
+    def optimize_timestep(self, state: torch.Tensor, act_func: Callable[[torch.Tensor], int]):
         self._reset_noise()
 
         action = act_func(state)
@@ -54,7 +56,7 @@ class AbstractController(object):
         mem_serializer = MemorySerializer(self.mem)
         return mem_serializer.try_load()
 
-    def _clip_reward(self, reward):
+    def _clip_reward(self, reward) -> float:
         reward_clip = self.args.reward_clip
         if reward_clip > 0:
             reward = max(min(reward, reward_clip), -reward_clip)  # Clip rewards
@@ -83,4 +85,4 @@ class AbstractController(object):
 
     def log_step(self, action: int, reward: float):
         data = '%d,%d,%f' % (self.t, action, reward)
-        fileutil.log_into_file(data, self.STEP_SAVE_FILENAME)
+        fileutil.append_file(data, self.STEP_SAVE_FILENAME)

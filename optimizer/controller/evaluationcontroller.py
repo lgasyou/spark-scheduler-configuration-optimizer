@@ -42,7 +42,7 @@ class EvaluationController(AbstractController):
         self.env.reset_buffer()
         done, state = False, self.env.try_get_state()
         while not done:
-            state, action, reward, done = self.optimize_episode(state, self.agent.act_e_greedy)
+            state, action, reward, done = self.optimize_timestep(state, self.agent.act_e_greedy)
             self.logger.info("Episode {}, Time {}: Reward {}, Action {}, Done {}"
                              .format(self.episode, self.t, reward, action, done))
             time.sleep(interval)
@@ -73,7 +73,7 @@ class EvaluationController(AbstractController):
         self.time_delay_fetcher.save_time_delays(time_delays_filename)
         self.time_delay_fetcher.stop()
 
-        costs, _ = self.env.get_total_time_cost()
+        costs = self.env.get_total_time_cost()
         self.costs.append(costs)
         self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, costs))
         excelutil.list2excel(self.costs, time_costs_filename)

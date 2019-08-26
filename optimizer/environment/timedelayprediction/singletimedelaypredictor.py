@@ -10,7 +10,7 @@ class SingleTimeDelayPredictor(object):
     def __init__(self, spark_application_builder):
         self.simulator = ApplicationExecutionSimulator()
         algorithm_model_builder = AlgorithmModelBuilder(spark_application_builder)
-        self.models = algorithm_model_builder.get_model()
+        self.models = algorithm_model_builder.load_or_build_model()
         self.task_id = 0
 
     def add_algorithm(self, algorithm_type: str, model: predictionsparkmodel.Application):

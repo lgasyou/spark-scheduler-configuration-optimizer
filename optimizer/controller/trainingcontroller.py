@@ -43,7 +43,7 @@ class TrainingController(AbstractController):
         done, interval = False, TRAINING_LOOP_INTERNAL
         state = self.env.try_get_state()
         while not done:
-            state, action, reward, done = self.optimize_episode(state, self.agent.act)
+            state, action, reward, done = self.optimize_timestep(state, self.agent.act)
             self.logger.info("Episode {}: Reward {}, Action {}, Done {}".format(self.t, reward, action, done))
             time.sleep(interval)
 

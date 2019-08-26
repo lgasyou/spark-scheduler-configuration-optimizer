@@ -17,7 +17,7 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         self.JAVA_HOME = java_home
         self.workload_generator = WorkloadGenerator()
         self.WORKLOADS = self.workload_generator.generate_randomly(240, queue_partial=True)
-        self.workload_generator.save_evaluation_workloads(self.WORKLOADS)
+        self.workload_generator.save_workloads(self.WORKLOADS)
         self.workload_starter: Optional[threading.Thread] = None
 
     def is_done(self) -> bool:
@@ -37,7 +37,7 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
     def get_total_time_cost(self):
         finished_jobs = self.state_builder.parse_and_build_finished_apps()
         time_costs = [j.elapsed_time for j in finished_jobs]
-        return time_costs, sum(time_costs)
+        return time_costs
 
     def start_workloads(self):
         self.workload_starter = sparkutil.async_start_workloads(self.WORKLOADS, self.SPARK_HOME,

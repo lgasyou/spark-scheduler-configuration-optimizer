@@ -26,7 +26,7 @@ class RegularTimeDelayFetcher(object):
             return
 
         self.time_delays, self.running = {}, True
-        thread = threading.Thread(target=self._regular_get_time_delay, args=(every_n_seconds,))
+        thread = threading.Thread(target=self._regularly_get_time_delay, args=(every_n_seconds,))
         thread.start()
         self.logger.info('RegularTimeDelayFetcher started.')
 
@@ -38,7 +38,7 @@ class RegularTimeDelayFetcher(object):
             f.write(str(self.time_delays))
             self.logger.info('Time delay file %s saved.' % filename)
 
-    def _regular_get_time_delay(self, seconds: int):
+    def _regularly_get_time_delay(self, seconds: int):
         timer, t = 0, 0
         while self.running:
             if timer % seconds == 0:
