@@ -40,9 +40,9 @@ class NoisyLinear(nn.Module):
         self.weight_epsilon.copy_(epsilon_out.ger(epsilon_in))
         self.bias_epsilon.copy_(epsilon_out)
 
-    def forward(self, input) -> torch.Tensor:
+    def forward(self, x) -> torch.Tensor:
         if self.training:
-            return F.linear(input, self.weight_mu + self.weight_sigma * self.weight_epsilon,
+            return F.linear(x, self.weight_mu + self.weight_sigma * self.weight_epsilon,
                             self.bias_mu + self.bias_sigma * self.bias_epsilon)
         else:
-            return F.linear(input, self.weight_mu, self.bias_mu)
+            return F.linear(x, self.weight_mu, self.bias_mu)

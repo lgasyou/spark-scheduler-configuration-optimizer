@@ -1,11 +1,9 @@
-import os
 import time
 
 from optimizer.controller.abstractcontroller import AbstractController
 from optimizer.environment import TrainingEnv
 from optimizer.hyperparameters import TRAINING_LOOP_INTERNAL
 from optimizer.replaymemory.memoryserializer import MemorySerializer
-from optimizer.util import sparkutil
 
 
 class TrainingController(AbstractController):
@@ -37,7 +35,6 @@ class TrainingController(AbstractController):
         self.env.reset()
         self._train_episode()
         self._save_progress()
-        sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
 
     def _train_episode(self):
         done, interval = False, TRAINING_LOOP_INTERNAL

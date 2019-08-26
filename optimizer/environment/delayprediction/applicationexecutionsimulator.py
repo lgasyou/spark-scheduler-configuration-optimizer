@@ -1,6 +1,6 @@
 from typing import List
 
-from optimizer.environment.timedelayprediction import simulationmodel
+from optimizer.environment.delayprediction import simulationmodel
 
 
 class ApplicationExecutionSimulator(object):
@@ -21,7 +21,7 @@ class ApplicationExecutionSimulator(object):
             self.containers.append(addition)
             self._simulate_step(addition.start_time)
 
-        return self.current_time_delay
+        return self.current_delay
 
     def _simulate_step(self, current_time: int):
         """Predicts the finish time of job"""
@@ -35,7 +35,7 @@ class ApplicationExecutionSimulator(object):
             earliest_finish_container.add_task(task)
 
     @property
-    def current_time_delay(self):
+    def current_delay(self):
         return max([container.finish_time for container in self.containers])
 
     def _get_earliest_finish_container(self):

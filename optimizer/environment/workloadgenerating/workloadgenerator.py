@@ -13,7 +13,7 @@ class WorkloadGenerator(object):
     QUEUES = hyperparameters.QUEUES['names']
     DATA_SIZES = [str(i) for i in range(1, 9)]
 
-    SAVE_FILENAME = './data/testset/workloads.json'
+    DEFAULT_SAVE_FILENAME = './data/testset/workloads.json'
 
     def __init__(self, sample_index: int = 0):
         self.sampler = self.get_sampler_by_index(sample_index)
@@ -55,8 +55,10 @@ class WorkloadGenerator(object):
             queue = random.choice(self.QUEUES)
         return queue
 
-    def generate_sequentially(self):
+    def generate_sequentially(self, first_n: int = 0):
         all_samples = self.sampler.get_all_samples()
+        if first_n != 0:
+            all_samples = all_samples[:first_n]
         items = []
         for interval, data_size in all_samples:
             item = {
@@ -70,18 +72,18 @@ class WorkloadGenerator(object):
         return {'workloads': items}
 
     @staticmethod
-    def load_workloads(first_n: int = -1, filename: str = None) -> dict:
-        filename = filename or WorkloadGenerator.SAVE_FILENAME
+    def load_workloads(first_n: int = 0, filename: str = None) -> dict:
+        filename = filename or WorkloadGenerator.DEFAULT_SAVE_FILENAME
         with open(filename, 'r') as f:
             workloads = json.load(f)
-            if first_n > 0:
+            if first_n != 0:
                 workloads['workloads'] = workloads['workloads'][:first_n]
             logging.info('Workloads %s loaded with %d items.' % (filename, len(workloads['workloads'])))
             return workloads
 
     @staticmethod
     def save_workloads(workloads: dict, filename: str = None):
-        filename = filename or WorkloadGenerator.SAVE_FILENAME
+        filename = filename or WorkloadGenerator.DEFAULT_SAVE_FILENAME
         with open(filename, 'w') as f:
             json.dump(workloads, f)
             logging.info('Workloads %s saved.' % filename)

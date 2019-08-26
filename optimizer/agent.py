@@ -4,6 +4,7 @@ import random
 import argparse
 
 import torch
+from torch import nn
 from torch import optim
 
 from optimizer.environment import AbstractEnv
@@ -30,7 +31,7 @@ class Agent(object):
         self.discount = args.discount
 
         self.online_net = DQN(args, self.action_space).to(device=args.device)
-        self.online_net = torch.nn.DataParallel(self.online_net, CUDA_DEVICES)
+        self.online_net = nn.DataParallel(self.online_net, CUDA_DEVICES)
         if args.model and os.path.isfile(args.model):
             # Always load tensors onto CPU by default, will shift to GPU if necessary
             self.online_net.load_state_dict(torch.load(args.model, map_location='cpu'))
@@ -38,7 +39,7 @@ class Agent(object):
         self.online_net.train()
 
         self.target_net = DQN(args, self.action_space).to(device=args.device)
-        self.target_net = torch.nn.DataParallel(self.target_net, CUDA_DEVICES)
+        self.target_net = nn.DataParallel(self.target_net, CUDA_DEVICES)
         self.update_target_net()
         self.target_net.train()
         for param in self.target_net.parameters():

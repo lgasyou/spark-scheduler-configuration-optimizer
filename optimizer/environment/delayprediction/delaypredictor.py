@@ -2,13 +2,13 @@ import logging
 from typing import List
 
 from optimizer.environment.stateobtaining import yarnmodel
-from optimizer.environment.timedelayprediction import sparkmodel
-from optimizer.environment.timedelayprediction.resourceallocationsimulator import ResourceAllocationSimulator
-from optimizer.environment.timedelayprediction.singletimedelaypredictor import SingleTimeDelayPredictor
-from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.environment.delayprediction import sparkmodel
+from optimizer.environment.delayprediction.resourceallocationsimulator import ResourceAllocationSimulator
+from optimizer.environment.delayprediction.singledelaypredictor import SingleDelayPredictor
+from optimizer.environment.delayprediction.sparkapplicationbuilder import SparkApplicationBuilder
 
 
-class TimeDelayPredictor(object):
+class DelayPredictor(object):
 
     DEFAULT_INPUT_BYTES = 5 * 1024**3
     DEFAULT_NUM_EXECUTORS = 5
@@ -16,7 +16,7 @@ class TimeDelayPredictor(object):
     def __init__(self, spark_history_server_api_url: str):
         self.logger = logging.getLogger(__name__)
         self.spark_application_builder = SparkApplicationBuilder(spark_history_server_api_url)
-        self.single_predictor = SingleTimeDelayPredictor(spark_history_server_api_url)
+        self.single_predictor = SingleDelayPredictor(spark_history_server_api_url)
         self.simulator = ResourceAllocationSimulator()
 
     def predict(self, resources: list, running_apps: List[yarnmodel.RunningApplication],

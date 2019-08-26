@@ -9,8 +9,6 @@ class EvaluationEnv(AbstractEnv):
     High level environment implementation.
     """
 
-    TEST_SET = 'data/testset'
-
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
         self.training = True  # Consistent with model training mode

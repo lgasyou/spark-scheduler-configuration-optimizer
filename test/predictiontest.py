@@ -1,6 +1,6 @@
-from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
-from optimizer.environment.timedelayprediction.sparkmodelanalyzer import SparkModelAnalyzer
-from optimizer.environment.timedelayprediction.timedelaypredictor import SingleTimeDelayPredictor
+from optimizer.environment.delayprediction.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.environment.delayprediction.sparkmodelanalyzer import SparkModelAnalyzer
+from optimizer.environment.delayprediction.timedelaypredictor import SingleDelayPredictor
 from optimizer.util import timeutil
 from test.completedapplicationbuilder import CompletedApplicationBuilder
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     builder = SparkApplicationBuilder('http://omnisky:18080/api/v1/')
     analyzer = SparkModelAnalyzer()
-    predictor = SingleTimeDelayPredictor('http://omnisky:18080/api/v1/')
+    predictor = SingleDelayPredictor('http://omnisky:18080/api/v1/')
 
     print('{:<8} {:<5} {:<5} {:<8} {:<4} {:<4} {:<4} {}'.format(
         '负载', '开始时间', '完成时间', '预测完成时间', '时长', '预测时长', '误差率', '原型?'

@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from optimizer.environment.timedelayprediction import sparkmodel, predictionsparkmodel
+from optimizer.environment.delayprediction import sparkmodel, predictionsparkmodel
 
 
 class SparkModelAnalyzer(object):

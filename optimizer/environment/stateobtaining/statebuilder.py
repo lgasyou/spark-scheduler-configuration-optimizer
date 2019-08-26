@@ -6,7 +6,7 @@ from requests.exceptions import ConnectionError
 
 from optimizer.environment.stateinvalidexception import StateInvalidException
 from optimizer.environment.stateobtaining.yarnmodel import *
-from optimizer.environment.timedelayprediction import TimeDelayPredictor
+from optimizer.environment.delayprediction import DelayPredictor
 from optimizer.hyperparameters import STATE_SHAPE, CONTAINER_NUM_VCORES, CONTAINER_MEM
 from optimizer.util import jsonutil
 
@@ -14,11 +14,11 @@ from optimizer.util import jsonutil
 class StateBuilder(object):
 
     def __init__(self, rm_api_url: str, spark_history_server_api_url: str, scheduler_strategy):
-        self.logger = logging.getLogger(__name__)
         self.RM_API_URL = rm_api_url
         self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_api_url
+
         self.scheduler_strategy = scheduler_strategy
-        self.delay_predictor = TimeDelayPredictor(spark_history_server_api_url)
+        self.delay_predictor = DelayPredictor(spark_history_server_api_url)
 
     # TODO: async, await get json
     def build(self):
@@ -28,10 +28,10 @@ class StateBuilder(object):
             running_apps = self.parse_and_build_running_apps()
             waiting_apps = self.parse_and_build_waiting_apps()
             queue_resources = self.parse_and_build_queue_resources(resources, constraints)
-            self.predict_time_delays(queue_resources, running_apps, waiting_apps)
+            self.predict_delays(queue_resources, running_apps, waiting_apps)
             return State(waiting_apps, running_apps, resources, constraints)
         except (TypeError, KeyError, ConnectionError, requests.exceptions.HTTPError) as e:
-            self.logger.debug(e, exc_info=True)
+            logging.debug(e, exc_info=True)
             raise StateInvalidException
 
     # TODO: Redesign this, with three channels.
@@ -52,7 +52,7 @@ class StateBuilder(object):
         for i, ra in enumerate(raw.running_apps[:75]):
             row = i + 75
             line = [ra.elapsed_time, ra.priority, ra.converted_location,
-                    ra.progress, ra.queue_usage_percentage, ra.predicted_time_delay]
+                    ra.progress, ra.queue_usage_percentage, ra.predicted_delay]
             for rr in ra.request_resources[:65]:
                 line.extend([rr.priority, rr.memory, rr.cpu])
             line.extend([0.0] * (width - len(line)))
@@ -88,7 +88,7 @@ class StateBuilder(object):
         app_json = jsonutil.get_json(url)
         return self.build_waiting_apps_from_json(app_json)
 
-    def predict_time_delays(self, resources, running_apps, waiting_apps):
+    def predict_delays(self, resources, running_apps, waiting_apps):
         self.delay_predictor.predict(resources, running_apps, waiting_apps)
 
     def parse_and_build_finished_apps(self) -> List[FinishedApplication]:

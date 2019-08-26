@@ -1,11 +1,11 @@
 from typing import List
 
-from optimizer.environment.timedelayprediction import predictionsparkmodel, simulationmodel, sparkmodel
-from optimizer.environment.timedelayprediction.algorithmmodelbuilder import AlgorithmModelBuilder
-from optimizer.environment.timedelayprediction.applicationexecutionsimulator import ApplicationExecutionSimulator
+from optimizer.environment.delayprediction import predictionsparkmodel, simulationmodel, sparkmodel
+from optimizer.environment.delayprediction.algorithmmodelbuilder import AlgorithmModelBuilder
+from optimizer.environment.delayprediction.applicationexecutionsimulator import ApplicationExecutionSimulator
 
 
-class SingleTimeDelayPredictor(object):
+class SingleDelayPredictor(object):
 
     def __init__(self, spark_application_builder):
         self.simulator = ApplicationExecutionSimulator()
@@ -25,8 +25,8 @@ class SingleTimeDelayPredictor(object):
         tasks = self._build_tasks(input_bytes, model)
         containers = self._build_containers(executors)
         finish_time = self.simulator.simulate(containers, tasks)
-        time_delay = (finish_time - start_time) / 1000 if finish_time > 0 else -1
-        return time_delay, finish_time
+        delay = (finish_time - start_time) / 1000 if finish_time > 0 else -1
+        return delay, finish_time
 
     def _build_tasks(self, input_bytes: int, model: predictionsparkmodel.Application):
         tasks = []

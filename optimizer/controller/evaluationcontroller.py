@@ -4,16 +4,16 @@ import time
 
 from optimizer.controller.abstractcontroller import AbstractController
 from optimizer.environment import EvaluationEnv
-from optimizer.environment.stateobtaining.regulartimedelayfetcher import RegularTimeDelayFetcher
+from optimizer.environment.stateobtaining.regulardelayfetcher import RegularDelayFetcher
 from optimizer.hyperparameters import EVALUATION_LOOP_INTERNAL
-from optimizer.util import excelutil, sparkutil
+from optimizer.util import excelutil
 
 
 class EvaluationController(AbstractController):
 
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
-        self.time_delay_fetcher = RegularTimeDelayFetcher(self.env.communicator.state_builder)
+        self.delay_fetcher = RegularDelayFetcher(self.env.communicator.state_builder)
         self.costs = []
         self.episode = 0
 
@@ -30,11 +30,11 @@ class EvaluationController(AbstractController):
         for i in range(self.args.evaluation_episodes):
             self.episode = i
             self.env.reset()
-            self.time_delay_fetcher.start_heartbeat()
+            self.delay_fetcher.start_heartbeat()
             self.with_optimize_episode()
             self.cleanup(
                 time_costs_filename='./results/optim-time-costs-%d.xlsx' % i,
-                time_delays_filename='./results/optim-time-delays-%d.txt' % i
+                delays_filename='./results/optim-time-delays-%d.txt' % i
             )
 
     def with_optimize_episode(self):
@@ -52,11 +52,11 @@ class EvaluationController(AbstractController):
         for i in range(self.args.evaluation_episodes):
             self.episode = i
             self.env.reset()
-            self.time_delay_fetcher.start_heartbeat()
+            self.delay_fetcher.start_heartbeat()
             self.without_optimize_episode(action_index)
             self.cleanup(
                 time_costs_filename='./results/no-optim-time-costs-%d-%d.xlsx' % (action_index, i),
-                time_delays_filename='./results/no-optim-time-delays-%d-%d.txt' % (action_index, i)
+                delays_filename='./results/no-optim-delays-%d-%d.txt' % (action_index, i)
             )
 
     def without_optimize_episode(self, action_index: int):
@@ -69,17 +69,15 @@ class EvaluationController(AbstractController):
                              .format(self.episode, reward, action_index, done))
             time.sleep(interval)
 
-    def cleanup(self, time_costs_filename: str, time_delays_filename: str):
-        self.time_delay_fetcher.save_time_delays(time_delays_filename)
-        self.time_delay_fetcher.stop()
+    def cleanup(self, time_costs_filename: str, delays_filename: str):
+        self.delay_fetcher.save_delays(delays_filename)
+        self.delay_fetcher.stop()
 
         costs = self.env.get_total_time_cost()
         self.costs.append(costs)
         self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, costs))
         excelutil.list2excel(self.costs, time_costs_filename)
         self.logger.info('Summary %s saved.' % time_costs_filename)
-
-        sparkutil.clean_spark_log(os.getcwd(), self.args.hadoop_home)
 
     def _env(self, args: argparse.Namespace):
         return EvaluationEnv(args)

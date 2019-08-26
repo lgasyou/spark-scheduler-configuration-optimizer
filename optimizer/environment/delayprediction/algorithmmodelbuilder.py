@@ -3,9 +3,9 @@ import os
 import pickle
 from typing import Dict
 
-from optimizer.environment.timedelayprediction import predictionsparkmodel
-from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
-from optimizer.environment.timedelayprediction.sparkmodelanalyzer import SparkModelAnalyzer
+from optimizer.environment.delayprediction import predictionsparkmodel
+from optimizer.environment.delayprediction.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.environment.delayprediction.sparkmodelanalyzer import SparkModelAnalyzer
 
 
 class AlgorithmModelBuilder(object):
