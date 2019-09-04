@@ -47,13 +47,9 @@ class AbstractCommunicator(ICommunicator):
     def get_reward(self) -> float:
         return self.reward_calculator.get_reward(self.state)
 
-    def get_state(self) -> State:
-        """Get raw state of YARN."""
-        return self.state_builder.build()
-
     def get_state_tensor(self) -> torch.Tensor:
         """
-        Get state of YARN which is trimmed.
+        Get state which is trimmed.
         Which is defined as the ϕ(s) function defined in document.
 
         state: {
@@ -63,8 +59,9 @@ class AbstractCommunicator(ICommunicator):
             queue_constraints: [QueueConstraint, QueueConstraint, ...]
         }
         """
-        self.state = self.get_state()
-        return self.state_builder.build_tensor(self.state)
+        self.state = self.state_builder.build()
+        normalized_state = self.state_builder.normalize_state(self.state)
+        return self.state_builder.build_tensor(normalized_state)
 
     def set_and_refresh_queue_config(self, action_index: int) -> None:
         """Use script "refresh-queues.sh" to refresh the configurations of queues."""

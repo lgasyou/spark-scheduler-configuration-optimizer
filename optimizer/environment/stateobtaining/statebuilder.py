@@ -1,13 +1,13 @@
 import logging
 
 import requests
-import torch
 from requests.exceptions import ConnectionError
 
 from optimizer.environment.stateinvalidexception import StateInvalidException
 from optimizer.environment.stateobtaining.yarnmodel import *
+from optimizer.environment.stateobtaining.stateprocessor import StateProcessor
 from optimizer.environment.delayprediction import DelayPredictor
-from optimizer.hyperparameters import STATE_SHAPE, CONTAINER_NUM_VCORES, CONTAINER_MEM
+from optimizer.hyperparameters import CONTAINER_NUM_VCORES, CONTAINER_MEM
 from optimizer.util import jsonutil
 
 
@@ -17,10 +17,10 @@ class StateBuilder(object):
         self.RM_API_URL = rm_api_url
         self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_api_url
 
+        self.state_processor = StateProcessor()
         self.scheduler_strategy = scheduler_strategy
         self.delay_predictor = DelayPredictor(spark_history_server_api_url)
 
-    # TODO: async, await get json
     def build(self):
         try:
             resources = self.parse_and_build_resources()
@@ -34,49 +34,11 @@ class StateBuilder(object):
             logging.debug(e, exc_info=True)
             raise StateInvalidException
 
-    # TODO: Redesign this, with three channels.
-    @staticmethod
-    def build_tensor(raw: State):
-        height, width = STATE_SHAPE
-        tensor = torch.zeros(height, width)
+    def normalize_state(self, state: State):
+        return self.state_processor.normalize_state(state)
 
-        # Line 0-74: waiting apps and their resource requests
-        for i, wa in enumerate(raw.waiting_apps[:75]):
-            line = [wa.elapsed_time, wa.priority, wa.converted_location]
-            for rr in wa.request_resources[:64]:
-                line.extend([rr.priority, rr.memory, rr.cpu])
-            line.extend([0.0] * (width - len(line)))
-            tensor[i] = torch.Tensor(line)
-
-        # Line 75-149: running apps and their resource requests
-        for i, ra in enumerate(raw.running_apps[:75]):
-            row = i + 75
-            line = [ra.elapsed_time, ra.priority, ra.converted_location,
-                    ra.progress, ra.queue_usage_percentage, ra.predicted_delay]
-            for rr in ra.request_resources[:65]:
-                line.extend([rr.priority, rr.memory, rr.cpu])
-            line.extend([0.0] * (width - len(line)))
-            tensor[row] = torch.Tensor(line)
-
-        # Line 150-198: resources of cluster
-        row, idx = 150, 0
-        for r in raw.resources[:4900]:
-            tensor[row][idx] = r.mem
-            idx += 1
-            tensor[row][idx] = r.vcore_num
-            idx += 1
-            if idx == width:
-                row += 1
-                idx = 0
-
-        # Line 199: queue constraints
-        row, queue_constraints = 199, []
-        for c in raw.constraints[:50]:
-            queue_constraints.extend([c.converted_name, c.capacity, c.max_capacity, c.used_capacity])
-        queue_constraints.extend([0.0] * (width - len(queue_constraints)))
-        tensor[row] = torch.Tensor(queue_constraints)
-
-        return tensor
+    def build_tensor(self, normalized_state: State):
+        return self.state_processor.to_tensor(normalized_state)
 
     def parse_and_build_running_apps(self) -> List[RunningApplication]:
         url = self.RM_API_URL + 'ws/v1/cluster/apps?states=RUNNING'

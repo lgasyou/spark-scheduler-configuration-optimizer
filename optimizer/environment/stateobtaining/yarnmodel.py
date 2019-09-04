@@ -8,7 +8,7 @@ from optimizer.hyperparameters import QUEUES
 class ApplicationRequestResource(object):
     priority: int
     memory: int
-    cpu: int
+    vcore_num: int
 
 
 @dataclasses.dataclass

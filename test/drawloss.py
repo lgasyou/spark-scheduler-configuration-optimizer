@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 
+
 plt.rcParams['figure.dpi'] = 200
 
 with open('../results/steps.txt', 'r') as f:
