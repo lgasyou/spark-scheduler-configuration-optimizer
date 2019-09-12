@@ -1,8 +1,8 @@
 from typing import List
 
-from optimizer.environment.delayprediction import predictionsparkmodel, simulationmodel, sparkmodel
-from optimizer.environment.delayprediction.algorithmmodelbuilder import AlgorithmModelBuilder
-from optimizer.environment.delayprediction.applicationexecutionsimulator import ApplicationExecutionSimulator
+from optimizer.environment.timedelayprediction import predictionsparkmodel, simulationmodel, sparkmodel
+from optimizer.environment.timedelayprediction.algorithmmodelbuilder import AlgorithmModelBuilder
+from optimizer.environment.timedelayprediction.applicationexecutionsimulator import ApplicationExecutionSimulator
 
 
 class SingleDelayPredictor(object):

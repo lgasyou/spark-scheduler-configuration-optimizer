@@ -4,9 +4,10 @@ from optimizer.util import timeutil
 class ResourceAllocationSimulator(object):
 
     def __init__(self):
-        self.free_resources = dict()
+        self.free_resources = {}
 
     def set_resources(self, resources: list):
+        self.free_resources.clear()
         self.free_resources[timeutil.current_time_ms()] = resources
 
     # Returns allocated and unallocated number of containers.

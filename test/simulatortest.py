@@ -1,4 +1,4 @@
-from optimizer.environment.delayprediction.resourceallocationsimulator import ResourceAllocationSimulator
+from optimizer.environment.timedelayprediction.resourceallocationsimulator import ResourceAllocationSimulator
 
 simulator = ResourceAllocationSimulator()
 simulator.set_resources([5, 2])

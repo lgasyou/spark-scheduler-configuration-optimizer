@@ -2,10 +2,10 @@ import logging
 from typing import List
 
 from optimizer.environment.stateobtaining import yarnmodel
-from optimizer.environment.delayprediction import sparkmodel
-from optimizer.environment.delayprediction.resourceallocationsimulator import ResourceAllocationSimulator
-from optimizer.environment.delayprediction.singledelaypredictor import SingleDelayPredictor
-from optimizer.environment.delayprediction.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.environment.timedelayprediction import sparkmodel
+from optimizer.environment.timedelayprediction.resourceallocationsimulator import ResourceAllocationSimulator
+from optimizer.environment.timedelayprediction.singledelaypredictor import SingleDelayPredictor
+from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
 
 
 class DelayPredictor(object):
@@ -38,7 +38,7 @@ class DelayPredictor(object):
             start_time = app.started_time
             queue = app.converted_location
             delay, finish_time = self.predict_running_app(app_id, name, start_time)
-            app.predicted_time_delay = delay
+            app.predicted_delay = delay
             if delay != -1:
                 self.logger.info('%s, Delay: %f' % (app_id, delay))
                 num_containers = app.running_containers
@@ -47,6 +47,7 @@ class DelayPredictor(object):
                 false_running_apps.append(app)
         return false_running_apps
 
+    # Predict applications who are only allocated AM's container.
     def predict_false_running_apps(self, false_running_apps):
         false_running_apps.sort(key=lambda i: i.application_id)
         for app in false_running_apps:
@@ -57,7 +58,7 @@ class DelayPredictor(object):
             allocated = self.simulator.allocate(queue, self.DEFAULT_NUM_EXECUTORS)
             executors = self._build_executors(allocated)
             delay, finish_time = self.single_predictor.predict(name, self.DEFAULT_INPUT_BYTES, executors, start_time)
-            app.predicted_time_delay = delay
+            app.predicted_delay = delay
             self.logger.info('%s, Delay: %f' % (app_id, delay))
             self.simulator.release(finish_time, queue, len(executors))
 
@@ -71,7 +72,7 @@ class DelayPredictor(object):
             allocated = self.simulator.allocate(queue, self.DEFAULT_NUM_EXECUTORS)
             executors = self._build_executors(allocated)[1:]
             delay, finish_time = self.single_predictor.predict(name, self.DEFAULT_INPUT_BYTES, executors, start_time)
-            app.predicted_time_delay = delay
+            app.predicted_delay = delay
             self.logger.info('%s, Delay: %f' % (app_id, delay))
             self.simulator.release(finish_time, queue, len(executors) + 1)
 

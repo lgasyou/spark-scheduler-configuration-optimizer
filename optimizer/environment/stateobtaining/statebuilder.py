@@ -6,7 +6,7 @@ from requests.exceptions import ConnectionError
 from optimizer.environment.stateinvalidexception import StateInvalidException
 from optimizer.environment.stateobtaining.yarnmodel import *
 from optimizer.environment.stateobtaining.stateprocessor import StateProcessor
-from optimizer.environment.delayprediction import DelayPredictor
+from optimizer.environment.timedelayprediction import DelayPredictor
 from optimizer.hyperparameters import CONTAINER_NUM_VCORES, CONTAINER_MEM
 from optimizer.util import jsonutil
 

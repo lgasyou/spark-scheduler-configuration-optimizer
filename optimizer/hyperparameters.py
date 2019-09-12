@@ -1,4 +1,4 @@
-CUDA_DEVICES = [5, 6, 7]
+CUDA_DEVICES = [0]
 
 STATE_SHAPE = (200, 200)
 

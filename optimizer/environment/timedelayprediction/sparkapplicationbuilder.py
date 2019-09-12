@@ -1,6 +1,6 @@
 import requests
 
-from optimizer.environment.delayprediction import sparkmodel
+from optimizer.environment.timedelayprediction import sparkmodel
 from optimizer.util import jsonutil, timeutil
 
 

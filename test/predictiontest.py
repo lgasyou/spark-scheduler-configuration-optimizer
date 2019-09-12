@@ -1,6 +1,6 @@
-from optimizer.environment.delayprediction.sparkapplicationbuilder import SparkApplicationBuilder
-from optimizer.environment.delayprediction.sparkmodelanalyzer import SparkModelAnalyzer
-from optimizer.environment.delayprediction.timedelaypredictor import SingleDelayPredictor
+from optimizer.environment.timedelayprediction.sparkapplicationbuilder import SparkApplicationBuilder
+from optimizer.environment.timedelayprediction.sparkmodelanalyzer import SparkModelAnalyzer
+from optimizer.environment.timedelayprediction.timedelaypredictor import SingleDelayPredictor
 from optimizer.util import timeutil
 from test.completedapplicationbuilder import CompletedApplicationBuilder
 
