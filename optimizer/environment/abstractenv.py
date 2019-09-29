@@ -22,8 +22,8 @@ class AbstractEnv(object):
         self.actions = self.communicator.action_set
 
     def step(self, action: int) -> Tuple[torch.Tensor, float, bool]:
-        state = self.try_get_state()
         reward = self.communicator.act(action)
+        state = self.try_get_state()
         done = self.communicator.is_done()
         return state, reward, done
 

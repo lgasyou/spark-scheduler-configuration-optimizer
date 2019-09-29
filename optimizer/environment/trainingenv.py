@@ -1,7 +1,7 @@
 import argparse
 
 from optimizer.environment.abstractenv import AbstractEnv
-from optimizer.environment.clustercommunication.trainingcommunicator import TrainingCommunicator
+from optimizer.environment.simulation.simulationtrainingcommunicator import SimulationTrainingCommunicator
 
 
 class TrainingEnv(AbstractEnv):
@@ -14,5 +14,4 @@ class TrainingEnv(AbstractEnv):
         self.communicator.reset()
 
     def _communicator(self, args: argparse.Namespace):
-        return TrainingCommunicator(args.resource_manager_host, args.spark_history_server_host,
-                                    args.hadoop_home, args.spark_home, args.java_home)
+        return SimulationTrainingCommunicator(args.simulation_host)
