@@ -2,12 +2,11 @@ name: rainbow
 channels:
   - pytorch
 dependencies:
-  - plotly
   - pytorch
   - psutil
   - pandas
-  - tqdm
   - requests
   - pip:
     - bs4
     - lxml
+    - openpyxl

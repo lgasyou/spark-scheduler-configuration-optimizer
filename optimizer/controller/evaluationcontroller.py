@@ -1,5 +1,4 @@
 import argparse
-import os
 import time
 
 from optimizer.controller.abstractcontroller import AbstractController
@@ -34,7 +33,7 @@ class EvaluationController(AbstractController):
             self.with_optimize_episode()
             self.cleanup(
                 time_costs_filename='./results/optim-time-costs-%d.xlsx' % i,
-                delays_filename='./results/optim-time-delays-%d.txt' % i
+                delays_filename='./results/optim-delays-%d.txt' % i
             )
 
     def with_optimize_episode(self):

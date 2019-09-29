@@ -10,7 +10,7 @@ from optimizer.environment.timedelayprediction.sparkapplicationbuilder import Sp
 
 class DelayPredictor(object):
 
-    DEFAULT_INPUT_BYTES = 5 * 1024**3
+    DEFAULT_INPUT_BYTES = 1024**3
     DEFAULT_NUM_EXECUTORS = 5
 
     def __init__(self, spark_history_server_api_url: str):
