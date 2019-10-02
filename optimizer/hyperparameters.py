@@ -1,6 +1,6 @@
 CUDA_DEVICES = [0]
 
-STATE_SHAPE = (200, 200)
+STATE_SHAPE = (21, 4)
 
 CONTAINER_NUM_VCORES = 4
 CONTAINER_MEM = 8
@@ -21,9 +21,9 @@ QUEUES = {
     "names": ["queueA", "queueB"],
     "actions": {
         "capacityScheduler": {
-            0: ([25, 75], [60, 80]),
-            1: ([50, 50], [50, 50]),
-            2: ([75, 25], [80, 80]),
+            0: ([3, 7], [6, 8]),
+            1: ([5, 5], [5, 5]),
+            2: ([7, 3], [8, 8]),
         },
         "fairScheduler": {
             0: ([25, 75], 'fifo'),

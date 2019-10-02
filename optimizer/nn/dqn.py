@@ -12,11 +12,11 @@ class DQN(nn.Module):
         self.atoms = args.atoms
         self.action_space = action_space
 
-        # 98, 98, 32
-        # 47, 47, 32
-        self.convs = nn.Sequential(nn.Conv2d(args.history_length, 32, 5, stride=2, padding=0), nn.ReLU(),
-                                   nn.Conv2d(32, 32, 5, stride=2, padding=0), nn.ReLU())
-        self.conv_output_size = 70688
+        self.convs = nn.Sequential(nn.Conv2d(args.history_length, 16, [8, 4], stride=1), nn.ReLU(),
+                                   nn.Conv2d(16, 32, [5, 1], stride=1), nn.ReLU(),
+                                   nn.Conv2d(32, 64, [2, 1], stride=1), nn.ReLU(),
+                                   nn.Conv2d(64, 128, [2, 1], stride=1), nn.ReLU())
+        self.conv_output_size = 1024
 
         self.fc_h_v = NoisyLinear(self.conv_output_size, args.hidden_size, std_init=args.noisy_std)
         self.fc_h_a = NoisyLinear(self.conv_output_size, args.hidden_size, std_init=args.noisy_std)

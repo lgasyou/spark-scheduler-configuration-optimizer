@@ -33,7 +33,7 @@ class WorkloadGenerator(object):
             queue = self._generate_queue_by_rule(i, batch_size, queue_partial)
             item = {
                 "name": random.choice(self.WORKLOAD_TYPES),
-                "interval": interval,
+                "interval": interval * 1000,
                 "queue": queue,
                 "dataSize": data_size
             }

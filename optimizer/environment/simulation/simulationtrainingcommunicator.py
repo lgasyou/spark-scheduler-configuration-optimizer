@@ -9,7 +9,7 @@ from typing import Optional
 from optimizer.environment.clustercommunication.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.clustercommunication.ievaluationcommunicator import IEvaluationCommunicator
 from optimizer.environment.workloadgenerating.workloadgenerator import WorkloadGenerator
-from optimizer.hyperparameters import STATE_SHAPE
+from optimizer.hyperparameters import QUEUES
 
 
 class SimulationTrainingCommunicator(IEvaluationCommunicator):
@@ -22,70 +22,74 @@ class SimulationTrainingCommunicator(IEvaluationCommunicator):
             scheduler_type, '', '')
         self.action_set = self.scheduler_strategy.action_set
 
-        self.state_tensor = None
-        self.done_flag: bool = True
+        self.state = None
+        self.done = True
 
-    # TODO: We must decide when is done.
     def is_done(self) -> bool:
-        return False
+        return self.done
 
     def act(self, action_index: int) -> float:
         s = socket.socket()
         s.connect((self.HOST, 55532))
-        s.send(json.dumps({
-            'queues': [
-                {
-                    'name': 'queueA',
-                    'capacity': '25',
-                    'maxCapacity': '80'
-                },
-                {
-                    'name': 'queueB',
-                    'capacity': '75',
-                    'maxCapacity': '80'
-                }
-            ]
-        }).encode('utf-8') + b'\n')
-        state_json = json.loads(s.recv(10240))
+        s.send(json.dumps({'queues': self.build_queue_json(action_index)}).encode('utf-8') + b'\n')
+        response = json.loads(s.recv(10240))
         s.close()
-        logging.info(state_json)
-        return self.get_reward(state_json)
+        self.state = response['state']
+        self.done = response['done']
+        logging.info(self.state)
+        return self.get_reward(self.state)
 
     def get_reward(self, state) -> float:
-        return 0
+        return -1
 
     def get_state_tensor(self):
-        return torch.zeros(STATE_SHAPE)
+        state = []
+        for wj in self.state['waitJob'][:20]:
+            state.append([wj['container'], wj['worktime'], queue_name_to_index(wj['queue']), 0])
+
+        for rj in self.state['runJob'][:20]:
+            state.append([rj['container'], rj['worktime'], queue_name_to_index(rj['queue']), 1])
+
+        for _ in range(20 - len(state)):
+            state.append([0, 0, 0, 0])
+
+        queues = []
+        for queue in self.state['stricts']:
+            queues.extend([queue['common'], queue['max']])
+        state.append(queues)
+
+        return torch.tensor(state, dtype=torch.float32)
 
     def reset(self):
         workloads = self.generate_train_set()
         s = socket.socket()
-        logging.info('%s:%d' % (self.HOST, 55533))
         s.connect((self.HOST, 55533))
         s.send(json.dumps({
-            'interval': '30000',
+            'interval': '1000',
             'numContainer': 10,
             'workloads': workloads['workloads'],
-            'queues': [
-                {
-                    'name': 'queueA',
-                    'capacity': '25',
-                    'maxCapacity': '80'
-                },
-                {
-                    'name': 'queueB',
-                    'capacity': '75',
-                    'maxCapacity': '80'
-                }
-            ]
+            'queues': self.build_queue_json(0)
         }).encode('utf-8') + b'\n')
-        response = json.loads(s.recv(10240))
+        self.state = json.loads(s.recv(10240))['state']
         s.close()
-        state = response['state']
-        self.done_flag = response['done']
 
     def generate_train_set(self) -> dict:
         return self.workload_generator.generate_randomly(batch_size=18, queue_partial=True)
 
     def get_scheduler_type(self) -> str:
         return "capacityScheduler"
+
+    def build_queue_json(self, action_index):
+        queues = []
+        for name, action in self.action_set[action_index].items():
+            queue = {
+                'name': name,
+                'capacity': action[0],
+                'maxCapacity': action[1]
+            }
+            queues.append(queue)
+        return queues
+
+
+def queue_name_to_index(queue_name: str) -> int:
+    return QUEUES['names'].index(queue_name)
