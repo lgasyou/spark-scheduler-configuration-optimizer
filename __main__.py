@@ -16,7 +16,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--spark-home', type=str, default='/home/ls/library/spark', help='Spark home path')
     parser.add_argument('--resource-manager-host', type=str, default='http://10.1.114.60:8088/', help='Address:port of ResourceManager')
     parser.add_argument('--spark-history-server-host', type=str, default='http://10.1.114.60:18080/', help='Address:port of Spark history server')
-    parser.add_argument('--simulation-host', type=str, default='localhost', help='Address:port of Spark history server')
+    parser.add_argument('--simulation-host', type=str, default='10.4.20.35', help='Address:port of Spark history server')
     parser.add_argument('--execution-mode', type=int, default=int(0), help='Set program execution mode.')
     parser.add_argument('--log-filename', type=str, default='./results/runtime.log', help='Runtime log filename.')
     parser.add_argument('--seed', type=int, default=123, help='Random seed')

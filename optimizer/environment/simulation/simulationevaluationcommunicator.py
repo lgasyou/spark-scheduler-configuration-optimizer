@@ -12,11 +12,13 @@ from optimizer.environment.workloadgenerating.workloadgenerator import WorkloadG
 from optimizer.hyperparameters import QUEUES
 
 
-class SimulationTrainingCommunicator(IEvaluationCommunicator):
+class SimulationEvaluationCommunicator(IEvaluationCommunicator):
 
     def __init__(self, simulation_host: str):
         self.HOST = simulation_host
         self.workload_generator = WorkloadGenerator()
+        self.WORKLOADS = self.workload_generator.generate_randomly(18, queue_partial=True)
+        self.workload_generator.save_workloads(self.WORKLOADS)
         scheduler_type = self.get_scheduler_type()
         self.scheduler_strategy = SchedulerStrategyFactory.create(
             scheduler_type, '', '')
@@ -32,8 +34,7 @@ class SimulationTrainingCommunicator(IEvaluationCommunicator):
         s = socket.socket()
         s.connect((self.HOST, 55532))
         s.send(json.dumps({'queues': self.build_queue_json(action_index)}).encode('utf-8') + b'\n')
-        recv = s.recv(102400, socket.MSG_WAITALL)
-        response = json.loads(recv)
+        response = json.loads(s.recv(102400, socket.MSG_WAITALL))
         s.close()
         self.state = response['state']
         self.done = response['done']
@@ -64,7 +65,7 @@ class SimulationTrainingCommunicator(IEvaluationCommunicator):
         return torch.tensor(state, dtype=torch.float32)
 
     def reset(self):
-        workloads = self.generate_train_set()
+        workloads = self.WORKLOADS
         s = socket.socket()
         s.connect((self.HOST, 55533))
         s.send(json.dumps({
@@ -75,9 +76,6 @@ class SimulationTrainingCommunicator(IEvaluationCommunicator):
         }).encode('utf-8') + b'\n')
         self.state = json.loads(s.recv(102400, socket.MSG_WAITALL))['state']
         s.close()
-
-    def generate_train_set(self) -> dict:
-        return self.workload_generator.generate_randomly(batch_size=240, queue_partial=True)
 
     def get_scheduler_type(self) -> str:
         return "capacityScheduler"
@@ -92,6 +90,14 @@ class SimulationTrainingCommunicator(IEvaluationCommunicator):
             }
             queues.append(queue)
         return queues
+
+    def get_total_time_cost(self):
+        s = socket.socket()
+        s.connect((self.HOST, 55534))
+        s.send(b'\n')
+        time_cost = json.loads(s.recv(102400, socket.MSG_WAITALL))
+        s.close()
+        return time_cost['timeCost']
 
 
 def queue_name_to_index(queue_name: str) -> int:

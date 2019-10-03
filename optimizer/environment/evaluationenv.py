@@ -2,6 +2,7 @@ import argparse
 
 from optimizer.environment import AbstractEnv
 from optimizer.environment.clustercommunication.evaluationcommunicator import EvaluationCommunicator
+from optimizer.environment.simulation.simulationevaluationcommunicator import SimulationEvaluationCommunicator
 
 
 class EvaluationEnv(AbstractEnv):
@@ -32,5 +33,4 @@ class EvaluationEnv(AbstractEnv):
         self.communicator.close()
 
     def _communicator(self, args: argparse.Namespace):
-        return EvaluationCommunicator(args.resource_manager_host, args.spark_history_server_host,
-                                      args.hadoop_home, args.spark_home, args.java_home)
+        return SimulationEvaluationCommunicator(args.simulation_host)
