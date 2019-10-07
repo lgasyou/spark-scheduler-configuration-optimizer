@@ -2,6 +2,7 @@
 .idea/
 !.idea/dictionaries/
 
+data/mnist/
 # Output directories
 results/
 
