@@ -1,10 +1,8 @@
-import os
+import argparse
 import socket
 import json
 import logging
 import torch
-import threading
-from typing import Optional
 
 from optimizer.environment.clustercommunication.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.clustercommunication.ievaluationcommunicator import IEvaluationCommunicator
@@ -14,10 +12,10 @@ from optimizer.hyperparameters import QUEUES
 
 class SimulationEvaluationCommunicator(IEvaluationCommunicator):
 
-    def __init__(self, simulation_host: str):
-        self.HOST = simulation_host
+    def __init__(self, args: argparse.Namespace):
+        self.HOST = args.simulation_host
         self.workload_generator = WorkloadGenerator()
-        self.WORKLOADS = self.workload_generator.generate_randomly(18, queue_partial=True)
+        self.WORKLOADS = self.workload_generator.generate_randomly(240, queue_partial=True)
         self.workload_generator.save_workloads(self.WORKLOADS)
         scheduler_type = self.get_scheduler_type()
         self.scheduler_strategy = SchedulerStrategyFactory.create(

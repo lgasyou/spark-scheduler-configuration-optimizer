@@ -1,4 +1,6 @@
+import argparse
 import os
+import logging
 import threading
 from typing import Optional
 
@@ -10,11 +12,13 @@ from optimizer.util import yarnutil, sparkutil, processutil
 
 class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
 
-    def __init__(self, rm_host: str, spark_history_server_host: str,
-                 hadoop_home: str, spark_home: str, java_home: str):
+    def __init__(self, args: argparse.Namespace):
+        rm_host = args.rm_host
+        spark_history_server_host = args.spark_history_server_host
+        hadoop_home = args.hadoop_home
         super().__init__(rm_host, spark_history_server_host, hadoop_home)
-        self.SPARK_HOME = spark_home
-        self.JAVA_HOME = java_home
+        self.SPARK_HOME = args.spark_home
+        self.JAVA_HOME = args.java_home
         self.workload_generator = WorkloadGenerator()
         self.WORKLOADS = self.workload_generator.generate_randomly(18, queue_partial=True)
         self.workload_generator.save_workloads(self.WORKLOADS)
@@ -25,10 +29,10 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
                processutil.has_thread_finished(self.workload_starter)
 
     def close(self):
-        self.logger.info('Restarting YARN...')
+        logging.info('Restarting YARN...')
         restart_process = yarnutil.restart_yarn(os.getcwd(), self.HADOOP_HOME)
         restart_process.wait()
-        self.logger.info('YARN restarted.')
+        logging.info('YARN restarted.')
 
     def reset(self):
         self.close()

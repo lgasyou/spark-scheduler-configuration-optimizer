@@ -10,7 +10,7 @@ from optimizer.environment.timedelayprediction.sparkmodelanalyzer import SparkMo
 
 class AlgorithmModelBuilder(object):
 
-    SAVE_FILENAME = './results/algorithm-models.pk'
+    SAVE_FILENAME = 'results/algorithm-models.pk'
 
     def __init__(self, application_builder: SparkApplicationBuilder):
         self.logger = logging.getLogger(__name__)

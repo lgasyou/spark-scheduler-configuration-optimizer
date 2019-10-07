@@ -1,43 +1,83 @@
 #!/usr/bin/env bash
 
-spark_home=$2
-hadoop_conf_dir=$3/etc/hadoop
-java_home=$4
-work_dir=$5
-queue=$6
-size=$7
+CLASS=$1
+export SPARK_HOME=$2
+export HADOOP_HOME=$3
+export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
+export JAVA_HOME=$4
+QUEUE=$5
+DATA_SIZE=$6
+WORK_DIR=$7
+JAR_DIR="${WORK_DIR}"/data/workloads
+MNIST_DIR="${WORK_DIR}"/data/mnist
+OUTPUT_DIR="${WORK_DIR}"/results/workload-out
 
-export JAVA_HOME=${java_home}
-export HADOOP_CONF_DIR=${hadoop_conf_dir}
+echo "Starting workload with parameters: class ${CLASS}, queue ${QUEUE}, data_size ${DATA_SIZE}"
+case ${CLASS} in
+"rnn")
+    "${SPARK_HOME}"/bin/spark-submit \
+        --class com.intel.analytics.bigdl.models.rnn.workload_rnn \
+        --master yarn \
+        --deploy-mode cluster \
+        --executor-cores 2 \
+        --num-executors 2 \
+        --executor-memory 6g \
+        --driver-memory 2g \
+        --queue "${QUEUE}" \
+        "${JAR_DIR}" \
+        -b 8 \
+        -f "${MNIST_DIR}" \
+        -s "${OUTPUT_DIR}" \
+        --checkpoint "${OUTPUT_DIR}" \
+        -e "${DATA_SIZE}"
 
+     rm "${OUTPUT_DIR}"/*
+     ;;
 
-function submit() {
-    class=$1
-    queue=$2
-    workload=$3
-    size=$4
+"autoencoder" | "lenet")
+    "${SPARK_HOME}"/bin/spark-submit \
+        --class com.intel.analytics.bigdl.models."${CLASS}".workload_"${CLASS}" \
+        --master yarn \
+        --deploy-mode cluster \
+        --executor-cores 2 \
+        --num-executors 2 \
+        --executor-memory 6g \
+        --driver-memory 2g \
+        --queue "${QUEUE}" \
+        "${JAR_DIR}" \
+        -b 8 \
+        -f "${MNIST_DIR}"/cifar-10/ \
+        -e "${DATA_SIZE}"
+    rm "${OUTPUT_DIR}"/*
+    ;;
 
-    echo "${spark_home}/bin/spark-submit \
-    --class ${class} \
-    --master yarn \
-    --deploy-mode cluster \
-    --queue ${queue} \
-    --num-executors 5 \
-    --executor-cores 4 \
-    --executor-memory 6g \
-    --driver-memory 1g \
-    ${work_dir}/data/testset/${workload}.jar ${size}"
+"resnet" | "vgg")
+    "${SPARK_HOME}"/bin/spark-submit \
+        --class com.intel.analytics.bigdl.models."${CLASS}".workload_"${CLASS}" \
+        --master yarn \
+        --deploy-mode cluster \
+        --executor-cores 2 \
+        --num-executors 2 \
+        --executor-memory 6g \
+        --driver-memory 2g \
+        --queue "${QUEUE}" \
+        "${JAR_DIR}" \
+        -b 8 \
+        -f "${MNIST_DIR}" \
+        -e "${DATA_SIZE}"
 
-    ${spark_home}/bin/spark-submit \
-    --class ${class} \
-    --master yarn \
-    --deploy-mode cluster \
-    --queue ${queue} \
-    --num-executors 5 \
-    --executor-cores 4 \
-    --executor-memory 6g \
-    --driver-memory 1g \
-    ${work_dir}/data/testset/${workload}.jar ${size}
-}
+    rm "${OUTPUT_DIR}"/*
+    ;;
 
-submit $1 ${queue} workload_$1 ${size}
+*)
+    spark-submit \
+        --class "${CLASS}" \
+        --master yarn \
+        --deploy-mode cluster \
+        --executor-cores 2 \
+        --num-executors 2 \
+        --executor-memory 6g \
+        --driver-memory 2g \
+        "${JAR_DIR} ${DATA_SIZE}"
+    ;;
+esac

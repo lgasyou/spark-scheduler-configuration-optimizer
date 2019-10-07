@@ -106,7 +106,7 @@ class CapacitySchedulerStrategy(AbstractSchedulerStrategy):
 
     def override_config(self, action_index: int):
         dest = os.path.join(self.HADOOP_ETC, 'capacity-scheduler.xml')
-        xml_modifier = XmlModifier('./data/capacity-scheduler-template.xml', dest)
+        xml_modifier = XmlModifier('data/capacity-scheduler-template.xml', dest)
 
         action: dict = self.action_set[action_index]
         for queue_name, conf in action.items():
@@ -117,7 +117,7 @@ class CapacitySchedulerStrategy(AbstractSchedulerStrategy):
         xml_modifier.save()
 
     def copy_conf_file(self):
-        fileutil.file_copy('./data/capacity-scheduler.xml', self.HADOOP_ETC + '/capacity-scheduler.xml')
+        fileutil.file_copy('data/capacity-scheduler.xml', self.HADOOP_ETC + '/capacity-scheduler.xml')
 
     def get_queue_constraints(self):
         url = self.RM_HOST + 'ws/v1/cluster/scheduler'

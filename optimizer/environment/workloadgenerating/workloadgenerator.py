@@ -13,7 +13,7 @@ class WorkloadGenerator(object):
     QUEUES = hyperparameters.QUEUES['names']
     DATA_SIZES = [str(i) for i in range(1, 9)]
 
-    DEFAULT_SAVE_FILENAME = './data/testset/workloads.json'
+    DEFAULT_SAVE_FILENAME = 'data/testset/workloads.json'
 
     def __init__(self, sample_index: int = 0):
         self.sampler = self.get_sampler_by_index(sample_index)

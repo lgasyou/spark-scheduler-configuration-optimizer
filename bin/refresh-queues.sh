@@ -2,4 +2,4 @@
 
 hadoop_home=$1
 
-${hadoop_home}/bin/yarn rmadmin -refreshQueues
+"${hadoop_home}"/bin/yarn rmadmin -refreshQueues

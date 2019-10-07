@@ -1,5 +1,4 @@
 import abc
-import logging
 import time
 from typing import Optional
 
@@ -17,8 +16,6 @@ from optimizer.util import yarnutil
 class AbstractCommunicator(ICommunicator):
 
     def __init__(self, rm_host: str, spark_history_server_host: str, hadoop_home: str):
-        self.logger = logging.getLogger(__name__)
-
         self.HADOOP_HOME = hadoop_home
         self.HADOOP_ETC = hadoop_home + '/etc/hadoop'
         self.RM_API_URL = rm_host
