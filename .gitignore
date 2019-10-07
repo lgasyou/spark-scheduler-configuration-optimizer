@@ -99,3 +99,4 @@ venv/
 *.pth
 # Plots
 *.html
+/data/mnist/

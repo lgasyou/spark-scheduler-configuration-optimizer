@@ -39,7 +39,7 @@ def start_process(cmd: list) -> subprocess.Popen:
 def start_workload_process(workload_type, queue, data_size, spark_home, hadoop_home, java_home):
     c = ['../bin/start-spark-workload.sh', workload_type,
          spark_home, hadoop_home, java_home,
-         queue, data_size, '..']
+         queue, data_size, '/home/ls/spark-scheduler-configuration-optimizer']
     return start_process(c)
 
 
