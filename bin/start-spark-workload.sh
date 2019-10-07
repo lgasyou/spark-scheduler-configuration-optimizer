@@ -12,6 +12,11 @@ JAR_DIR="${WORK_DIR}"/data/workloads
 MNIST_DIR="${WORK_DIR}"/data/mnist
 OUTPUT_DIR="${WORK_DIR}"/results/workload-out
 
+EXECUTOR_CORES=2
+NUM_EXECUTORS=2
+EXECUTOR_MEMORY=6g
+DRIVER_MEMORY=2g
+
 echo "Starting workload with parameters: class ${CLASS}, queue ${QUEUE}, data_size ${DATA_SIZE}"
 case ${CLASS} in
 "rnn")
@@ -19,10 +24,10 @@ case ${CLASS} in
         --class com.intel.analytics.bigdl.models.rnn.workload_rnn \
         --master yarn \
         --deploy-mode cluster \
-        --executor-cores 2 \
-        --num-executors 2 \
-        --executor-memory 6g \
-        --driver-memory 2g \
+        --executor-cores "${EXECUTOR_CORES}" \
+        --num-executors "${NUM_EXECUTORS}" \
+        --executor-memory "${EXECUTOR_MEMORY}" \
+        --driver-memory "${DRIVER_MEMORY}" \
         --queue "${QUEUE}" \
         "${JAR_DIR}" \
         -b 8 \
@@ -39,10 +44,10 @@ case ${CLASS} in
         --class com.intel.analytics.bigdl.models."${CLASS}".workload_"${CLASS}" \
         --master yarn \
         --deploy-mode cluster \
-        --executor-cores 2 \
-        --num-executors 2 \
-        --executor-memory 6g \
-        --driver-memory 2g \
+        --executor-cores "${EXECUTOR_CORES}" \
+        --num-executors "${NUM_EXECUTORS}" \
+        --executor-memory "${EXECUTOR_MEMORY}" \
+        --driver-memory "${DRIVER_MEMORY}" \
         --queue "${QUEUE}" \
         "${JAR_DIR}" \
         -b 8 \
@@ -56,10 +61,10 @@ case ${CLASS} in
         --class com.intel.analytics.bigdl.models."${CLASS}".workload_"${CLASS}" \
         --master yarn \
         --deploy-mode cluster \
-        --executor-cores 2 \
-        --num-executors 2 \
-        --executor-memory 6g \
-        --driver-memory 2g \
+        --executor-cores "${EXECUTOR_CORES}" \
+        --num-executors "${NUM_EXECUTORS}" \
+        --executor-memory "${EXECUTOR_MEMORY}" \
+        --driver-memory "${DRIVER_MEMORY}" \
         --queue "${QUEUE}" \
         "${JAR_DIR}" \
         -b 8 \
@@ -74,10 +79,10 @@ case ${CLASS} in
         --class "${CLASS}" \
         --master yarn \
         --deploy-mode cluster \
-        --executor-cores 2 \
-        --num-executors 2 \
-        --executor-memory 6g \
-        --driver-memory 2g \
-        "${JAR_DIR} ${DATA_SIZE}"
+        --executor-cores "${EXECUTOR_CORES}" \
+        --num-executors "${NUM_EXECUTORS}" \
+        --executor-memory "${EXECUTOR_MEMORY}" \
+        --driver-memory "${DRIVER_MEMORY}" \
+        "${JAR_DIR}/workload_${CLASS}.jar ${DATA_SIZE}"
     ;;
 esac
