@@ -24,12 +24,8 @@ class TrainingController(AbstractController):
             self.memory_serializer.try_load_by_filename(self.TMP_MEMORY_FILENAME)
             self.t = self.mem.index
             self.logger.info('Start from episode %d.' % self.t)
-            try:
-                while True:
-                    self._train_step()
-            except InterruptedError:
-                self._save_agent()
-                raise InterruptedError
+            while True:
+                self._train_step()
 
     def _train_step(self):
         self.env.reset()
@@ -42,14 +38,15 @@ class TrainingController(AbstractController):
         while not done:
             state, action, reward, done = self.optimize_timestep(state, self.agent.act)
             self.logger.info("Episode {}: Reward {}, Action {}, Done {}".format(self.t, reward, action, done))
-            time.sleep(interval)
+            if not self.simulating:
+                time.sleep(interval)
 
     def _save_progress(self):
         self.memory_serializer.save_as(self.TMP_MEMORY_FILENAME)
         self._save_agent()
 
     def _save_agent(self):
-        self.agent.save('./results')
+        self.agent.save(directory='results')
 
     def _env(self, args):
         return TrainingEnv(self.args)

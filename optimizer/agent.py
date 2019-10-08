@@ -117,8 +117,8 @@ class Agent(object):
         self.target_net.load_state_dict(self.online_net.state_dict())
 
     # Save model parameters on current device (don't test move model between devices)
-    def save(self, path: str) -> None:
-        filename = os.path.join(path, 'model.pth')
+    def save(self, directory: str) -> None:
+        filename = os.path.join(directory, 'model.pth')
         torch.save(self.online_net.state_dict(), filename)
         self.logger.info('Agent model %s saved.' % filename)
 
