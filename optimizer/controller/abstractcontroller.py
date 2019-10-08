@@ -16,7 +16,7 @@ class AbstractController(object):
     def __init__(self, args: argparse.Namespace):
         self.args = args
         self.logger = logging.getLogger(__name__)
-        self.simulating = args.is_simulating
+        self.simulating = args.use_simulation_env
 
         self.env = self._env(args)
         self.action_space = self.env.action_space()

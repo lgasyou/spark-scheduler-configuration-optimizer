@@ -1,7 +1,6 @@
 import time
 import requests
 import json
-import os
 import subprocess
 from typing import Dict
 
@@ -43,20 +42,41 @@ def start_workload_process(workload_type, queue, data_size, spark_home, hadoop_h
     return start_process(c)
 
 
-data_sizes = [str(i) for i in range(1, 9)]
+def run_all_workloads():
+    restart_yarn('..', hadoop_home).wait()
+    print('Total %d' % len(workload_types) * len(data_sizes))
+    for workload_type in workload_types:
+        for data_size in data_sizes:
+            start_workload_process(workload_type, 'queueB', data_size, spark_home, hadoop_home, java_home)
+            time.sleep(90)
+            while not has_all_application_done(rm_api):
+                time.sleep(1)
+            print('{} which uses {} data size finished.'.format(workload_type, data_size))
+
+
+def summary():
+    apps = get_json(rm_api + 'ws/v1/cluster/apps')['apps']['app']
+    apps.sort(key=lambda a: a['id'])
+    app_name = apps[0]
+    data_size = 0
+    for app in apps:
+        if app_name == app['name']:
+            data_size += 1
+        else:
+            app_name = app['name']
+            data_size = 1
+
+        print(app['name'].split('_')[-1], app['elapsedTime'], data_size, sep=',')
+
+
+data_sizes = [str(i) for i in range(1, 3)]
 # workload_types = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm']
-workload_types = ['rnn', 'autoencoder', 'lenet', 'resnet', 'vgg']
+# workload_types = ['rnn', 'autoencoder', 'lenet', 'resnet', 'vgg']
+workload_types = ['resnet', 'vgg']
 java_home = '/home/ls/library/jdk'
 spark_home = '/home/ls/library/spark'
 hadoop_home = '/home/ls/library/hadoop'
 rm_api = 'http://10.1.114.60:8088/'
 
-restart_yarn('..', hadoop_home).wait()
-print('Total %d' % len(workload_types) * len(data_sizes))
-for workload_type in workload_types:
-    for data_size in data_sizes:
-        start_workload_process(workload_type, 'queueA', data_size, spark_home, hadoop_home, java_home)
-        time.sleep(10)
-        while not has_all_application_done(rm_api):
-            time.sleep(1)
-        print('{} which uses {} data size finished.'.format(workload_type, data_size))
+run_all_workloads()
+summary()

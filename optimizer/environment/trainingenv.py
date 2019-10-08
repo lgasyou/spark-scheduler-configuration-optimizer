@@ -15,6 +15,6 @@ class TrainingEnv(AbstractEnv):
         self.communicator.reset()
 
     def _communicator(self, args: argparse.Namespace):
-        if args.is_simulating:
+        if self.simulating:
             return SimulationTrainingCommunicator(args)
         return TrainingCommunicator(args)

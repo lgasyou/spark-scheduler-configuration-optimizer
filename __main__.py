@@ -16,8 +16,8 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--spark-home', type=str, default='/home/ls/library/spark', help='Spark home path')
     parser.add_argument('--resource-manager-host', type=str, default='http://10.1.114.60:8088/', help='Address:port of ResourceManager')
     parser.add_argument('--spark-history-server-host', type=str, default='http://10.1.114.60:18080/', help='Address:port of Spark history server')
-    parser.add_argument('--is-simulating', action='store_true', help='Using simulation environment')
-    parser.add_argument('--simulation-host', type=str, default='localhost', help='Address:port of Spark history server')
+    parser.add_argument('--use-simulation-env', action='store_true', help='Using simulation environment')
+    parser.add_argument('--simulation-host', type=str, default='10.4.20.35', help='Address:port of Spark history server')
     parser.add_argument('--execution-mode', type=int, default=int(0), help='Set program execution mode.')
     parser.add_argument('--log-into-file', action='store_true', help='Redirect log to file')
     parser.add_argument('--log-filename', type=str, default='./results/runtime.log', help='Runtime log filename.')
@@ -72,18 +72,14 @@ def setup_torch_args(args: argparse.Namespace):
 def get_args() -> argparse.Namespace:
     parser = setup_arg_parser()
     args = parser.parse_args()
-    if args.log_into_file:
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s %(levelname)s %(funcName)s: %(message)s',
-            filename=args.log_filename,
-            filemode='a'
-        )
-    else:
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s %(levelname)s %(funcName)s: %(message)s',
-        )
+    logging_config = {
+        'level': logging.INFO,
+        'format': '%(asctime)s %(levelname)s %(funcName)s: %(message)s'
+    }
+    if args.use_simulation_env:
+        logging_config['filename'] = args.log_filename
+        logging_config['filemode'] = 'a'
+    logging.basicConfig(**logging_config)
     setup_torch_args(args)
     return args
 

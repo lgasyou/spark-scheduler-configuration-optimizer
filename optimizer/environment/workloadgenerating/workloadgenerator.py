@@ -9,7 +9,8 @@ from optimizer.util import randomutil
 
 class WorkloadGenerator(object):
 
-    WORKLOAD_TYPES = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm']
+    WORKLOAD_TYPES = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm',
+                      'rnn', 'autoencoder', 'lenet', 'resnet', 'vgg']
     QUEUES = hyperparameters.QUEUES['names']
     DATA_SIZES = [str(i) for i in range(1, 9)]
 

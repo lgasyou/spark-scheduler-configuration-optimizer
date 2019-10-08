@@ -15,6 +15,7 @@ class AbstractEnv(object):
 
     def __init__(self, args: argparse.Namespace):
         self.logger = logging.getLogger(__name__)
+        self.simulating = args.use_simulation_env
         self.device = args.device
         self.buffer_history_length = args.history_length
         self.state_buffer = deque([], maxlen=args.history_length)
