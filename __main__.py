@@ -76,7 +76,7 @@ def get_args() -> argparse.Namespace:
         'level': logging.INFO,
         'format': '%(asctime)s %(levelname)s %(funcName)s: %(message)s'
     }
-    if args.use_simulation_env:
+    if args.log_into_file:
         logging_config['filename'] = args.log_filename
         logging_config['filemode'] = 'a'
     logging.basicConfig(**logging_config)
