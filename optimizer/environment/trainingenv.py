@@ -1,6 +1,7 @@
 import argparse
 
 from optimizer.environment.abstractenv import AbstractEnv
+from optimizer.environment.clustercommunication.trainingcommunicator import TrainingCommunicator
 from optimizer.environment.simulation.simulationtrainingcommunicator import SimulationTrainingCommunicator
 
 
@@ -14,4 +15,6 @@ class TrainingEnv(AbstractEnv):
         self.communicator.reset()
 
     def _communicator(self, args: argparse.Namespace):
-        return SimulationTrainingCommunicator(args.simulation_host)
+        if args.is_simulating:
+            return SimulationTrainingCommunicator(args)
+        return TrainingCommunicator(args)

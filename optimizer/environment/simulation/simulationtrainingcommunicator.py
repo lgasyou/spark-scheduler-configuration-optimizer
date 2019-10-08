@@ -1,96 +1,22 @@
 import argparse
-import socket
-import json
-import logging
-import torch
 
-from optimizer.environment.clustercommunication.schedulerstrategy import SchedulerStrategyFactory
-from optimizer.environment.clustercommunication.ievaluationcommunicator import IEvaluationCommunicator
-from optimizer.environment.workloadgenerating.workloadgenerator import WorkloadGenerator
-from optimizer.hyperparameters import QUEUES
+from optimizer.environment.simulation.abstractsimulationcommunicator import AbstractSimulationCommunicator
 
 
-class SimulationTrainingCommunicator(IEvaluationCommunicator):
+class SimulationTrainingCommunicator(AbstractSimulationCommunicator):
 
     def __init__(self, args: argparse.Namespace):
-        self.HOST = args.simulation_host
-        self.workload_generator = WorkloadGenerator()
-        scheduler_type = self.get_scheduler_type()
-        self.scheduler_strategy = SchedulerStrategyFactory.create(
-            scheduler_type, '', '')
-        self.action_set = self.scheduler_strategy.action_set
-
-        self.state = None
-        self.done = True
+        super().__init__(args)
 
     def is_done(self) -> bool:
         return self.done
 
-    def act(self, action_index: int) -> float:
-        s = socket.socket()
-        s.connect((self.HOST, 55532))
-        s.send(json.dumps({'queues': self.build_queue_json(action_index)}).encode('utf-8') + b'\n')
-        recv = s.recv(102400, socket.MSG_WAITALL)
-        response = json.loads(recv)
-        s.close()
-        self.state = response['state']
-        self.done = response['done']
-        logging.info(self.state)
-        return self.get_reward(self.state)
-
-    def get_reward(self, state) -> float:
-        return -1
-
-    def get_state_tensor(self):
-        state = []
-        JOB_COUNT = 50
-        for rj in self.state['runJob'][:JOB_COUNT]:
-            state.append([rj['container'], rj['worktime'], queue_name_to_index(rj['queue']), 1])
-
-        remain_space = JOB_COUNT - len(state)
-        for wj in self.state['waitJob'][:remain_space]:
-            state.append([wj['container'], wj['worktime'], queue_name_to_index(wj['queue']), 0])
-
-        for _ in range(JOB_COUNT - len(state)):
-            state.append([0, 0, 0, 0])
-
-        queues = []
-        for queue in self.state['stricts']:
-            queues.extend([queue['common'], queue['max']])
-        state.append(queues)
-
-        return torch.tensor(state, dtype=torch.float32)
-
     def reset(self):
         workloads = self.generate_train_set()
-        s = socket.socket()
-        s.connect((self.HOST, 55533))
-        s.send(json.dumps({
-            'interval': '1000',
-            'numContainer': 10,
-            'workloads': workloads['workloads'],
-            'queues': self.build_queue_json(0)
-        }).encode('utf-8') + b'\n')
-        self.state = json.loads(s.recv(102400, socket.MSG_WAITALL))['state']
-        s.close()
+        self._submit_workloads_and_get_state(workloads)
 
     def generate_train_set(self) -> dict:
         return self.workload_generator.generate_randomly(batch_size=240, queue_partial=True)
 
     def get_scheduler_type(self) -> str:
         return "capacityScheduler"
-
-    def build_queue_json(self, action_index):
-        queues = []
-        for name, action in self.action_set[action_index].items():
-            queue = {
-                'name': name,
-                'capacity': action[0],
-                'maxCapacity': action[1]
-            }
-            queues.append(queue)
-        return queues
-
-
-def queue_name_to_index(queue_name: str) -> int:
-    return QUEUES['names'].index(queue_name)

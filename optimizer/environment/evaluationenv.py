@@ -33,4 +33,6 @@ class EvaluationEnv(AbstractEnv):
         self.communicator.close()
 
     def _communicator(self, args: argparse.Namespace):
-        return SimulationEvaluationCommunicator(args.simulation_host)
+        if args.is_simulating:
+            return SimulationEvaluationCommunicator(args)
+        return EvaluationCommunicator(args)

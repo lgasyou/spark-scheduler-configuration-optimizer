@@ -14,3 +14,6 @@ class ICommunicator(object):
 
     def is_done(self) -> bool:
         pass
+
+    def get_scheduler_type(self) -> str:
+        pass
