@@ -70,9 +70,9 @@ def summary():
 
 
 data_sizes = [str(i) for i in range(1, 3)]
-# workload_types = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm']
+workload_types = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm',
+                  'rnn', 'autoencoder', 'lenet', 'resnet', 'vgg']
 # workload_types = ['rnn', 'autoencoder', 'lenet', 'resnet', 'vgg']
-workload_types = ['resnet', 'vgg']
 java_home = '/home/ls/library/jdk'
 spark_home = '/home/ls/library/spark'
 hadoop_home = '/home/ls/library/hadoop'

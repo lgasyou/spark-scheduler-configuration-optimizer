@@ -83,6 +83,7 @@ case ${CLASS} in
         --num-executors "${NUM_EXECUTORS}" \
         --executor-memory "${EXECUTOR_MEMORY}" \
         --driver-memory "${DRIVER_MEMORY}" \
-        "${WORKLOAD_JAR_DIR}/workload_${CLASS}.jar ${DATA_SIZE}"
+        --queue "${QUEUE}" \
+        "${WORKLOAD_JAR_DIR}/workload_${CLASS}.jar" "${DATA_SIZE}"
     ;;
 esac
