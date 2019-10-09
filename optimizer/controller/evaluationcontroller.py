@@ -45,7 +45,7 @@ class EvaluationController(AbstractController):
         while not done:
             state, action, reward, done = self.optimize_timestep(state, self.agent.act_e_greedy)
 
-            if self.simulating and self.t % 30 == 0:
+            if self.simulating and self.t % 20 == 0:
                 cost = self.env.get_total_time_cost()
                 self.costs.append({self.t: cost})
                 self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, cost))
@@ -76,7 +76,7 @@ class EvaluationController(AbstractController):
         while not done:
             _, reward, done = self.env.step(action_index)
 
-            if self.simulating and self.t % 30 == 0:
+            if self.simulating and self.t % 20 == 0:
                 cost = self.env.get_total_time_cost()
                 self.costs.append({self.t: cost})
                 self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, cost))
@@ -88,7 +88,7 @@ class EvaluationController(AbstractController):
                 time.sleep(interval)
 
     def cleanup(self, time_costs_filename: str, delays_filename: str):
-        if self.simulating:
+        if not self.simulating:
             self.delay_fetcher.save_delays(delays_filename)
             self.delay_fetcher.stop()
 
