@@ -16,7 +16,7 @@ from optimizer.util import fileutil
 
 class Agent(object):
 
-    SAVE_FILENAME = './results/losses.txt'
+    SAVE_FILENAME = 'results/losses.txt'
 
     def __init__(self, args: argparse.Namespace, env: AbstractEnv):
         self.logger = logging.getLogger(__name__)

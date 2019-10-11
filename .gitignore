@@ -3,6 +3,7 @@
 !.idea/dictionaries/
 
 data/mnist/
+data/facebook-samples
 # Output directories
 results/
 

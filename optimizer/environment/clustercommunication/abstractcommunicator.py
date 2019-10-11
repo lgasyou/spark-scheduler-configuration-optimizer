@@ -33,10 +33,6 @@ class AbstractCommunicator(ICommunicator):
         self.state: Optional[State] = None
 
     def act(self, action_index: int) -> float:
-        """
-        Apply action and see how many rewards we can get.
-        :return: Reward this step gets.
-        """
         self.set_and_refresh_queue_config(action_index)
         self._wait_for_application()
         return self.get_reward()
@@ -45,20 +41,9 @@ class AbstractCommunicator(ICommunicator):
         return self.reward_calculator.get_reward(self.state)
 
     def get_state_tensor(self) -> torch.Tensor:
-        """
-        Get state which is trimmed.
-        Which is defined as the ϕ(s) function defined in document.
-
-        state: {
-            waiting_jobs: [WaitingJob, WaitingJob, ...],
-            running_jobs: [RunningJob, RunningJob, ...],
-            resources: [Resource, Resource, ...],
-            queue_constraints: [QueueConstraint, QueueConstraint, ...]
-        }
-        """
         self.state = self.state_builder.build()
-        normalized_state = self.state_builder.normalize_state(self.state)
-        return self.state_builder.build_tensor(normalized_state)
+        state_tensor = self.state_builder.build_tensor(self.state)
+        return self.state_builder.normalize_state_tensor(state_tensor)
 
     def set_and_refresh_queue_config(self, action_index: int) -> None:
         """Use script "refresh-queues.sh" to refresh the configurations of queues."""
@@ -67,7 +52,6 @@ class AbstractCommunicator(ICommunicator):
 
     @abc.abstractmethod
     def is_done(self) -> bool:
-        """Test if all jobs are done."""
         pass
 
     @abc.abstractmethod

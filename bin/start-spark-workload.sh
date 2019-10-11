@@ -29,7 +29,7 @@ case ${CLASS} in
         --executor-memory "${EXECUTOR_MEMORY}" \
         --driver-memory "${DRIVER_MEMORY}" \
         --queue "${QUEUE}" \
-        "${JAR_DIR}" \
+        "${WORKLOAD_JAR_DIR}"/workload_rnn.jar \
         -b 8 \
         -f "${MNIST_DIR}" \
         -s "${OUTPUT_DIR}" \
@@ -49,7 +49,7 @@ case ${CLASS} in
         --executor-memory "${EXECUTOR_MEMORY}" \
         --driver-memory "${DRIVER_MEMORY}" \
         --queue "${QUEUE}" \
-        "${JAR_DIR}" \
+        "${WORKLOAD_JAR_DIR}/workload_${CLASS}.jar" \
         -b 8 \
         -f "${MNIST_DIR}" \
         -e "${DATA_SIZE}"
@@ -66,7 +66,7 @@ case ${CLASS} in
         --executor-memory "${EXECUTOR_MEMORY}" \
         --driver-memory "${DRIVER_MEMORY}" \
         --queue "${QUEUE}" \
-        "${JAR_DIR}" \
+        "${WORKLOAD_JAR_DIR}/workload_${CLASS}.jar" \
         -b 8 \
         -f "${MNIST_DIR}"/cifar-10 \
         -e "${DATA_SIZE}"

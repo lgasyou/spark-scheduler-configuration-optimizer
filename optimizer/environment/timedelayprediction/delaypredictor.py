@@ -19,8 +19,8 @@ class DelayPredictor(object):
         self.single_predictor = SingleDelayPredictor(spark_history_server_api_url)
         self.simulator = ResourceAllocationSimulator()
 
-    def predict(self, resources: list, running_apps: List[yarnmodel.RunningApplication],
-                waiting_apps: List[yarnmodel.WaitingApplication]):
+    def predict(self, resources: list, running_apps: List[yarnmodel.YarnApplication],
+                waiting_apps: List[yarnmodel.YarnApplication]):
         self.simulator.set_resources(resources)
         false_running_apps = self.predict_running_apps(running_apps)
         self.predict_false_running_apps(false_running_apps)

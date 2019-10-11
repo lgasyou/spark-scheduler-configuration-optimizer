@@ -6,7 +6,7 @@ import time
 from optimizer.util import processutil
 
 
-def async_start_workloads(workloads, spark_home, hadoop_home, java_home, wait: int = 30):
+def async_start_workloads(workloads, spark_home, hadoop_home, java_home, wait: int = 90):
     args = (workloads, spark_home, hadoop_home, java_home)
     start_thread = threading.Thread(target=start_workloads, args=args)
     start_thread.start()

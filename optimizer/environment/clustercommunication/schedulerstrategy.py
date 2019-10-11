@@ -80,9 +80,8 @@ class FairSchedulerStrategy(AbstractSchedulerStrategy):
                 continue
 
             capacity = self.calculate_percentage(q['maxResources'], q['clusterResources'])
-            used_capacity = self.calculate_percentage(q['usedResources'], q['maxResources'])
             max_capacity = capacity
-            ret.append(QueueConstraint(name, used_capacity, capacity, max_capacity))
+            ret.append(QueueConstraint(capacity, max_capacity))
 
         return ret
 

@@ -5,47 +5,16 @@ from optimizer.hyperparameters import QUEUES
 
 
 @dataclasses.dataclass
-class ApplicationRequestResource(object):
-    priority: int
-    memory: int
-    vcore_num: int
+class YarnApplication(object):
 
-
-@dataclasses.dataclass
-class WaitingApplication(object):
-
-    application_id: str
-    name: str
-    started_time: int
-    elapsed_time: int
-    priority: int
     location: str
-    request_resources: List[ApplicationRequestResource] = dataclasses.field(default_factory=list)
+    request_container_count: int
+    application_id: str = None
     predicted_delay: int = -1
 
     @property
     def converted_location(self):
-        return queue_name_to_index(self.location)
-
-
-@dataclasses.dataclass
-class RunningApplication(object):
-
-    application_id: str
-    name: str
-    started_time: int
-    elapsed_time: int
-    running_containers: int
-    priority: int
-    location: str
-    progress: float
-    queue_usage_percentage: float
-    request_resources: List[ApplicationRequestResource] = dataclasses.field(default_factory=list)
-    predicted_delay: int = -1
-
-    @property
-    def converted_location(self):
-        return queue_name_to_index(self.location)
+        return queue_name_to_index(self.location) + 1
 
 
 @dataclasses.dataclass
@@ -56,29 +25,16 @@ class FinishedApplication(object):
 
 
 @dataclasses.dataclass
-class Resource(object):
-    vcore_num: int      # vCore
-    mem: int            # Memory(GB)
-
-
-@dataclasses.dataclass
 class QueueConstraint(object):
 
-    name: str
-    used_capacity: float
     capacity: float
     max_capacity: float
-
-    @property
-    def converted_name(self):
-        return queue_name_to_index(self.name)
 
 
 @dataclasses.dataclass
 class State(object):
-    waiting_apps: List[WaitingApplication] = dataclasses.field(default_factory=list)
-    running_apps: List[RunningApplication] = dataclasses.field(default_factory=list)
-    resources: List[Resource] = dataclasses.field(default_factory=list)
+    waiting_apps: List[YarnApplication] = dataclasses.field(default_factory=list)
+    running_apps: List[YarnApplication] = dataclasses.field(default_factory=list)
     constraints: List[QueueConstraint] = dataclasses.field(default_factory=list)
 
 

@@ -12,7 +12,6 @@ class RewardCalculator(object):
     def get_reward(self, state: yarnmodel.State):
         waiting_apps = state.waiting_apps
         running_apps = state.running_apps
-        # noinspection PyTypeChecker
         apps = waiting_apps + running_apps
 
         if self.last_delays:
