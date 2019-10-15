@@ -5,7 +5,7 @@ import logging
 from optimizer.controller.abstractcontroller import AbstractController
 from optimizer.environment import EvaluationEnv
 from optimizer.environment.stateobtaining.regulardelayfetcher import RegularDelayFetcher
-from optimizer.hyperparameters import EVALUATION_LOOP_INTERNAL
+from optimizer.hyperparameters import EXTRA_WAIT_TIME
 
 
 class EvaluationController(AbstractController):
@@ -39,7 +39,7 @@ class EvaluationController(AbstractController):
             )
 
     def with_optimize_episode(self):
-        interval = EVALUATION_LOOP_INTERNAL
+        interval = EXTRA_WAIT_TIME
         self.env.reset_buffer()
         done, state = False, self.env.try_get_state()
         while not done:
@@ -50,7 +50,7 @@ class EvaluationController(AbstractController):
                 self.costs.append({self.t: cost})
                 self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, cost))
 
-            self.logger.info("Episode {}, Time {}: Reward {}, Action {}, Done {}"
+            self.logger.info("Time Step {}, Time {}: Reward {}, Action {}, Done {}"
                              .format(self.episode, self.t, reward, action, done))
             if not self.simulating:
                 time.sleep(interval)
@@ -69,7 +69,7 @@ class EvaluationController(AbstractController):
             )
 
     def without_optimize_episode(self, action_index: int):
-        interval = EVALUATION_LOOP_INTERNAL
+        interval = EXTRA_WAIT_TIME
         self.env.reset_buffer()
         done, state = False, self.env.try_get_state()
         self.t = 0

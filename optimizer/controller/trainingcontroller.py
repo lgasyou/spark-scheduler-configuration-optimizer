@@ -1,9 +1,10 @@
 import time
+import logging
 
 from optimizer.controller.abstractcontroller import AbstractController
 from optimizer.environment import TrainingEnv
-from optimizer.hyperparameters import TRAINING_LOOP_INTERNAL
 from optimizer.replaymemory.memoryserializer import MemorySerializer
+from optimizer.hyperparameters import EXTRA_WAIT_TIME
 
 
 class TrainingController(AbstractController):
@@ -33,11 +34,12 @@ class TrainingController(AbstractController):
         self._save_progress()
 
     def _train_episode(self):
-        done, interval = False, TRAINING_LOOP_INTERNAL
+        done, interval = False, EXTRA_WAIT_TIME
         state = self.env.try_get_state()
         while not done:
             state, action, reward, done = self.optimize_timestep(state, self.agent.act)
-            self.logger.info("Episode {}: Reward {}, Action {}, Done {}".format(self.t, reward, action, done))
+            if self.t % 100 == 0:
+                self.logger.info("Time Step {}: Reward {}, Action {}, Done {}".format(self.t, reward, action, done))
             if not self.simulating:
                 time.sleep(interval)
 

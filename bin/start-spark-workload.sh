@@ -67,7 +67,7 @@ case ${CLASS} in
         --driver-memory "${DRIVER_MEMORY}" \
         --queue "${QUEUE}" \
         "${WORKLOAD_JAR_DIR}/workload_${CLASS}.jar" \
-        -b 8 \
+        -b 64 \
         -f "${MNIST_DIR}"/cifar-10 \
         -e "${DATA_SIZE}"
 

@@ -6,9 +6,12 @@ from optimizer.environment.clustercommunication.schedulerstrategy import Schedul
 from optimizer.environment.stateobtaining.stateprocessinghelper import StateProcessingHelper
 from optimizer.environment.simulation.simulationstatebuilder import SimulationStateBuilder
 from optimizer.util import socketutil
+from optimizer import hyperparameters
 
 
 class AbstractSimulationCommunicator(IEvaluationCommunicator):
+
+    TIME_STEP_INTERVAL_MS = hyperparameters.TIME_STEP_INTERVAL * 1000
 
     def __init__(self, args):
         self.HOST = args.simulation_host
@@ -26,7 +29,6 @@ class AbstractSimulationCommunicator(IEvaluationCommunicator):
         state_dict = response['state']
         self.state = SimulationStateBuilder.build(state_dict)
         self.done = response['done']
-        logging.info(self.state)
         return self.get_reward(self.state)
 
     def get_state_tensor(self):
@@ -38,7 +40,7 @@ class AbstractSimulationCommunicator(IEvaluationCommunicator):
 
     def _submit_workloads_and_get_state(self, workloads):
         state_dict = socketutil.ping_pong(self.HOST, 55533, {
-            'interval': '1000',
+            'interval': self.TIME_STEP_INTERVAL_MS,
             'numContainer': 10,
             'workloads': workloads['workloads'],
             'queues': self.build_queue_json(0)

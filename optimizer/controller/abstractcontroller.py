@@ -77,7 +77,6 @@ class AbstractController(object):
 
         if self.t % replay_frequency == 0:
             agent.learn(mem, self.t)  # Train with n-step distributional double-Q learning
-            self.logger.info('Agent learnt.')
 
         # Update target network
         if self.t % target_update == 0:
