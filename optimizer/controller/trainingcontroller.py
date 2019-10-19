@@ -38,7 +38,7 @@ class TrainingController(AbstractController):
         state = self.env.try_get_state()
         while not done:
             state, action, reward, done = self.optimize_timestep(state, self.agent.act)
-            if self.t % 100 == 0:
+            if self.t % 1 == 0:
                 self.logger.info("Time Step {}: Reward {}, Action {}, Done {}".format(self.t, reward, action, done))
             if not self.simulating:
                 time.sleep(interval)

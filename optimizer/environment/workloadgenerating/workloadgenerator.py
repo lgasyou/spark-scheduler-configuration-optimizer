@@ -36,7 +36,8 @@ class WorkloadGenerator(object):
                 "name": random.choice(self.WORKLOAD_TYPES),
                 "interval": interval,
                 "queue": queue,
-                "dataSize": data_size
+                "dataSize": data_size,
+                "id": i + 1
             }
             items.append(item)
         logging.info('Generated workloads with batch size %d.' % batch_size)

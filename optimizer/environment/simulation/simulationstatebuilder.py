@@ -7,11 +7,11 @@ class SimulationStateBuilder(object):
     def build(state_dict: dict) -> yarnmodel.State:
         waiting_apps = []
         for wa in state_dict['waitJob']:
-            waiting_apps.append(yarnmodel.YarnApplication(wa['queue'], wa['container'], predicted_delay=wa['worktime']))
+            waiting_apps.append(yarnmodel.YarnApplication(wa['queue'], wa['container'], wa['id'], wa['worktime']))
 
         running_apps = []
         for ra in state_dict['runJob']:
-            running_apps.append(yarnmodel.YarnApplication(ra['queue'], ra['container'], predicted_delay=ra['worktime']))
+            running_apps.append(yarnmodel.YarnApplication(ra['queue'], ra['container'], ra['id'], ra['worktime']))
 
         constraints = []
         for constraint in state_dict['stricts']:

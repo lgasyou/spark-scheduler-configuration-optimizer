@@ -4,6 +4,7 @@ from optimizer.environment.clustercommunication.ievaluationcommunicator import I
 from optimizer.environment.workloadgenerating.workloadgenerator import WorkloadGenerator
 from optimizer.environment.clustercommunication.schedulerstrategy import SchedulerStrategyFactory
 from optimizer.environment.stateobtaining.stateprocessinghelper import StateProcessingHelper
+from optimizer.environment.stateobtaining.rewardcalculator import RewardCalculator
 from optimizer.environment.simulation.simulationstatebuilder import SimulationStateBuilder
 from optimizer.util import socketutil
 from optimizer import hyperparameters
@@ -17,6 +18,7 @@ class AbstractSimulationCommunicator(IEvaluationCommunicator):
         self.HOST = args.simulation_host
         self.workload_generator = WorkloadGenerator()
         scheduler_type = self.get_scheduler_type()
+        self.reward_calculator = RewardCalculator()
         self.scheduler_strategy = SchedulerStrategyFactory.create(
             scheduler_type, '', '')
         self.action_set = self.scheduler_strategy.action_set
@@ -36,7 +38,7 @@ class AbstractSimulationCommunicator(IEvaluationCommunicator):
         return StateProcessingHelper.normalize_state_tensor(state_tensor)
 
     def get_reward(self, state) -> float:
-        return -1
+        return self.reward_calculator.get_reward(state)
 
     def _submit_workloads_and_get_state(self, workloads):
         state_dict = socketutil.ping_pong(self.HOST, 55533, {
