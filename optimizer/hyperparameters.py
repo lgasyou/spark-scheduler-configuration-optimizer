@@ -16,9 +16,9 @@ QUEUES = {
     "names": ["queueA", "queueB"],
     "actions": {
         "capacityScheduler": {
-            0: ([3, 7], [3, 7]),
+            0: ([3, 7], [6, 8]),
             1: ([5, 5], [5, 5]),
-            2: ([7, 3], [7, 3]),
+            2: ([7, 3], [8, 8]),
         },
         "fairScheduler": {
             0: ([25, 75], 'fifo'),

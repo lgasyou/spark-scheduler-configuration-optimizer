@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy import interpolate
 
 
 FILENAMES = ['../results/no-optim-delays-%d-0.txt' % i for i in range(3)]
@@ -20,7 +22,10 @@ for idx, filename in enumerate(FILENAMES):
             if value:
                 index.append(key)
                 values.append(value)
-        plt.plot(index, values, label=legends[idx])
+        new_index = np.linspace(min(index), max(index), 5000)
+        smooth_func = interpolate.interp1d(index, values, kind='cubic')
+        smooth = smooth_func(new_index)
+        plt.plot(new_index, smooth, label=legends[idx])
     plt.legend()
 
 plt.show()

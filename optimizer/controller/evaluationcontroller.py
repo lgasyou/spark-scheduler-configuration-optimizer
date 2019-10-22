@@ -45,7 +45,7 @@ class EvaluationController(AbstractController):
         while not done:
             state, action, reward, done = self.optimize_timestep(state, self.agent.act_e_greedy)
 
-            if self.simulating and self.t % 20 == 0:
+            if self.simulating and self.t % 40 == 0:
                 cost = self.env.get_total_time_cost()
                 self.costs.append({self.t: cost})
                 self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, cost))
