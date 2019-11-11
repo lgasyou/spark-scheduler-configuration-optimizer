@@ -24,7 +24,7 @@ class AbstractCommunicator(ICommunicator):
         scheduler_type = self.get_scheduler_type()
         self.scheduler_strategy = SchedulerStrategyFactory.create(
             scheduler_type, self.RM_API_URL, self.HADOOP_ETC)
-        self.scheduler_strategy.copy_conf_file()
+        # self.scheduler_strategy.copy_conf_file()
         self.action_set = self.scheduler_strategy.action_set
 
         self.state_builder = StateBuilder(self.RM_API_URL, self.SPARK_HISTORY_SERVER_API_URL, self.scheduler_strategy)

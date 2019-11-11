@@ -17,6 +17,8 @@ NUM_EXECUTORS=2
 EXECUTOR_MEMORY=6g
 DRIVER_MEMORY=2g
 
+echo "$CLASS $SPARK_HOME $HADOOP_HOME $JAVA_HOME $QUEUE $DATA_SIZE $PROJECT_DIR $WORKLOAD_JAR_DIR"
+
 echo "Starting workload with parameters: class ${CLASS}, queue ${QUEUE}, data_size ${DATA_SIZE}"
 case ${CLASS} in
 "rnn")
@@ -50,13 +52,32 @@ case ${CLASS} in
         --driver-memory "${DRIVER_MEMORY}" \
         --queue "${QUEUE}" \
         "${WORKLOAD_JAR_DIR}/workload_${CLASS}.jar" \
-        -b 8 \
+        -b 16 \
         -f "${MNIST_DIR}" \
         -e "${DATA_SIZE}"
+
     rm -r "${OUTPUT_DIR:?}"/*
     ;;
 
-"resnet" | "vgg")
+"resnet")
+    spark-submit \
+        --class com.intel.analytics.bigdl.models."${CLASS}".workload_"${CLASS}" \
+        --master yarn \
+        --deploy-mode cluster \
+        --executor-cores "${EXECUTOR_CORES}" \
+        --num-executors "${NUM_EXECUTORS}" \
+        --executor-memory "${EXECUTOR_MEMORY}" \
+        --driver-memory "${DRIVER_MEMORY}" \
+        --queue "${QUEUE}" \
+        "${WORKLOAD_JAR_DIR}/workload_${CLASS}.jar" \
+        -b 128 \
+        -f "${MNIST_DIR}"/cifar-10 \
+        -e "${DATA_SIZE}"
+
+    rm -r "${OUTPUT_DIR:?}"/*
+    ;;
+
+"vgg")
     spark-submit \
         --class com.intel.analytics.bigdl.models."${CLASS}".workload_"${CLASS}" \
         --master yarn \

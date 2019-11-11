@@ -6,6 +6,7 @@ import random
 class FacebookWorkloadSampler(object):
 
     SAMPLE_FILENAMES = [
+        'samples_with_queues.tsv',
         'FB-2009_samples_24_times_1hr_0.tsv',
         'FB-2009_samples_24_times_1hr_1.tsv',
         'FB-2010_samples_24_times_1hr_0.tsv',
@@ -23,9 +24,9 @@ class FacebookWorkloadSampler(object):
         while True:
             line_num = random.randint(0, self.num_samples - 1)
             sample = self.samples[line_num]
-            raw_interval, data_size = self._parse_line(sample)
+            raw_interval, data_size, queue = self._parse_line(sample)
             interval = raw_interval if raw_interval < 100 else 100
-            return interval, str(data_size)
+            return interval, str(data_size), int(queue)
 
     def get_all_samples(self):
         return [self._parse_line(line) for line in self.samples]
@@ -35,7 +36,8 @@ class FacebookWorkloadSampler(object):
         data = line.split('\t')
         interval = int(data[2])
         data_size = (len(data[3]) + 1) // 2
-        return interval, data_size
+        queue = data[6]
+        return interval, data_size, queue
 
 # data size statistic
 # [0, 86, 752, 717, 1072, 1730, 208, 222, 343, 239, 249, 234, 41, 1, 0, 0, 0, 0, 0, 0]

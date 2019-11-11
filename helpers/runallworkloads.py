@@ -59,6 +59,7 @@ def summary():
     apps.sort(key=lambda a: a['id'])
     app_name = apps[0]
     data_size = 0
+    results = []
     for app in apps:
         if app_name == app['name']:
             data_size += 1
@@ -66,17 +67,22 @@ def summary():
             app_name = app['name']
             data_size = 1
 
-        print(app['name'].split('_')[-1], app['elapsedTime'], data_size, sep=',')
+        result = (app['name'].split('_')[-1], app['elapsedTime'], 9 - data_size)
+        results.append(result)
+
+    results.reverse()
+    for result in results:
+        print(*result, sep=',')
 
 
-data_sizes = [str(i) for i in range(1, 9)]
+data_sizes = [str(i) for i in range(8, 0, -1)]
 # workload_types = ['bayes', 'FPGrowth', 'kmeans', 'lda', 'linear', 'svm',
-#                   'rnn', 'autoencoder', 'lenet', ]
-workload_types = ['resnet', 'vgg']
+#                   'rnn', 'autoencoder', 'lenet', 'vgg']
+workload_types = ['resnet']
 java_home = '/home/ls/library/jdk'
 spark_home = '/home/ls/library/spark'
 hadoop_home = '/home/ls/library/hadoop'
 rm_api = 'http://10.1.114.60:8088/'
 
-run_all_workloads()
+# run_all_workloads()
 summary()

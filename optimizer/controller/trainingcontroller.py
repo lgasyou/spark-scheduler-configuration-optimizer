@@ -21,12 +21,12 @@ class TrainingController(AbstractController):
         self.logger.info('Agent training finished.')
 
     def start_from_breakpoint(self):
-        if not self._load_memory():
-            self.memory_serializer.try_load_by_filename(self.TMP_MEMORY_FILENAME)
-            self.t = self.mem.index
-            self.logger.info('Start from episode %d.' % self.t)
-            while True:
-                self._train_step()
+        self._load_memory()
+        self.memory_serializer.try_load_by_filename(self.TMP_MEMORY_FILENAME)
+        self.t = self.mem.index
+        self.logger.info('Start from episode %d.' % self.t)
+        while True:
+            self._train_step()
 
     def _train_step(self):
         self.env.reset()

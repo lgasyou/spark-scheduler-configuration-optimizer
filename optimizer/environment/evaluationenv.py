@@ -18,8 +18,8 @@ class EvaluationEnv(AbstractEnv):
         self.reset_buffer()
         self.communicator.reset()
 
-    def get_total_time_cost(self) -> tuple:
-        return self.communicator.get_total_time_cost()
+    def get_finished_job_number(self) -> tuple:
+        return self.communicator.get_finished_job_number()
 
     # Uses loss of life as terminal signal
     def train(self) -> None:

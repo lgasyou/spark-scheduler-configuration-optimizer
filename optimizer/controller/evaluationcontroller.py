@@ -18,12 +18,13 @@ class EvaluationController(AbstractController):
         self.episode = 0
 
     def run(self):
-        self.logger.info('Evaluating with optimization.')
-        self.run_with_optimization()
+        # self.logger.info('Evaluating with optimization.')
+        # self.run_with_optimization()
 
         self.logger.info('Evaluating without optimization.')
         for action_index in range(self.action_space):
             self.run_without_optimization(action_index)
+        # self.run_without_optimization(1)
 
     def run_with_optimization(self):
         self.costs.clear()
@@ -46,12 +47,12 @@ class EvaluationController(AbstractController):
             state, action, reward, done = self.optimize_timestep(state, self.agent.act_e_greedy)
 
             if self.simulating and self.t % 40 == 0:
-                cost = self.env.get_total_time_cost()
+                cost = self.env.get_finished_job_number()
                 self.costs.append({self.t: cost})
                 self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, cost))
 
-            self.logger.info("Time Step {}, Time {}: Reward {}, Action {}, Done {}"
-                             .format(self.episode, self.t, reward, action, done))
+                self.logger.info("Time Step {}, Time {}: Reward {}, Action {}, Done {}"
+                                 .format(self.episode, self.t, reward, action, done))
             if not self.simulating:
                 time.sleep(interval)
 
@@ -77,12 +78,12 @@ class EvaluationController(AbstractController):
             _, reward, done = self.env.step(action_index)
 
             if self.simulating and self.t % 20 == 0:
-                cost = self.env.get_total_time_cost()
+                cost = self.env.get_finished_job_number()
                 self.costs.append({self.t: cost})
                 self.logger.info('Episode: {}, Time Cost: {}'.format(self.episode, cost))
 
-            self.logger.info("Episode {}: Reward {}, Action {}, Done {}"
-                             .format(self.episode, reward, action_index, done))
+                self.logger.info("Episode {}: Reward {}, Action {}, Done {}"
+                                 .format(self.episode, reward, action_index, done))
             self.t += 1
             if not self.simulating:
                 time.sleep(interval)
@@ -92,7 +93,7 @@ class EvaluationController(AbstractController):
             self.delay_fetcher.save_delays(delays_filename)
             self.delay_fetcher.stop()
 
-        cost = self.env.get_total_time_cost()
+        cost = self.env.get_finished_job_number()
         self.costs.append({self.t: cost})
         logging.info(self.costs)
         with open(delays_filename, 'w') as f:

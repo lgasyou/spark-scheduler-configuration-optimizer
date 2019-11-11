@@ -14,7 +14,7 @@ class IEvaluationCommunicator(ICommunicator):
     def close(self):
         pass
 
-    def get_total_time_cost(self) -> Tuple[pd.DataFrame, int]:
+    def get_finished_job_number(self) -> Tuple[pd.DataFrame, int]:
         pass
 
     def start_workloads(self) -> threading.Thread:

@@ -13,14 +13,14 @@ from optimizer.util import yarnutil, sparkutil, processutil
 class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
 
     def __init__(self, args: argparse.Namespace):
-        rm_host = args.rm_host
+        rm_host = args.resource_manager_host
         spark_history_server_host = args.spark_history_server_host
         hadoop_home = args.hadoop_home
         super().__init__(rm_host, spark_history_server_host, hadoop_home)
         self.SPARK_HOME = args.spark_home
         self.JAVA_HOME = args.java_home
         self.workload_generator = WorkloadGenerator()
-        self.WORKLOADS = self.workload_generator.generate_randomly(18, queue_partial=True)
+        self.WORKLOADS = self.workload_generator.generate_randomly(18)
         self.workload_generator.save_workloads(self.WORKLOADS)
         self.workload_starter: Optional[threading.Thread] = None
 
@@ -38,7 +38,7 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
         self.close()
         self.start_workloads()
 
-    def get_total_time_cost(self):
+    def get_finished_job_number(self):
         finished_jobs = self.state_builder.parse_and_build_finished_apps()
         time_costs = [j.elapsed_time for j in finished_jobs]
         return time_costs
