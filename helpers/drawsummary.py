@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 
 FILENAMES = ['../results/no-optim-delays-%d-0.txt' % i for i in range(3)]
-# FILENAMES.append('../results/optim-delays-0.txt')
+FILENAMES.append('../results/optim-delays-0.txt')
 
 legends = ['Fixed Configuration 0(25, 75)',
            'Fixed Configuration 1(50, 50)',
@@ -24,7 +24,7 @@ for idx, filename in enumerate(FILENAMES):
             if value:
                 index.append(key)
                 average = (BETA * average + (1 - BETA) * value)
-                values.append(average)
+                values.append(value)
         print(len(index))
         plt.plot(index, values, label=legends[idx])
     plt.legend()

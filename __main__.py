@@ -17,6 +17,7 @@ def setup_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--resource-manager-host', type=str, default='http://10.1.114.60:8088/', help='Address:port of ResourceManager')
     parser.add_argument('--spark-history-server-host', type=str, default='http://10.1.114.60:18080/', help='Address:port of Spark history server')
     parser.add_argument('--use-simulation-env', action='store_true', help='Using simulation environment')
+    parser.add_argument('--scheduler-type', type=str, default='capacityScheduler')
     parser.add_argument('--simulation-host', type=str, default='10.1.114.60', help='Address:port of Spark history server')
     parser.add_argument('--execution-mode', type=int, default=int(1), help='Set program execution mode.')
     parser.add_argument('--log-into-file', action='store_true', help='Redirect log to file')

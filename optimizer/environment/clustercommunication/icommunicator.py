@@ -19,6 +19,3 @@ class ICommunicator(object):
     def is_done(self) -> bool:
         """Test if all jobs are done."""
         pass
-
-    def get_scheduler_type(self) -> str:
-        pass

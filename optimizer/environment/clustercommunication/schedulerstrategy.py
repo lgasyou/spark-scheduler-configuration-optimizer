@@ -9,10 +9,11 @@ from optimizer.util.xmlmodifier import XmlModifier
 
 class AbstractSchedulerStrategy(object):
 
-    def __init__(self, scheduler_type, rm_host, hadoop_etc):
-        self.TYPE = scheduler_type
-        self.RM_HOST = rm_host
-        self.HADOOP_ETC = hadoop_etc
+    def __init__(self, args):
+        self.TYPE = args.scheduler_type
+        self.RM_HOST = args.resource_manager_host
+        self.HADOOP_ETC = args.hadoop_etc
+        self.IS_SIMULATING = args.use_simulation_env
         self.action_set = self._get_action_set()
 
     @abc.abstractmethod
@@ -54,7 +55,7 @@ class FairSchedulerStrategy(AbstractSchedulerStrategy):
 
     def override_config(self, action_index: int):
         dest = os.path.join(self.HADOOP_ETC, 'fair-scheduler.xml')
-        xml_modifier = XmlModifier('./data/fair-scheduler-template.xml', dest)
+        xml_modifier = XmlModifier('data/fair-scheduler-template.xml', dest)
 
         current_action = self.action_set[action_index]
         weights: dict = current_action['weights']
@@ -65,7 +66,8 @@ class FairSchedulerStrategy(AbstractSchedulerStrategy):
         xml_modifier.save()
 
     def copy_conf_file(self):
-        fileutil.file_copy('./data/fair-scheduler.xml', self.HADOOP_ETC + '/fair-scheduler.xml')
+        if not self.IS_SIMULATING:
+            fileutil.file_copy('data/fair-scheduler.xml', self.HADOOP_ETC + '/fair-scheduler.xml')
 
     def get_queue_constraints(self):
         url = self.RM_HOST + 'ws/v1/cluster/scheduler'
@@ -116,7 +118,8 @@ class CapacitySchedulerStrategy(AbstractSchedulerStrategy):
         xml_modifier.save()
 
     def copy_conf_file(self):
-        fileutil.file_copy('data/capacity-scheduler.xml', self.HADOOP_ETC + '/capacity-scheduler.xml')
+        if not self.IS_SIMULATING:
+            fileutil.file_copy('data/capacity-scheduler.xml', self.HADOOP_ETC + '/capacity-scheduler.xml')
 
     def get_queue_constraints(self):
         url = self.RM_HOST + 'ws/v1/cluster/scheduler'
@@ -125,11 +128,9 @@ class CapacitySchedulerStrategy(AbstractSchedulerStrategy):
         ret = []
         queues = conf['scheduler']['schedulerInfo']['queues']['queue']
         for q in queues:
-            name = q['queueName']
             capacity = q['capacity']
-            used_capacity = q['usedCapacity']
             max_capacity = q['maxCapacity']
-            ret.append(QueueConstraint(name, used_capacity, capacity, max_capacity))
+            ret.append(QueueConstraint(capacity, max_capacity))
 
         return ret
 
@@ -149,10 +150,10 @@ class SchedulerStrategyFactory(object):
     }
 
     @staticmethod
-    def create(scheduler_type: str, rm_host: str, hadoop_etc: str) -> AbstractSchedulerStrategy:
+    def create(args) -> AbstractSchedulerStrategy:
         try:
-            cls = SchedulerStrategyFactory.STR_STRATEGY_MAP[scheduler_type]
+            cls = SchedulerStrategyFactory.STR_STRATEGY_MAP[args.scheduler_type]
         except KeyError:
-            raise RuntimeError
+            raise RuntimeError('No strategy for %s.' % args.scheduler_type)
 
-        return cls(scheduler_type, rm_host, hadoop_etc)
+        return cls(args)

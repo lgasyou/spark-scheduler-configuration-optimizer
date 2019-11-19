@@ -13,10 +13,7 @@ from optimizer.util import yarnutil, sparkutil, processutil
 class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
 
     def __init__(self, args: argparse.Namespace):
-        rm_host = args.resource_manager_host
-        spark_history_server_host = args.spark_history_server_host
-        hadoop_home = args.hadoop_home
-        super().__init__(rm_host, spark_history_server_host, hadoop_home)
+        super().__init__(args)
         self.SPARK_HOME = args.spark_home
         self.JAVA_HOME = args.java_home
         self.workload_generator = WorkloadGenerator()
@@ -46,6 +43,3 @@ class EvaluationCommunicator(AbstractCommunicator, IEvaluationCommunicator):
     def start_workloads(self):
         self.workload_starter = sparkutil.async_start_workloads(self.WORKLOADS, self.SPARK_HOME,
                                                                 self.HADOOP_HOME, self.JAVA_HOME)
-
-    def get_scheduler_type(self) -> str:
-        return "capacityScheduler"

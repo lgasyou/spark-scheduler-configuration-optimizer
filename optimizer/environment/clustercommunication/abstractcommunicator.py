@@ -1,4 +1,5 @@
 import abc
+import argparse
 import time
 from typing import Optional
 
@@ -15,16 +16,14 @@ from optimizer.util import yarnutil
 
 class AbstractCommunicator(ICommunicator):
 
-    def __init__(self, rm_host: str, spark_history_server_host: str, hadoop_home: str):
-        self.HADOOP_HOME = hadoop_home
-        self.HADOOP_ETC = hadoop_home + '/etc/hadoop'
-        self.RM_API_URL = rm_host
-        self.SPARK_HISTORY_SERVER_API_URL = spark_history_server_host + 'api/v1/'
+    def __init__(self, args: argparse.Namespace):
+        self.HADOOP_HOME = args.hadoop_home
+        self.HADOOP_ETC = args.hadoop_home + '/etc/hadoop'
+        self.RM_API_URL = args.resource_manager_host
+        self.SPARK_HISTORY_SERVER_API_URL = args.spark_history_server_host + 'api/v1/'
 
-        scheduler_type = self.get_scheduler_type()
-        self.scheduler_strategy = SchedulerStrategyFactory.create(
-            scheduler_type, self.RM_API_URL, self.HADOOP_ETC)
-        # self.scheduler_strategy.copy_conf_file()
+        self.scheduler_strategy = SchedulerStrategyFactory.create(args)
+        self.scheduler_strategy.copy_conf_file()
         self.action_set = self.scheduler_strategy.action_set
 
         self.state_builder = StateBuilder(self.RM_API_URL, self.SPARK_HISTORY_SERVER_API_URL, self.scheduler_strategy)
@@ -52,10 +51,6 @@ class AbstractCommunicator(ICommunicator):
 
     @abc.abstractmethod
     def is_done(self) -> bool:
-        pass
-
-    @abc.abstractmethod
-    def get_scheduler_type(self) -> str:
         pass
 
     def override_config(self, action_index: int):
